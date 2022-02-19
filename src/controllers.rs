@@ -3,6 +3,7 @@ use actix_web::http::Cookie;
 use actix_web::web::Form;
 use actix_web::{get, post, HttpResponse, Responder, HttpRequest, HttpMessage};
 use std::thread;
+use magic_crypt::MagicCryptTrait;
 
 #[derive(serde::Deserialize)]
 pub struct LoginForm {
@@ -13,7 +14,9 @@ pub struct LoginForm {
 #[post("/login")]
 pub async fn login(login_form: Form<LoginForm>) -> impl Responder {
     
-    match JwtUser::emit(login_form.login.as_str(), login_form.password.as_str()).await {
+    let mc = new_magic_crypt!(std::env::var("ENCRYPT_KEY").unwrap(), 256);
+    let encrypted_password : String = mc.encrypt_str_to_base64(login_form.password.as_str());
+    match JwtUser::emit(login_form.login.as_str(), encrypted_password.as_str()).await {
         Some(token) => {
             HttpResponse::Found()
                 .header("Location", "/")

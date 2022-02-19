@@ -1,3 +1,5 @@
+#[macro_use] extern crate magic_crypt;
+
 mod auth;
 mod constants;
 mod controllers;
@@ -10,6 +12,8 @@ use actix_web::{App, HttpServer};
 use actix_files as fs;
 
 use dotenv::dotenv;
+
+
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {

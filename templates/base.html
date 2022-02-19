@@ -1,0 +1,18 @@
+<html>
+	<head>
+		<title>{% block title %}{% endblock %}</title>
+		<script src="/styles/tailwind.css"></script>
+	</head>
+	<body class="bg-slate-200">
+		{% include "nav.html" %}
+			<div class="flex justify-center">
+          <div class="w-4/5 py-4 px-8 bg-white shadow-xl rounded-xl my-10">
+            <div class="mb-5">
+		    <h2 class="text-gray-800 text-3xl font-semibold mb-2">{% block pagetitle %}{%endblock%}</h2>
+              <hr>
+            </div>
+		{% block body %}
+		{% endblock %}
+		</div>
+	</body>
+</html>

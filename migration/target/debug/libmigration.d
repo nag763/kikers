@@ -1,0 +1,1 @@
+/home/usr/workspace/friendly-football-bets/migration/target/debug/libmigration.rlib: /home/usr/workspace/friendly-football-bets/migration/src/lib.rs /home/usr/workspace/friendly-football-bets/migration/src/m20220101_000001_create_table.rs

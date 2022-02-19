@@ -1,2 +1,0 @@
-cargo:rustc-env=TYPENUM_BUILD_CONSTS=/home/usr/workspace/friendly-football-bets/migration/target/debug/build/typenum-d2b77880758bcf06/out/consts.rs
-cargo:rustc-env=TYPENUM_BUILD_OP=/home/usr/workspace/friendly-football-bets/migration/target/debug/build/typenum-d2b77880758bcf06/out/op.rs

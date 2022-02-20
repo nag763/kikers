@@ -24,3 +24,21 @@ pub async fn index(req: HttpRequest) -> impl Responder {
     };
     HttpResponse::Ok().body(index.render().unwrap())
 }
+
+#[derive(Template, Debug)]
+#[template(path = "signup.html")]
+struct SignUp {
+    title: String,
+    user: Option<JwtUser>,
+}
+
+
+#[get("/signup")]
+pub async fn signup(req: HttpRequest) -> impl Responder {
+    if req.cookie(super::constants::JWT_TOKEN_PATH).is_none() {
+        let sign_up : SignUp = SignUp { title: "Sign up".to_string(), user: None};
+        HttpResponse::Ok().body(sign_up.render().unwrap())
+    } else {
+        HttpResponse::Found().header("Location", "/").finish()
+    }
+}

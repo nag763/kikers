@@ -17,3 +17,4 @@ jwt = "0.16.0"
 actix-files = "0.5.0"
 hmac = "0.12.1"
 magic-crypt = "3.1.9"
+minreq = { version = "2.5.1" , features = [ "https" ] } 

@@ -12,9 +12,8 @@ pub struct Model {
     #[sea_orm(unique)]
     pub login: String,
     pub password: String,
-    pub is_admin: i8,
     pub is_authorized: i8,
-    pub role: Option<Role>,
+    pub role: Role,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter)]

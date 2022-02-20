@@ -3,6 +3,7 @@ use crate::entities::user;
 use hmac::Hmac;
 use hmac::Mac;
 use jwt::{Header, SignWithKey, Token, VerifyWithKey};
+use sea_orm::ActiveEnum;
 use sea_orm::ColumnTrait;
 use sea_orm::Condition;
 use sea_orm::EntityTrait;
@@ -12,10 +13,12 @@ use sha2::Sha256;
 
 #[derive(Debug, Default, Deserialize, Serialize)]
 pub struct JwtUser {
-    id: i32,
+    pub id: i32,
     pub login: String,
     pub name: String,
-    pub is_admin: i8,
+    pub is_authorized: i8,
+    pub role: String,
+
 }
 
 impl JwtUser {
@@ -43,7 +46,8 @@ impl JwtUser {
                 id: user.id,
                 login: user.login,
                 name: user.name,
-                is_admin: user.is_admin,
+                is_authorized: user.is_authorized,
+                role: user.role.to_value(),
             },
         );
         let signed_token = unsigned_token.sign_with_key(&key).unwrap();

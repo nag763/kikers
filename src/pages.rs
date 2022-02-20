@@ -18,7 +18,7 @@ pub async fn index(req: HttpRequest) -> impl Responder {
     match req.cookie(super::constants::JWT_TOKEN_PATH) {
         Some(token) =>  match JwtUser::check_token(token.value()) {
             Ok(jwt_user) => { index = Index { title: format!("Weclome back {0}", jwt_user.name), user: Some(jwt_user)}; },
-            Err(_) => return HttpResponse::Forbidden().finish()
+            Err(_) => return HttpResponse::Found().header("Location", "/").del_cookie(&token).finish()
         },
         None => { index = Index { title: "Login".to_string(), user: None }}
     };

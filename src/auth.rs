@@ -1,5 +1,6 @@
 use super::entities::user::Model as User;
 use crate::entities::user;
+use crate::error::ApplicationError;
 use hmac::Hmac;
 use hmac::Mac;
 use jwt::{Header, SignWithKey, Token, VerifyWithKey};
@@ -18,14 +19,13 @@ pub struct JwtUser {
     pub name: String,
     pub is_authorized: i8,
     pub role: String,
-
 }
 
 impl JwtUser {
-    pub async fn emit(login: &str, password: &str) -> Option<String> {
-        let db_url = std::env::var("DATABASE_URL").expect("DATABASE_URL is not set in .env file");
-        let conn = sea_orm::Database::connect(&db_url).await.unwrap();
-        let user: User = user::Entity::find()
+    pub async fn emit(login: &str, password: &str) -> Result<Option<String>, ApplicationError> {
+        let db_url = std::env::var("DATABASE_URL")?;
+        let conn = sea_orm::Database::connect(&db_url).await?;
+        let user_unwrapped: Option<User> = user::Entity::find()
             .filter(
                 Condition::all()
                     .add(user::Column::Login.eq(login))
@@ -33,31 +33,49 @@ impl JwtUser {
                     .add(user::Column::IsAuthorized.eq(1)),
             )
             .one(&conn)
-            .await
-            .expect("Error during db connect")?;
+            .await?;
 
-        let jwt_key: String = std::env::var("JWT_KEY").expect("No jwt key configured");
-        let key: Hmac<Sha256> = Hmac::new_from_slice(jwt_key.as_bytes()).unwrap();
+        match user_unwrapped {
+            Some(user) => {
+                let jwt_key: String = std::env::var("JWT_KEY")?;
+                let key: Hmac<Sha256> = Hmac::new_from_slice(jwt_key.as_bytes())?;
 
-        let header: Header = Default::default();
-        let unsigned_token = Token::new(
-            header,
-            JwtUser {
-                id: user.id,
-                login: user.login,
-                name: user.name,
-                is_authorized: user.is_authorized,
-                role: user.role.to_value(),
-            },
-        );
-        let signed_token = unsigned_token.sign_with_key(&key).unwrap();
-
-        Some(signed_token.into())
+                let header: Header = Default::default();
+                let unsigned_token = Token::new(
+                    header,
+                    JwtUser {
+                        id: user.id,
+                        login: user.login,
+                        name: user.name,
+                        is_authorized: user.is_authorized,
+                        role: user.role.to_value(),
+                    },
+                );
+                let signed_token = unsigned_token.sign_with_key(&key)?;
+                Ok(Some(signed_token.into()))
+            }
+            None => {
+                let user_unwrapped: Option<User> = user::Entity::find()
+                    .filter(
+                        Condition::all()
+                            .add(user::Column::Login.eq(login))
+                            .add(user::Column::Password.eq(password))
+                            .add(user::Column::IsAuthorized.eq(0)),
+                    )
+                    .one(&conn)
+                    .await?;
+                if user_unwrapped.is_some() {
+                    Err(ApplicationError::UserNotAuthorized(login.to_string()))
+                } else {
+                    Ok(None)
+                }
+            }
+        }
     }
 
-    pub fn check_token(token: &str) -> Result<JwtUser, Box<dyn std::error::Error>> {
-        let jwt_key: String = std::env::var("JWT_KEY").expect("No jwt key configured");
-        let key: Hmac<Sha256> = Hmac::new_from_slice(jwt_key.as_bytes()).unwrap();
+    pub fn check_token(token: &str) -> Result<JwtUser, ApplicationError> {
+        let jwt_key: String = std::env::var("JWT_KEY")?;
+        let key: Hmac<Sha256> = Hmac::new_from_slice(jwt_key.as_bytes())?;
         let token: Token<Header, JwtUser, _> = VerifyWithKey::verify_with_key(token, &key)?;
         let (_, jwt_user) = token.into();
         Ok(jwt_user)

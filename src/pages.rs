@@ -1,28 +1,52 @@
 use askama::Template;
 
 use crate::auth::JwtUser;
-use actix_web::{get, HttpResponse, Responder, HttpRequest};
+use crate::error::ApplicationError;
+use actix_web::web;
 use actix_web::HttpMessage;
+use actix_web::{get, HttpRequest, HttpResponse};
 
+#[derive(serde::Deserialize)]
+pub struct ContextQuery {
+    info: Option<String>,
+    error: Option<String>,
+}
 
 #[derive(Template, Debug)]
 #[template(path = "index.html")]
 struct Index {
     title: String,
     user: Option<JwtUser>,
+    error: Option<String>,
+    info: Option<String>,
 }
 
 #[get("/")]
-pub async fn index(req: HttpRequest) -> impl Responder {
+pub async fn index(
+    req: HttpRequest,
+    context_query: web::Query<ContextQuery>,
+) -> Result<HttpResponse, ApplicationError> {
     let index: Index;
     match req.cookie(super::constants::JWT_TOKEN_PATH) {
-        Some(token) =>  match JwtUser::check_token(token.value()) {
-            Ok(jwt_user) => { index = Index { title: format!("Weclome back {0}", jwt_user.name), user: Some(jwt_user)}; },
-            Err(_) => return HttpResponse::Found().header("Location", "/").del_cookie(&token).finish()
-        },
-        None => { index = Index { title: "Login".to_string(), user: None }}
+        Some(token) => {
+            let jwt_user = JwtUser::check_token(token.value())?;
+            index = Index {
+                title: format!("Weclome back {0}", jwt_user.name),
+                user: Some(jwt_user),
+                error: context_query.error.clone(),
+                info: context_query.info.clone(),
+            };
+        }
+        None => {
+            index = Index {
+                title: "Login".to_string(),
+                user: None,
+                error: context_query.error.clone(),
+                info: context_query.info.clone(),
+            }
+        }
     };
-    HttpResponse::Ok().body(index.render().unwrap())
+    Ok(HttpResponse::Ok().body(index.render()?))
 }
 
 #[derive(Template, Debug)]
@@ -30,15 +54,24 @@ pub async fn index(req: HttpRequest) -> impl Responder {
 struct SignUp {
     title: String,
     user: Option<JwtUser>,
+    error: Option<String>,
+    info: Option<String>,
 }
 
-
 #[get("/signup")]
-pub async fn signup(req: HttpRequest) -> impl Responder {
+pub async fn signup(
+    req: HttpRequest,
+    context_query: web::Query<ContextQuery>,
+) -> Result<HttpResponse, ApplicationError> {
     if req.cookie(super::constants::JWT_TOKEN_PATH).is_none() {
-        let sign_up : SignUp = SignUp { title: "Sign up".to_string(), user: None};
-        HttpResponse::Ok().body(sign_up.render().unwrap())
+        let sign_up: SignUp = SignUp {
+            title: "Sign up".to_string(),
+            user: None,
+            error: context_query.error.clone(),
+            info: context_query.info.clone(),
+        };
+        Ok(HttpResponse::Ok().body(sign_up.render()?))
     } else {
-        HttpResponse::Found().header("Location", "/").finish()
+        Ok(HttpResponse::Found().header("Location", "/").finish())
     }
 }

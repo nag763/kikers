@@ -1,6 +1,9 @@
 use super::entities::user::Model as User;
+use crate::entities::sea_orm_active_enums::Role;
 use crate::entities::user;
 use crate::error::ApplicationError;
+use actix_web::dev::ServiceRequest;
+use actix_web::HttpMessage;
 use hmac::Hmac;
 use hmac::Mac;
 use jwt::{Header, SignWithKey, Token, VerifyWithKey};
@@ -79,5 +82,19 @@ impl JwtUser {
         let token: Token<Header, JwtUser, _> = VerifyWithKey::verify_with_key(token, &key)?;
         let (_, jwt_user) = token.into();
         Ok(jwt_user)
+    }
+}
+
+pub async fn extract(req: &mut ServiceRequest) -> Result<Vec<Role>, actix_web::Error> {
+    match req.cookie(super::constants::JWT_TOKEN_PATH) {
+        Some(token) => {
+            let user: JwtUser = JwtUser::check_token(token.value())?;
+            let role: Role = Role::try_from_value(&user.role).unwrap();
+            Ok(vec![role])
+        }
+        None => {
+            error!("no jwt");
+            Ok(vec![])
+        }
     }
 }

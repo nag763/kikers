@@ -2,7 +2,8 @@
 
 pub mod prelude;
 
-pub mod error;
-pub mod sea_orm_active_enums;
+pub mod navaccess;
+pub mod role;
+pub mod role_navaccess;
 pub mod seaql_migrations;
 pub mod user;

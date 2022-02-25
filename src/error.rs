@@ -11,6 +11,7 @@ pub enum ApplicationError {
     UserNotAuthorized(String),
     IllegalToken,
     TemplateError,
+    CookiesUnapproved,
 }
 
 #[derive(Template, Debug)]
@@ -25,6 +26,7 @@ impl ApplicationError {
     fn redirect_url(&self) -> Option<String> {
         match &*self {
             Self::IllegalToken => Some("/logout".into()),
+            Self::CookiesUnapproved => Some("/cookies".into()),
             _ => None,
         }
     }
@@ -38,6 +40,7 @@ impl fmt::Display for ApplicationError {
             Self::UserNotAuthorized(user) => format!("The following user's access has not been granted or has been revoked : {} ", user) ,
             Self::NotFound => "One of the requested item hasn't been found, please ensure your request is correct".into(),
             Self::IllegalToken => "Your authentication token is not correct, please reconnect in order to regenarate it".into(),
+            Self::CookiesUnapproved => "You haven't approved cookies yet, approve them prior any usage of the application".into(),
             Self::TemplateError => "An error happened regarding the display, this error has been reported".into(),
         };
         write!(f, "{}", reason)
@@ -62,7 +65,9 @@ impl actix_web::error::ResponseError for ApplicationError {
             ApplicationError::InternalError
             | ApplicationError::DatabaseError(_)
             | ApplicationError::TemplateError => StatusCode::INTERNAL_SERVER_ERROR,
-            ApplicationError::IllegalToken => StatusCode::BAD_REQUEST,
+            ApplicationError::IllegalToken | ApplicationError::CookiesUnapproved => {
+                StatusCode::BAD_REQUEST
+            }
             ApplicationError::UserNotAuthorized(_) => StatusCode::FORBIDDEN,
             ApplicationError::NotFound => StatusCode::NOT_FOUND,
         }

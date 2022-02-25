@@ -75,3 +75,23 @@ pub async fn signup(
         Ok(HttpResponse::Found().header("Location", "/").finish())
     }
 }
+
+#[derive(Template, Debug)]
+#[template(path = "cookies.html")]
+struct Cookies {
+    title: String,
+    user: Option<JwtUser>,
+    error: Option<String>,
+    info: Option<String>,
+}
+
+#[get("/cookies")]
+pub async fn cookies() -> Result<HttpResponse, ApplicationError> {
+    let cookies: Cookies = Cookies {
+        title: "Cookie approval".to_string(),
+        user: None,
+        error: None,
+        info: None,
+    };
+    Ok(HttpResponse::Ok().body(cookies.render()?))
+}

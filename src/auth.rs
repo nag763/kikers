@@ -1,17 +1,15 @@
+use super::entities::navaccess::Model as NavAccess;
 use super::entities::user::Model as User;
-use crate::entities::sea_orm_active_enums::Role;
+use crate::entities::navaccess;
+use crate::entities::role_navaccess;
 use crate::entities::user;
 use crate::error::ApplicationError;
-use actix_web::dev::ServiceRequest;
-use actix_web::HttpMessage;
-use hmac::Hmac;
-use hmac::Mac;
+use hmac::{Hmac, Mac};
 use jwt::{Header, SignWithKey, Token, VerifyWithKey};
-use sea_orm::ActiveEnum;
-use sea_orm::ColumnTrait;
-use sea_orm::Condition;
-use sea_orm::EntityTrait;
-use sea_orm::QueryFilter;
+use sea_orm::{
+    ColumnTrait, Condition, EntityTrait, JoinType, QueryFilter, QueryOrder, QuerySelect,
+    RelationTrait,
+};
 use serde::{Deserialize, Serialize};
 use sha2::Sha256;
 
@@ -20,8 +18,9 @@ pub struct JwtUser {
     pub id: i32,
     pub login: String,
     pub name: String,
+    pub nav: Vec<(String, String)>,
     pub is_authorized: i8,
-    pub role: String,
+    pub role: i32,
 }
 
 impl JwtUser {
@@ -40,6 +39,19 @@ impl JwtUser {
 
         match user_unwrapped {
             Some(user) => {
+                let list_of_navaccess: Vec<NavAccess> = navaccess::Entity::find()
+                    .join(
+                        JoinType::InnerJoin,
+                        navaccess::Relation::RoleNavaccess.def(),
+                    )
+                    .filter(Condition::all().add(role_navaccess::Column::RoleId.eq(user.role)))
+                    .order_by_asc(navaccess::Column::Position)
+                    .all(&conn)
+                    .await?;
+                let list_of_navaccess_as_string: Vec<(String, String)> = list_of_navaccess
+                    .iter()
+                    .map(|navaccess| (navaccess.label.clone(), navaccess.href.clone()))
+                    .collect();
                 let jwt_key: String = std::env::var("JWT_KEY")?;
                 let key: Hmac<Sha256> = Hmac::new_from_slice(jwt_key.as_bytes())?;
 
@@ -50,8 +62,9 @@ impl JwtUser {
                         id: user.id,
                         login: user.login,
                         name: user.name,
+                        nav: list_of_navaccess_as_string,
                         is_authorized: user.is_authorized,
-                        role: user.role.to_value(),
+                        role: user.role,
                     },
                 );
                 let signed_token = unsigned_token.sign_with_key(&key)?;
@@ -82,19 +95,5 @@ impl JwtUser {
         let token: Token<Header, JwtUser, _> = VerifyWithKey::verify_with_key(token, &key)?;
         let (_, jwt_user) = token.into();
         Ok(jwt_user)
-    }
-}
-
-pub async fn extract(req: &mut ServiceRequest) -> Result<Vec<Role>, actix_web::Error> {
-    match req.cookie(super::constants::JWT_TOKEN_PATH) {
-        Some(token) => {
-            let user: JwtUser = JwtUser::check_token(token.value())?;
-            let role: Role = Role::try_from_value(&user.role).unwrap();
-            Ok(vec![role])
-        }
-        None => {
-            error!("no jwt");
-            Ok(vec![])
-        }
     }
 }

@@ -1,13 +1,16 @@
 use crate::auth::JwtUser;
-use crate::entities::sea_orm_active_enums::Role;
 use crate::entities::user;
+use crate::entities::user::Model as User;
 use crate::error::ApplicationError;
 use actix_web::http::Cookie;
 use actix_web::web::Form;
 use actix_web::{get, post, HttpMessage, HttpRequest, HttpResponse, Responder};
-use actix_web_grants::proc_macro::has_roles;
 use magic_crypt::MagicCryptTrait;
 use sea_orm::ActiveModelTrait;
+use sea_orm::ColumnTrait;
+use sea_orm::Condition;
+use sea_orm::EntityTrait;
+use sea_orm::QueryFilter;
 use sea_orm::Set;
 use std::thread;
 
@@ -72,6 +75,13 @@ pub async fn register_user(
     let conn = sea_orm::Database::connect(&db_url).await?;
     let mc = new_magic_crypt!(std::env::var("ENCRYPT_KEY")?, 256);
     let encrypted_password: String = mc.encrypt_str_to_base64(sign_up_form.password.as_str());
+    let user_with_same_login: Option<User> = user::Entity::find()
+        .filter(Condition::all().add(user::Column::Login.eq(sign_up_form.login.to_owned())))
+        .one(&conn)
+        .await?;
+    if user_with_same_login.is_some() {
+        return Ok(HttpResponse::Found().header("Location", "?error=Someone with the same login already exists, please contact the administrator if you believe you are the owner of the account").finish());
+    }
     let new_user = user::ActiveModel {
         login: Set(sign_up_form.login.to_owned()),
         name: Set(sign_up_form.name.to_owned()),
@@ -83,4 +93,9 @@ pub async fn register_user(
     Ok(HttpResponse::Found()
         .header("Location", format!("/?info={}", info_msg))
         .finish())
+}
+
+#[get("/cookies_approved")]
+pub async fn cookies_approved() -> Result<impl Responder, ApplicationError> {
+    Ok(HttpResponse::Found().header("Location", "/").cookie(Cookie::new(std::env::var("COOKIE_APPROVAL_PATH")?, "1")).finish())
 }

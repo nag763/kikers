@@ -18,7 +18,7 @@ pub struct JwtUser {
     pub id: i32,
     pub login: String,
     pub name: String,
-    pub nav: Vec<(String, String)>,
+    pub nav: Vec<NavAccess>,
     pub is_authorized: i8,
     pub role: i32,
 }
@@ -39,7 +39,7 @@ impl JwtUser {
 
         match user_unwrapped {
             Some(user) => {
-                let list_of_navaccess: Vec<NavAccess> = navaccess::Entity::find()
+                let nav: Vec<NavAccess> = navaccess::Entity::find()
                     .join(
                         JoinType::InnerJoin,
                         navaccess::Relation::RoleNavaccess.def(),
@@ -48,10 +48,6 @@ impl JwtUser {
                     .order_by_asc(navaccess::Column::Position)
                     .all(&conn)
                     .await?;
-                let list_of_navaccess_as_string: Vec<(String, String)> = list_of_navaccess
-                    .iter()
-                    .map(|navaccess| (navaccess.label.clone(), navaccess.href.clone()))
-                    .collect();
                 let jwt_key: String = std::env::var("JWT_KEY")?;
                 let key: Hmac<Sha256> = Hmac::new_from_slice(jwt_key.as_bytes())?;
 
@@ -62,7 +58,7 @@ impl JwtUser {
                         id: user.id,
                         login: user.login,
                         name: user.name,
-                        nav: list_of_navaccess_as_string,
+                        nav,
                         is_authorized: user.is_authorized,
                         role: user.role,
                     },

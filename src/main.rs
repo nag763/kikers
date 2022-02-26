@@ -4,7 +4,6 @@ extern crate magic_crypt;
 extern crate log;
 
 mod auth;
-mod constants;
 mod controllers;
 mod entities;
 mod error;
@@ -12,22 +11,23 @@ mod middleware;
 mod pages;
 
 use crate::controllers::{cookies_approved, login, logout, register_user};
-use crate::middleware::cookie_approval::CookieChecker;
 use crate::error::ApplicationError;
-use crate::pages::{cookies, index, signup};
-use actix_web::ResponseError;
+use crate::middleware::cookie_approval::CookieChecker;
+use crate::middleware::role_checker::RoleChecker;
+use crate::pages::admin::admin_dashboard;
+use crate::pages::unauth::{cookies, index, signup};
 use actix_files as fs;
 use actix_web::middleware::Logger;
 use actix_web::web;
+use actix_web::ResponseError;
 use actix_web::{App, HttpServer};
-use log4rs;
-
 use dotenv::dotenv;
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     dotenv().ok();
-    log4rs::init_file("log4rs.yaml", Default::default()).expect("Log4rs file misconfigured or not found");
+    log4rs::init_file("log4rs.yaml", Default::default())
+        .expect("Log4rs file misconfigured or not found");
     HttpServer::new(|| {
         App::new()
             .wrap(Logger::new("[%a]->'%U'(%s)"))
@@ -36,9 +36,7 @@ async fn main() -> std::io::Result<()> {
                     .show_files_listing()
                     .use_last_modified(true),
             )
-            .default_service(
-                web::route().to(|| ApplicationError::NotFound.error_response())
-            )
+            .default_service(web::route().to(|| ApplicationError::NotFound.error_response()))
             .service(cookies_approved)
             .service(
                 web::scope("")
@@ -48,8 +46,13 @@ async fn main() -> std::io::Result<()> {
                     .service(login)
                     .service(register_user)
                     .service(logout)
-                    .service(signup),
-                )
+                    .service(signup)
+                    .service(
+                        web::scope("")
+                            .wrap(RoleChecker::default())
+                            .service(admin_dashboard),
+                    ),
+            )
     })
     .bind("0.0.0.0:8080")?
     .run()

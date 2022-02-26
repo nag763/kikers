@@ -21,17 +21,27 @@ pub struct LoginForm {
 }
 
 #[post("/login")]
-pub async fn login(login_form: Form<LoginForm>) -> Result<HttpResponse, ApplicationError> {
+pub async fn login(
+    req: HttpRequest,
+    login_form: Form<LoginForm>,
+) -> Result<HttpResponse, ApplicationError> {
     let mc = new_magic_crypt!(std::env::var("ENCRYPT_KEY")?, 256);
     let encrypted_password: String = mc.encrypt_str_to_base64(login_form.password.as_str());
     match JwtUser::emit(login_form.login.as_str(), encrypted_password.as_str()).await? {
         Some(token) => Ok(HttpResponse::Found()
             .header("Location", "/")
-            .cookie(Cookie::new(super::constants::JWT_TOKEN_PATH, token))
+            .cookie(Cookie::new(
+                std::env::var("JWT_TOKEN_PATH")?.as_str(),
+                token,
+            ))
             .finish()),
         None => {
+            warn!(
+                "{:?} tried to connect with login {} without success",
+                req.peer_addr(),
+                login_form.login
+            );
             thread::sleep(std::time::Duration::from_secs(3));
-            error!("User tried to log in without success");
             Ok(HttpResponse::Found()
                 .header(
                     "Location",
@@ -43,14 +53,14 @@ pub async fn login(login_form: Form<LoginForm>) -> Result<HttpResponse, Applicat
 }
 
 #[get("/logout")]
-pub async fn logout(req: HttpRequest) -> impl Responder {
-    if let Some(jwt_cookie) = req.cookie(super::constants::JWT_TOKEN_PATH) {
-        HttpResponse::Found()
+pub async fn logout(req: HttpRequest) -> Result<impl Responder, ApplicationError> {
+    if let Some(jwt_cookie) = req.cookie(std::env::var("JWT_TOKEN_PATH")?.as_str()) {
+        Ok(HttpResponse::Found()
             .header("Location", "/?info=You have been logged out successfully")
             .del_cookie(&jwt_cookie)
-            .finish()
+            .finish())
     } else {
-        HttpResponse::Found().header("Location", "/").finish()
+        Ok(HttpResponse::Found().header("Location", "/").finish())
     }
 }
 

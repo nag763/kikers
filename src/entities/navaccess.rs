@@ -2,7 +2,7 @@
 
 use sea_orm::entity::prelude::*;
 
-#[derive(Clone, Debug, PartialEq, DeriveEntityModel)]
+#[derive(Clone, Debug, PartialEq, DeriveEntityModel, serde::Serialize, serde::Deserialize)]
 #[sea_orm(table_name = "NAVACCESS")]
 pub struct Model {
     #[sea_orm(primary_key)]
@@ -10,7 +10,7 @@ pub struct Model {
     pub label: String,
     pub href: String,
     #[sea_orm(unique)]
-    pub position: i32,
+    pub position: Option<i32>,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]

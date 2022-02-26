@@ -2,15 +2,10 @@ use askama::Template;
 
 use crate::auth::JwtUser;
 use crate::error::ApplicationError;
+use crate::pages::ContextQuery;
 use actix_web::web;
 use actix_web::HttpMessage;
 use actix_web::{get, HttpRequest, HttpResponse};
-
-#[derive(serde::Deserialize)]
-pub struct ContextQuery {
-    info: Option<String>,
-    error: Option<String>,
-}
 
 #[derive(Template, Debug)]
 #[template(path = "index.html")]
@@ -27,7 +22,7 @@ pub async fn index(
     context_query: web::Query<ContextQuery>,
 ) -> Result<HttpResponse, ApplicationError> {
     let index: Index;
-    match req.cookie(super::constants::JWT_TOKEN_PATH) {
+    match req.cookie(std::env::var("JWT_TOKEN_PATH")?.as_str()) {
         Some(token) => {
             let jwt_user = JwtUser::check_token(token.value())?;
             index = Index {
@@ -63,7 +58,10 @@ pub async fn signup(
     req: HttpRequest,
     context_query: web::Query<ContextQuery>,
 ) -> Result<HttpResponse, ApplicationError> {
-    if req.cookie(super::constants::JWT_TOKEN_PATH).is_none() {
+    if req
+        .cookie(std::env::var("JWT_TOKEN_PATH")?.as_str())
+        .is_none()
+    {
         let sign_up: SignUp = SignUp {
             title: "Sign up".to_string(),
             user: None,

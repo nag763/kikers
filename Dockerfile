@@ -4,10 +4,6 @@ WORKDIR /usr/src/friendly-football-bets
 
 COPY ./ .
 
-RUN cargo install sea-orm-cli --features sqlx-mysql
+CMD cargo install --path .
 
-RUN sea-orm-cli migrate init
-
-RUN sea-orm-cli migrate up
-
-RUN cargo run
+RUN ffb

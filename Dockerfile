@@ -1,9 +1,15 @@
 FROM rust:1.57
 
+EXPOSE 8080
+
+RUN apt update; apt install npm -y
+
 WORKDIR /usr/src/friendly-football-bets
 
 COPY ./ .
 
-CMD cargo install --path .
+RUN bash install_styles.sh
 
-RUN ffb
+RUN cargo b --release
+
+CMD cargo r --release

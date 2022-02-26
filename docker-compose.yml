@@ -1,0 +1,28 @@
+version: "3.3"
+services:
+  mysqldb:
+    image: mysql:8.0
+    restart: unless-stopped
+    env_file: ./.env
+    environment:
+      - MYSQL_ROOT_PASSWORD=foopassword
+      - MYSQL_DATABASE=fbets
+      - MYSQL_USER=fb
+      - MYSQL_PASSWORD=password
+    volumes:
+      - ./sql_init:/docker-entrypoint-initdb.d
+      - db:/var/lib/mysql
+  app:
+    build:
+            context: .
+            dockerfile: Dockerfile
+    links:
+        - mysqldb:dbhost
+    depends_on:
+        - mysqldb
+    restart: on-failure
+    env_file: ./.env
+    ports:
+      - 8080:8080/tcp
+volumes:
+  db:

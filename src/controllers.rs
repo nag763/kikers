@@ -31,6 +31,7 @@ pub async fn login(login_form: Form<LoginForm>) -> Result<HttpResponse, Applicat
             .finish()),
         None => {
             thread::sleep(std::time::Duration::from_secs(3));
+            error!("User tried to log in without success");
             Ok(HttpResponse::Found()
                 .header(
                     "Location",

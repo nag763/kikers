@@ -20,13 +20,14 @@ use actix_files as fs;
 use actix_web::middleware::Logger;
 use actix_web::web;
 use actix_web::{App, HttpServer};
+use log4rs;
 
 use dotenv::dotenv;
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     dotenv().ok();
-    env_logger::init();
+    log4rs::init_file("log4rs.yaml", Default::default()).expect("Log4rs file misconfigured or not found");
     HttpServer::new(|| {
         App::new()
             .wrap(Logger::new("[%a]->'%U'(%s)"))

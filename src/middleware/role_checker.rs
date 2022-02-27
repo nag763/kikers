@@ -2,13 +2,13 @@ use std::pin::Pin;
 use std::task::{Context, Poll};
 
 use crate::auth::JwtUser;
+use crate::entities::navaccess::Model as Navaccess;
 use actix_service::{Service, Transform};
 use actix_web::HttpMessage;
 use actix_web::ResponseError;
 use actix_web::{dev::ServiceRequest, dev::ServiceResponse, Error};
 use futures::future::{ok, Ready};
 use futures::Future;
-use crate::entities::navaccess::Model as Navaccess;
 
 use crate::error::ApplicationError;
 
@@ -54,7 +54,8 @@ where
     }
 
     fn call(&mut self, req: ServiceRequest) -> Self::Future {
-        let jwt_path: String = std::env::var("JWT_TOKEN_PATH").unwrap_or_else(|_| "jwt-token".to_string());
+        let jwt_path: String =
+            std::env::var("JWT_TOKEN_PATH").unwrap_or_else(|_| "jwt-token".to_string());
         let navaccess: Vec<Navaccess> = match req.cookie(jwt_path.as_str()) {
             Some(token) => match JwtUser::check_token(token.value()) {
                 Ok(jwt_user) => jwt_user.nav,
@@ -76,15 +77,12 @@ where
         };
 
         let req_path: &str = req.path();
-        println!("{:?}", navaccess);
         if !navaccess.iter().any(|nav| nav.href == req_path) {
             return Box::pin(async move {
-                Ok(req.into_response(
-                    ApplicationError::BadRequest.error_response().into_body(),
-                ))
+                Ok(req.into_response(ApplicationError::BadRequest.error_response().into_body()))
             });
         }
-        
+
         let fut = self.service.call(req);
 
         Box::pin(async move {

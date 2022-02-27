@@ -1,0 +1,52 @@
+<div class="overflow-auto">
+<table class="table-auto">
+  <thead>
+    <tr>
+      <th class="px-4 py-2">Login</th>
+      <th class="px-4 py-2">Name</th>
+      <th class="px-4 py-2">Role</th>
+      <th class="px-4 py-2">Activation</th>
+    </tr>
+  </thead>
+  <tbody>
+	  {% for (i, user) in data.iter().enumerate() %}
+	  {% if i%2 == 0 %}
+    <tr>
+	   {% else %}
+    <tr class="bg-gray-100">
+	   {% endif %}
+	    <td class="border px-4 py-2">{{user.login}}</td>
+	    <td class="border px-4 py-2">{{user.name}}</td>
+	    <td class="border px-4 py-2">{{user.role}}</td>
+	    <td class="border px-4 py-2">
+	    <form method="post" action="/user/activation">
+	    <input hidden name="id" value="{{user.id}}"/>
+	    <input hidden name="login" value="{{user.login}}"/>
+	    <input hidden name="offset" value="{{offset}}"/>
+	    {% if user.is_authorized == 1 %}
+	    <input hidden name="value" value="0"/>
+	    <button type="submit" class="text-white bg-yellow-400 hover:bg-yellow-500 focus:ring-4 focus:ring-yellow-300 font-medium rounded-full text-sm px-5 py-2.5 text-center mr-2 mb-2 dark:focus:ring-yellow-900">Deactivate</button>
+	    {% else %}
+	    <input hidden name="value" value="1"/>
+	    <button type="submit" class="text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-full text-sm px-5 py-2.5 text-center mr-2 mb-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800">Activate</button>
+	    {% endif %}
+	    </form>
+	    </td>
+	    <td class="border px-4 py-2"><a><button class="h-10 px-5 m-2 text-red-100 transition-colors duration-150 bg-red-700 rounded-lg focus:shadow-outline hover:bg-red-800">Delete</button></a></td>
+    </tr>
+     	{% endfor %}
+  </tbody>
+</table>
+<div class= "mt-5">
+	{% if offset != 0 %}
+	<a href="?offset={{offset-10}}">
+<button type="button" class="text-white bg-gradient-to-r from-blue-400 to-green-600 hover:bg-gradient-to-br focus:ring-4 focus:ring-teal-300 dark:focus:ring-teal-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-2 mb-2">Previous</button>
+	</a>
+	{% endif %}
+	{% if data.len()==10 %}
+	<a href="?offset={{offset+10}}">
+	<button type="button" class="text-white bg-gradient-to-br from-green-400 to-blue-600 hover:bg-gradient-to-bl focus:ring-4 focus:ring-green-200 dark:focus:ring-green-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-2 mb-2">Next</button>
+	</a>
+	{% endif %}
+</div>
+</div>

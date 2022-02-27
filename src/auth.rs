@@ -4,6 +4,7 @@ use crate::entities::navaccess;
 use crate::entities::role_navaccess;
 use crate::entities::user;
 use crate::error::ApplicationError;
+use actix_web::{HttpMessage, HttpRequest};
 use hmac::{Hmac, Mac};
 use jwt::{Header, SignWithKey, Token, VerifyWithKey};
 use sea_orm::{
@@ -91,5 +92,12 @@ impl JwtUser {
         let token: Token<Header, JwtUser, _> = VerifyWithKey::verify_with_key(token, &key)?;
         let (_, jwt_user) = token.into();
         Ok(jwt_user)
+    }
+
+    pub fn from_request(req: HttpRequest) -> Result<JwtUser, ApplicationError> {
+        match req.cookie(std::env::var("JWT_TOKEN_PATH")?.as_str()) {
+            Some(token) => Ok(JwtUser::check_token(token.value())?),
+            None => Err(ApplicationError::InternalError),
+        }
     }
 }

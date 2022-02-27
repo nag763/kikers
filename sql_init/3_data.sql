@@ -21,7 +21,7 @@
 
 LOCK TABLES `NAVACCESS` WRITE;
 /*!40000 ALTER TABLE `NAVACCESS` DISABLE KEYS */;
-INSERT INTO `NAVACCESS` VALUES (1,'Leaderboard','/leaderboard',0),(2,'My bets','/mybets',1),(3,'Administration','/admin',3);
+INSERT INTO `NAVACCESS` VALUES (1,'Leaderboard','/leaderboard',0),(2,'My bets','/mybets',1),(3,'Administration','/admin',3), (4, 'Activation of users', 'user/activation', NULL);
 /*!40000 ALTER TABLE `NAVACCESS` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -41,7 +41,7 @@ UNLOCK TABLES;
 
 LOCK TABLES `ROLE_NAVACCESS` WRITE;
 /*!40000 ALTER TABLE `ROLE_NAVACCESS` DISABLE KEYS */;
-INSERT INTO `ROLE_NAVACCESS` VALUES (1,1,1),(3,2,1),(5,3,1),(4,2,2),(6,3,2),(7,3,3);
+INSERT INTO `ROLE_NAVACCESS` VALUES (1,1,1),(3,2,1),(5,3,1),(4,2,2),(6,3,2),(7,3,3),(8,3,4);
 /*!40000 ALTER TABLE `ROLE_NAVACCESS` ENABLE KEYS */;
 UNLOCK TABLES;
 

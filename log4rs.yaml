@@ -6,7 +6,7 @@ appenders:
     kind: rolling_file
     path: "log/ffb_out.log"
     encoder:
-      pattern: "{d} {l} {M} - {m}"
+      pattern: "{d} {l} {M} - {m}\n"
     policy:
         kind : compound
         trigger:
@@ -21,7 +21,7 @@ appenders:
     kind: rolling_file
     path: "log/mw_out.log"
     encoder:
-      pattern: "{m}"
+      pattern: "{d} [l} {M} - {m}\n"
     policy:
         kind : compound
         trigger:
@@ -36,7 +36,7 @@ appenders:
     kind: rolling_file
     path: "log/ffb_err.log"
     encoder:
-      pattern: "{d} {l} {M} - {m}"
+      pattern: "{d} {l} {M} - {m}\n"
     policy:
         kind : compound
         trigger:

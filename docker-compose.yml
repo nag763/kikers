@@ -23,7 +23,7 @@ services:
     restart: on-failure
     env_file: ./.env
     ports:
-      - 8080:8080/tcp
+      - 80:8080/tcp
     volumes:
       - ./log:/usr/src/friendly-football-bets/log
 volumes:

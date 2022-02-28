@@ -62,7 +62,7 @@ where
                 Err(_) => {
                     return Box::pin(async move {
                         Ok(req.into_response(
-                            ApplicationError::InternalError.error_response().into_body(),
+                            ApplicationError::IllegalToken.error_response().into_body(),
                         ))
                     });
                 }

@@ -21,9 +21,9 @@ pub async fn user_activation(
     req: HttpRequest,
     user_activation_form: Form<UserActivation>,
 ) -> Result<impl Responder, ApplicationError> {
+    let jwt_user: JwtUser = JwtUser::from_request(req)?;
     let db_url = std::env::var("DATABASE_URL")?;
     let conn = sea_orm::Database::connect(&db_url).await?;
-    let jwt_user: JwtUser = JwtUser::from_request(req)?;
     let user_to_update: User = match user::Entity::find_by_id(user_activation_form.id)
         .one(&conn)
         .await?
@@ -33,6 +33,7 @@ pub async fn user_activation(
     };
 
     if jwt_user.role < user_to_update.role {
+        error!("User {} tried to change activation status (to {}) of a user (#{}) with greater or same role than him ", jwt_user.login, user_activation_form.value, user_activation_form.id);
         return Err(ApplicationError::BadRequest);
     }
 
@@ -40,6 +41,7 @@ pub async fn user_activation(
     user_to_update.is_authorized = Set(user_activation_form.value);
     user_to_update.update(&conn).await?;
 
+    info!("User {} updated activation status (to {}) of user (#{})", jwt_user.login, user_activation_form.value, user_activation_form.id);
     Ok(HttpResponse::Found()
         .header(
             "Location",

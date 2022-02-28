@@ -57,7 +57,7 @@ impl JwtUser {
                     header,
                     JwtUser {
                         id: user.id,
-                        login: user.login,
+                        login: user.login.clone(),
                         name: user.name,
                         nav,
                         is_authorized: user.is_authorized,
@@ -65,6 +65,7 @@ impl JwtUser {
                     },
                 );
                 let signed_token = unsigned_token.sign_with_key(&key)?;
+                info!("Token for {} has been emitted", login);
                 Ok(Some(signed_token.into()))
             }
             None => {
@@ -78,8 +79,10 @@ impl JwtUser {
                     .one(&conn)
                     .await?;
                 if user_unwrapped.is_some() {
+                    warn!("User {} tried to connect but isn't authorized yet", login);
                     Err(ApplicationError::UserNotAuthorized(login.to_string()))
                 } else {
+                    warn!("User {} tried to connect but either his credentials are incorrect or he doesn't exist", login);
                     Ok(None)
                 }
             }

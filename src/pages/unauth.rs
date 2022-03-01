@@ -26,7 +26,7 @@ pub async fn index(
         Some(token) => {
             let jwt_user = JwtUser::check_token(token.value())?;
             index = Index {
-                title: format!("Weclome back {0}", jwt_user.name),
+                title: format!("Welcome back {0}", jwt_user.name),
                 user: Some(jwt_user),
                 error: context_query.error.clone(),
                 info: context_query.info.clone(),

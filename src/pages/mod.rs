@@ -5,5 +5,6 @@ pub mod unauth;
 pub struct ContextQuery {
     info: Option<String>,
     error: Option<String>,
-    offset: Option<u64>,
+    page: Option<usize>,
+    per_page: Option<usize>,
 }

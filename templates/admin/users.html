@@ -22,7 +22,8 @@
 	    <form method="post" action="/user/activation">
 	    <input hidden name="id" value="{{app_user.id}}"/>
 	    <input hidden name="login" value="{{app_user.login}}"/>
-	    <input hidden name="offset" value="{{offset}}"/>
+	    <input hidden name="page" value="{{page}}"/>
+	    <input hidden name="per_page" value="{{per_page}}"/>
 	    {% if app_user.is_authorized == 1 %}
 	    <input hidden name="value" value="0"/>
 	    <button type="submit" class="text-white bg-yellow-400 hover:bg-yellow-500 focus:ring-4 focus:ring-yellow-300 font-medium rounded-full text-sm px-5 py-2.5 text-center mr-2 mb-2 dark:focus:ring-yellow-900">Deactivate</button>
@@ -35,7 +36,8 @@
 	    <form method="post" action="/user/deletion">
 	    <input hidden name="id" value="{{app_user.id}}"/>
 	    <input hidden name="login" value="{{app_user.login}}"/>
-	    <input hidden name="offset" value="{{offset}}"/>
+	    <input hidden name="page" value="{{page}}"/>
+	    <input hidden name="per_page" value="{{per_page}}"/>
 	    <td class="border px-4 py-2"><a><button class="h-10 px-5 m-2 text-red-100 transition-colors duration-150 bg-red-700 rounded-lg focus:shadow-outline hover:bg-red-800">Delete</button></a></td>
 	    </form>
     </tr>
@@ -43,17 +45,13 @@
   </tbody>
 </table>
 <div class= "mt-5">
-	{% if offset != 0 %}
-		{% if 10 < offset %}
-		<a href="?offset={{offset-10}}">
-		{% else %}
-		<a href="?offset=0">
-		{% endif %}
+	{% if page != 1 %}
+		<a href="?page={{page-1}}&per_page={{per_page}}">
 <button type="button" class="text-white bg-gradient-to-r from-blue-400 to-green-600 hover:bg-gradient-to-br focus:ring-4 focus:ring-teal-300 dark:focus:ring-teal-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-2 mb-2">Previous</button>
 	</a>
 	{% endif %}
-	{% if data.len()==10 %}
-	<a href="?offset={{offset+10}}">
+	{% if page != num_pages %}
+	<a href="?page={{page+1}}&per_page={{per_page}}">
 	<button type="button" class="text-white bg-gradient-to-br from-green-400 to-blue-600 hover:bg-gradient-to-bl focus:ring-4 focus:ring-green-200 dark:focus:ring-green-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-2 mb-2">Next</button>
 	</a>
 	{% endif %}

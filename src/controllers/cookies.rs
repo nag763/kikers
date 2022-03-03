@@ -1,6 +1,6 @@
 use crate::error::ApplicationError;
 use actix_web::http::Cookie;
-use actix_web::{get, HttpResponse, Responder, HttpRequest};
+use actix_web::{get, HttpRequest, HttpResponse, Responder};
 
 #[get("/cookies_approved")]
 pub async fn cookies_approved(req: HttpRequest) -> Result<impl Responder, ApplicationError> {

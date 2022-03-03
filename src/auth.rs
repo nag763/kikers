@@ -14,7 +14,7 @@ use sea_orm::{
 use serde::{Deserialize, Serialize};
 use sha2::Sha256;
 
-#[derive(Debug, Default, Deserialize, Serialize)]
+#[derive(Debug, Default, Deserialize, Serialize, Clone)]
 pub struct JwtUser {
     pub id: i32,
     pub login: String,
@@ -22,6 +22,7 @@ pub struct JwtUser {
     pub nav: Vec<NavAccess>,
     pub is_authorized: i8,
     pub role: i32,
+    pub to_refresh_on: i64,
 }
 
 impl JwtUser {
@@ -49,6 +50,9 @@ impl JwtUser {
                     .order_by_asc(navaccess::Column::Position)
                     .all(&conn)
                     .await?;
+                let to_refresh_on: i64 =
+                    (time::OffsetDateTime::now_utc() + time::Duration::minutes(1)).unix_timestamp();
+
                 let jwt_key: String = std::env::var("JWT_KEY")?;
                 let key: Hmac<Sha256> = Hmac::new_from_slice(jwt_key.as_bytes())?;
 
@@ -62,6 +66,7 @@ impl JwtUser {
                         nav,
                         is_authorized: user.is_authorized,
                         role: user.role,
+                        to_refresh_on,
                     },
                 );
                 let signed_token = unsigned_token.sign_with_key(&key)?;

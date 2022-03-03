@@ -81,7 +81,10 @@ pub async fn register_user(
         .status_code
         != 200
     {
-        warn!("User {} has requested an account creation but isn't an existing kik user", sign_up_form.login);
+        warn!(
+            "User {} has requested an account creation but isn't an existing kik user",
+            sign_up_form.login
+        );
         return Ok(HttpResponse::Found().header("Location", "?error=The given login isn't associed to any kik login, please ensure you use an existing kik login").finish());
     }
 
@@ -95,7 +98,11 @@ pub async fn register_user(
         .one(&conn)
         .await?;
     if user_with_same_login.is_some() {
-        warn!("Peer {:?} tried to sign up but a user with the same username ({}) already exists", req.peer_addr(), sign_up_form.login);
+        warn!(
+            "Peer {:?} tried to sign up but a user with the same username ({}) already exists",
+            req.peer_addr(),
+            sign_up_form.login
+        );
         return Ok(HttpResponse::Found().header("Location", "?error=Someone with the same login already exists, please contact the administrator if you believe you are the owner of the account").finish());
     }
 
@@ -106,7 +113,10 @@ pub async fn register_user(
         ..Default::default()
     };
     new_user.insert(&conn).await?;
-    info!("User {} has been created, access hasn't been granted yet", sign_up_form.login);
+    info!(
+        "User {} has been created, access hasn't been granted yet",
+        sign_up_form.login
+    );
     let info_msg : String = format!("User {} has been created, you will need to wait for approval before being able to use this site's functionnalities.", sign_up_form.login);
     Ok(HttpResponse::Found()
         .header("Location", format!("/?info={}", info_msg))

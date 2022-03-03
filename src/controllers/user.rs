@@ -5,7 +5,9 @@ use crate::error::ApplicationError;
 use actix_web::web::Form;
 use actix_web::{post, HttpRequest, HttpResponse, Responder};
 use sea_orm::ActiveModelTrait;
+use sea_orm::DeleteResult;
 use sea_orm::EntityTrait;
+use sea_orm::ModelTrait;
 use sea_orm::Set;
 
 #[derive(serde::Deserialize)]
@@ -41,7 +43,10 @@ pub async fn user_activation(
     user_to_update.is_authorized = Set(user_activation_form.value);
     user_to_update.update(&conn).await?;
 
-    info!("User {} updated activation status (to {}) of user (#{})", jwt_user.login, user_activation_form.value, user_activation_form.id);
+    info!(
+        "User {} updated activation status (to {}) of user (#{})",
+        jwt_user.login, user_activation_form.value, user_activation_form.id
+    );
     Ok(HttpResponse::Found()
         .header(
             "Location",
@@ -51,4 +56,41 @@ pub async fn user_activation(
             ),
         )
         .finish())
+}
+
+#[derive(serde::Deserialize)]
+pub struct UserDeletion {
+    id: i32,
+    offset: i32,
+    login: String,
+}
+
+#[post("/user/deletion")]
+pub async fn user_deletion(
+    user_deletion_form: Form<UserDeletion>,
+) -> Result<impl Responder, ApplicationError> {
+    let db_url = std::env::var("DATABASE_URL")?;
+    let conn = sea_orm::Database::connect(&db_url).await?;
+    let user_to_delete: Option<User> = user::Entity::find_by_id(user_deletion_form.id)
+        .one(&conn)
+        .await?;
+    return match user_to_delete {
+        Some(user_to_delete) => {
+            let res: DeleteResult = user_to_delete.delete(&conn).await?;
+            if res.rows_affected == 1 {
+                Ok(HttpResponse::Found()
+                    .header(
+                        "Location",
+                        format!(
+                            "/admin?info=User {}'s has been deleted&offset={}",
+                            user_deletion_form.login, user_deletion_form.offset
+                        ),
+                    )
+                    .finish())
+            } else {
+                Err(ApplicationError::InternalError)
+            }
+        }
+        None => Err(ApplicationError::InternalError),
+    };
 }

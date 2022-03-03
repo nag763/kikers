@@ -9,21 +9,21 @@
     </tr>
   </thead>
   <tbody>
-	  {% for (i, user) in data.iter().enumerate() %}
+	  {% for (i, app_user) in data.iter().enumerate() %}
 	  {% if i%2 == 0 %}
     <tr>
 	   {% else %}
     <tr class="bg-gray-100">
 	   {% endif %}
-	    <td class="border px-4 py-2">{{user.login}}</td>
-	    <td class="border px-4 py-2">{{user.name}}</td>
-	    <td class="border px-4 py-2">{{user.role}}</td>
+	    <td class="border px-4 py-2">{{app_user.login}}</td>
+	    <td class="border px-4 py-2">{{app_user.name}}</td>
+	    <td class="border px-4 py-2">{{app_user.role}}</td>
 	    <td class="border px-4 py-2">
 	    <form method="post" action="/user/activation">
-	    <input hidden name="id" value="{{user.id}}"/>
-	    <input hidden name="login" value="{{user.login}}"/>
+	    <input hidden name="id" value="{{app_user.id}}"/>
+	    <input hidden name="login" value="{{app_user.login}}"/>
 	    <input hidden name="offset" value="{{offset}}"/>
-	    {% if user.is_authorized == 1 %}
+	    {% if app_user.is_authorized == 1 %}
 	    <input hidden name="value" value="0"/>
 	    <button type="submit" class="text-white bg-yellow-400 hover:bg-yellow-500 focus:ring-4 focus:ring-yellow-300 font-medium rounded-full text-sm px-5 py-2.5 text-center mr-2 mb-2 dark:focus:ring-yellow-900">Deactivate</button>
 	    {% else %}
@@ -32,14 +32,23 @@
 	    {% endif %}
 	    </form>
 	    </td>
+	    <form method="post" action="/user/deletion">
+	    <input hidden name="id" value="{{app_user.id}}"/>
+	    <input hidden name="login" value="{{app_user.login}}"/>
+	    <input hidden name="offset" value="{{offset}}"/>
 	    <td class="border px-4 py-2"><a><button class="h-10 px-5 m-2 text-red-100 transition-colors duration-150 bg-red-700 rounded-lg focus:shadow-outline hover:bg-red-800">Delete</button></a></td>
+	    </form>
     </tr>
      	{% endfor %}
   </tbody>
 </table>
 <div class= "mt-5">
 	{% if offset != 0 %}
-	<a href="?offset={{offset-10}}">
+		{% if 10 < offset %}
+		<a href="?offset={{offset-10}}">
+		{% else %}
+		<a href="?offset=0">
+		{% endif %}
 <button type="button" class="text-white bg-gradient-to-r from-blue-400 to-green-600 hover:bg-gradient-to-br focus:ring-4 focus:ring-teal-300 dark:focus:ring-teal-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-2 mb-2">Previous</button>
 	</a>
 	{% endif %}

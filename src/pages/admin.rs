@@ -31,13 +31,13 @@ pub async fn admin_dashboard(
     let db_url = std::env::var("DATABASE_URL")?;
     let conn = sea_orm::Database::connect(&db_url).await?;
     let jwt_user: JwtUser = JwtUser::from_request(req)?;
-    let page: usize = context_query.page.unwrap_or(1);
+    let page: usize = context_query.page.unwrap_or(0);
     let per_page: usize = context_query.per_page.unwrap_or(10);
     let paginated_data = user::Entity::find()
         .filter(Condition::all().add(user::Column::Role.lt(jwt_user.role)))
         .paginate(&conn, per_page);
     let num_pages = paginated_data.num_pages().await?;
-    let data : Vec<User> =  paginated_data.fetch_page(page-1).await?;
+    let data : Vec<User> =  paginated_data.fetch_page(page).await?;
     let index = Admin {
         title: "User management".into(),
         user: Some(jwt_user),

@@ -1,4 +1,4 @@
 #!/bin/sh
 
-npx tailwindcss@2 -o styles/tailwind.css
+npx tailwindcss -o styles/tailwind.css
 

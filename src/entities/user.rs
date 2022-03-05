@@ -13,14 +13,24 @@ pub struct Model {
     pub password: String,
     pub is_authorized: i8,
     pub role: i32,
+    pub joined_on: DateTime,
 }
 
-#[derive(Copy, Clone, Debug, EnumIter)]
-pub enum Relation {}
+#[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
+pub enum Relation {
+    #[sea_orm(
+        belongs_to = "super::role::Entity",
+        from = "Column::Role",
+        to = "super::role::Column::Id",
+        on_update = "Restrict",
+        on_delete = "Restrict"
+    )]
+    Role,
+}
 
-impl RelationTrait for Relation {
-    fn def(&self) -> RelationDef {
-        panic!("No RelationDef")
+impl Related<super::role::Entity> for Entity {
+    fn to() -> RelationDef {
+        Relation::Role.def()
     }
 }
 

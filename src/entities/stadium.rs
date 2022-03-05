@@ -3,30 +3,32 @@
 use sea_orm::entity::prelude::*;
 
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel)]
-#[sea_orm(table_name = "ROLE")]
+#[sea_orm(table_name = "STADIUM")]
 pub struct Model {
     #[sea_orm(primary_key)]
     pub id: i32,
     pub name: String,
+    pub city: String,
+    pub country: String,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
 pub enum Relation {
-    #[sea_orm(has_many = "super::role_navaccess::Entity")]
-    RoleNavaccess,
-    #[sea_orm(has_many = "super::user::Entity")]
-    User,
+    #[sea_orm(has_many = "super::club::Entity")]
+    Club,
+    #[sea_orm(has_many = "super::game::Entity")]
+    Game,
 }
 
-impl Related<super::role_navaccess::Entity> for Entity {
+impl Related<super::club::Entity> for Entity {
     fn to() -> RelationDef {
-        Relation::RoleNavaccess.def()
+        Relation::Club.def()
     }
 }
 
-impl Related<super::user::Entity> for Entity {
+impl Related<super::game::Entity> for Entity {
     fn to() -> RelationDef {
-        Relation::User.def()
+        Relation::Game.def()
     }
 }
 

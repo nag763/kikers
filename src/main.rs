@@ -35,7 +35,10 @@ async fn main() -> std::io::Result<()> {
             .wrap(Logger::new("[%a]->'%U'(%s)"))
             .service(
                 fs::Files::new("/styles", "./styles")
-                    .show_files_listing()
+                    .use_last_modified(true),
+            )
+            .service(
+                fs::Files::new("/assets", "./assets")
                     .use_last_modified(true),
             )
             .default_service(web::route().to(|| ApplicationError::NotFound.error_response()))

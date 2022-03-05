@@ -31,7 +31,7 @@ UNLOCK TABLES;
 
 LOCK TABLES `NAVACCESS` WRITE;
 /*!40000 ALTER TABLE `NAVACCESS` DISABLE KEYS */;
-INSERT INTO `NAVACCESS` VALUES (1,'Leaderboard','/leaderboard',0),(2,'My bets','/mybets',1),(3,'Administration','/admin',3),(4,'Activation of users','/user/activation',NULL),(5,'Deletion of users','/user/deletion',NULL),(6,'User modification','/user/modification',NULL),(7,'User search','/user/search',NULL);
+INSERT INTO `NAVACCESS` VALUES (1,'Leaderboard','/leaderboard',0),(2,'My bets','/mybets',1),(3,'Administration','/admin',3),(4,'Activation of users','/user/activation',NULL),(5,'Deletion of users','/user/deletion',NULL),(6,'User modification','/user/modification',NULL),(7,'User search','/user/search',NULL),(8,'Games','/games',2);
 /*!40000 ALTER TABLE `NAVACCESS` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -41,7 +41,7 @@ UNLOCK TABLES;
 
 LOCK TABLES `ROLE_NAVACCESS` WRITE;
 /*!40000 ALTER TABLE `ROLE_NAVACCESS` DISABLE KEYS */;
-INSERT INTO `ROLE_NAVACCESS` VALUES (1,1,1),(3,2,1),(5,3,1),(4,2,2),(6,3,2),(7,3,3),(8,3,4),(9,3,5),(10,3,6),(11,3,7);
+INSERT INTO `ROLE_NAVACCESS` VALUES (1,1,1),(3,2,1),(5,3,1),(4,2,2),(6,3,2),(7,3,3),(8,3,4),(9,3,5),(10,3,6),(11,3,7),(12,1,8),(13,2,8),(14,3,8);
 /*!40000 ALTER TABLE `ROLE_NAVACCESS` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -114,4 +114,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2022-03-05 16:24:00
+-- Dump completed on 2022-03-05 20:26:10

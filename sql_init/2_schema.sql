@@ -121,7 +121,7 @@ CREATE TABLE `GAME` (
   `away_team_odds` float DEFAULT NULL,
   `away_team_score` int unsigned DEFAULT NULL,
   `edition_id` int NOT NULL,
-  `played_on` datetime DEFAULT NULL,
+  `played_on` timestamp NULL DEFAULT NULL,
   `result` enum('W','A','D','C') DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `home_team_id` (`home_team_id`,`away_team_id`,`edition_id`),
@@ -149,7 +149,7 @@ CREATE TABLE `NAVACCESS` (
   `position` int DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `position` (`position`)
-) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -183,7 +183,7 @@ CREATE TABLE `ROLE_NAVACCESS` (
   KEY `role_id` (`role_id`),
   CONSTRAINT `ROLE_NAVACCESS_ibfk_1` FOREIGN KEY (`navaccess_id`) REFERENCES `NAVACCESS` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `ROLE_NAVACCESS_ibfk_2` FOREIGN KEY (`role_id`) REFERENCES `ROLE` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=15 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -247,4 +247,4 @@ CREATE TABLE `seaql_migrations` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2022-03-05 16:23:59
+-- Dump completed on 2022-03-05 20:26:10

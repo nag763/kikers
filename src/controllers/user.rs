@@ -131,7 +131,7 @@ pub async fn user_modification(
         .one(&conn)
         .await?
         .ok_or(ApplicationError::NotFound)?;
-    let mut user : user::ActiveModel = user.into();
+    let mut user: user::ActiveModel = user.into();
     user.name = Set(user_modification_form.name.clone());
     user.is_authorized = Set(user_modification_form.is_authorized.is_some() as i8);
     user.update(&conn).await?;
@@ -147,4 +147,42 @@ pub async fn user_modification(
             ),
         )
         .finish())
+}
+
+#[derive(serde::Deserialize)]
+pub struct UserSearch {
+    login: String,
+    page: i32,
+    per_page: i32,
+}
+
+#[post("/user/search")]
+pub async fn user_search(
+    req: HttpRequest,
+    user_search_form: Form<UserSearch>,
+) -> Result<impl Responder, ApplicationError> {
+    let db_url = std::env::var("DATABASE_URL")?;
+    let conn = sea_orm::Database::connect(&db_url).await?;
+    let jwt_user: JwtUser = JwtUser::from_request(req)?;
+    let user: Option<User> = user::Entity::find()
+        .filter(
+            Condition::all()
+                .add(user::Column::Role.lt(jwt_user.role))
+                .add(user::Column::Login.eq(user_search_form.login.clone())),
+        )
+        .one(&conn)
+        .await?;
+    let result: String = match user {
+        Some(v) => format!(
+            "/admin?page={}&per_page={}&id={}",
+            user_search_form.page, user_search_form.per_page, v.id
+        ),
+        None => {
+            format!(
+                "/admin?error=User {} hasn't been found&page={}&per_page={}",
+                user_search_form.login, user_search_form.page, user_search_form.per_page,
+            )
+        }
+    };
+    Ok(HttpResponse::Found().header("Location", result).finish())
 }

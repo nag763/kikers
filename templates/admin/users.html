@@ -1,6 +1,22 @@
 {% if data.is_empty() %}
 <p>There are no more results, go back if you need to see again the list of users</p>
 {% else %}
+      <form action="/user/search" method="post">
+<div class="flex sm:justify-center lg:justify-end">
+  <div class="mb-3 xl:w-96">
+    <div class="input-group relative flex items-stretch w-full mb-4">
+      <input hidden name="page" value="{{page}}"/>
+      <input hidden name="per_page" value="{{per_page}}"/>
+      <input type="search" class="form-control relative flex-auto min-w-0 block w-full px-3 py-1.5 text-base font-normal text-gray-700 bg-white bg-clip-padding border border-solid border-gray-300 rounded transition ease-in-out m-0 focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none" placeholder="Search login" aria-label="Search" aria-describedby="button-addon2" name="login">
+      <button class="btn inline-block px-6 py-2.5 bg-blue-600 text-white font-medium text-xs leading-tight uppercase rounded shadow-md hover:bg-blue-700 hover:shadow-lg focus:bg-blue-700  focus:shadow-lg focus:outline-none focus:ring-0 active:bg-blue-800 active:shadow-lg transition duration-150 ease-in-out flex items-center" type="submit">
+        <svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="search" class="w-4" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+          <path fill="currentColor" d="M505 442.7L405.3 343c-4.5-4.5-10.6-7-17-7H372c27.6-35.3 44-79.7 44-128C416 93.1 322.9 0 208 0S0 93.1 0 208s93.1 208 208 208c48.3 0 92.7-16.4 128-44v16.3c0 6.4 2.5 12.5 7 17l99.7 99.7c9.4 9.4 24.6 9.4 33.9 0l28.3-28.3c9.4-9.4 9.4-24.6.1-34zM208 336c-70.7 0-128-57.2-128-128 0-70.7 57.2-128 128-128 70.7 0 128 57.2 128 128 0 70.7-57.2 128-128 128z"></path>
+        </svg>
+      </button>
+      </form>
+    </div>
+  </div>
+</div>
 <div class="grid grid-cols-2 gap-2">
 <div class="overflow-auto">
 <table class="table-auto">
@@ -66,12 +82,19 @@
 </div>
 {% match chosen_user %}
 {% when Some with (chosen_user) %}
-<form class="w-full max-w-lg" method="post" action="/user/modification">
+  <div class="flex flex-wrap -mx-3 border px-2 py-3 mr-2 ml-2 mt-3">
+	<!-- div class="relative">
+		<div class="absolute top-0 right-0">
+		<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+		  <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+		</svg>
+		</div>
+	</div -->
+	<form class="w-full" method="post" action="/user/modification">
 	    <input hidden name="id" value="{{chosen_user.id}}"/>
 	    <input hidden name="page" value="{{page}}"/>
 	    <input hidden name="per_page" value="{{per_page}}"/>
-  <div class="flex flex-wrap -mx-3 mb-6">
-    <div class="w-full px-3">
+    	    <div class="w-full px-3">
       <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" for="Login">
         Login
       </label>
@@ -81,7 +104,7 @@
       <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" for="name">
         Name
       </label>
-      <input class="appearance-none block w-full text-gray-700 border border-gray-200 rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white focus:border-gray-500" name="name" placeholder="{{chosen_user.name}}" value="{{chosen_user.name}}">
+      <input class="appearance-none block w-full text-gray-700 border border-gray-200 rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white focus:border-gray-500" name="name" placeholder="{{chosen_user.name}}" value="{{chosen_user.name}}" minlength="3">
     </div>
 
     <div class="w-full px-3">
@@ -90,11 +113,11 @@
 	    {% else %}
 	    <input name="is_authorized" class="mr-2 leading-tight" type="checkbox"/>
 	    {% endif %}
-      <label class="text-sm">
-	      Is authorized
+      <label>
+	Can access application
       </span>
     </div>
-    <div class="mt-3 flex">
+    <div class="mt-5 flex flex-row-reverse">
 	    <button class="h-10 px-5 m-2 text-red-100 transition-colors duration-150 bg-blue-700 rounded-lg focus:shadow-outline hover:bg-blue-800" type="submit">
 			Save
 	    </button>
@@ -109,26 +132,25 @@
 </form>
     </div>
   </div>
-  </div>
-  </div>
-</form>
 {% when None %}
-{% endmatch %}
+<div>
 </div>
+{% endmatch %}
+  </div>
 {% endif %}
-<div class= "mt-5 flex">
+<div class= "mt-5 grid grid-cols-2">
+	<div class="justify-self-start">
 	{% if page != 0 %}
-	<div>
 		<a href="?page={{page-1}}&per_page={{per_page}}">
 <button type="button" class="text-white bg-gradient-to-r from-blue-400 to-green-600 hover:bg-gradient-to-br focus:ring-4 focus:ring-teal-300 dark:focus:ring-teal-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-2 mb-2">Previous</button>
 	</a>
-	</div>
 	{% endif %}
+	</div>
+	<div class="justify-self-end">
 	{% if page < num_pages %}
-	<div>
 	<a href="?page={{page+1}}&per_page={{per_page}}" class="text-right">
 	<button type="button" class="text-white bg-gradient-to-br from-green-400 to-blue-600 hover:bg-gradient-to-bl focus:ring-4 focus:ring-green-200 dark:focus:ring-green-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-2 mb-2">Next</button>
 	</a>
-	</div>
 	{% endif %}
+	</div>
 </div>

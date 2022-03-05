@@ -12,7 +12,7 @@ mod pages;
 
 use crate::controllers::auth::{login, logout, register_user};
 use crate::controllers::cookies::cookies_approved;
-use crate::controllers::user::{user_activation, user_deletion, user_modification};
+use crate::controllers::user::{user_activation, user_deletion, user_modification, user_search};
 use crate::error::ApplicationError;
 use crate::middleware::cookie_approval::CookieChecker;
 use crate::middleware::role_checker::RoleChecker;
@@ -53,6 +53,7 @@ async fn main() -> std::io::Result<()> {
                         web::scope("")
                             .wrap(RoleChecker::default())
                             .service(admin_dashboard)
+                            .service(user_search)
                             .service(user_activation)
                             .service(user_deletion)
                             .service(user_modification),

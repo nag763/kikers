@@ -16,16 +16,6 @@
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
--- Dumping data for table `NAVACCESS`
---
-
-LOCK TABLES `NAVACCESS` WRITE;
-/*!40000 ALTER TABLE `NAVACCESS` DISABLE KEYS */;
-INSERT INTO `NAVACCESS` VALUES (1,'Leaderboard','/leaderboard',0),(2,'My bets','/mybets',1),(3,'Administration','/admin',3),(4,'Activation of users','/user/activation',NULL),(5,'Deletion of users','/user/deletion',NULL);
-/*!40000 ALTER TABLE `NAVACCESS` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
 -- Dumping data for table `ROLE`
 --
 
@@ -36,12 +26,22 @@ INSERT INTO `ROLE` VALUES (1,'user'),(2,'manager'),(3,'admin');
 UNLOCK TABLES;
 
 --
+-- Dumping data for table `NAVACCESS`
+--
+
+LOCK TABLES `NAVACCESS` WRITE;
+/*!40000 ALTER TABLE `NAVACCESS` DISABLE KEYS */;
+INSERT INTO `NAVACCESS` VALUES (1,'Leaderboard','/leaderboard',0),(2,'My bets','/mybets',1),(3,'Administration','/admin',3),(4,'Activation of users','/user/activation',NULL),(5,'Deletion of users','/user/deletion',NULL),(6,'User modification','/user/modification',NULL);
+/*!40000 ALTER TABLE `NAVACCESS` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Dumping data for table `ROLE_NAVACCESS`
 --
 
 LOCK TABLES `ROLE_NAVACCESS` WRITE;
 /*!40000 ALTER TABLE `ROLE_NAVACCESS` DISABLE KEYS */;
-INSERT INTO `ROLE_NAVACCESS` VALUES (1,1,1),(3,2,1),(5,3,1),(4,2,2),(6,3,2),(7,3,3),(8,3,4),(9,3,5);
+INSERT INTO `ROLE_NAVACCESS` VALUES (1,1,1),(3,2,1),(5,3,1),(4,2,2),(6,3,2),(7,3,3),(8,3,4),(9,3,5),(10,3,6);
 /*!40000 ALTER TABLE `ROLE_NAVACCESS` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -54,4 +54,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2022-03-03 22:40:06
+-- Dump completed on 2022-03-05 11:23:44

@@ -1,7 +1,7 @@
 {% if data.is_empty() %}
 <p>There are no more results, go back if you need to see again the list of users</p>
 {% else %}
-<div class="grid gric-cols-2">
+<div class="grid grid-cols-2 gap-2">
 <div class="overflow-auto">
 <table class="table-auto">
   <thead>
@@ -23,12 +23,14 @@
 	    <td class="border px-4 py-2">{{app_user.login}}</td>
 	    <td class="border px-4 py-2">{{app_user.name}}</td>
 	    <td class="border px-4 py-2">
-			    <button type="submit" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-green-300 font-medium rounded-full text-sm px-5 py-2.5 text-center mr-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+		    <a href="?id={{app_user.id}}&page={{page}}&per_page={{per_page}}">
+			    <button class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-green-300 font-medium rounded-full text-sm px-5 py-2.5 text-center mr-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
 		<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
   <path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z" />
   <path fill-rule="evenodd" d="M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" clip-rule="evenodd" />
 </svg>
 			    </button>
+		    </a>
 	    </td>
 	    <td class="border px-4 py-2" style="text-align:center">
 	    <form method="post" action="/user/activation">
@@ -50,7 +52,8 @@
 	    <input hidden name="login" value="{{app_user.login}}"/>
 	    <input hidden name="page" value="{{page}}"/>
 	    <input hidden name="per_page" value="{{per_page}}"/>
-	    <td class="border px-4 py-2"><a><button class="h-10 px-5 m-2 text-red-100 transition-colors duration-150 bg-red-700 rounded-lg focus:shadow-outline hover:bg-red-800">
+	    <td class="border px-4 py-2">
+		    <a><button class="h-10 px-5 m-2 text-red-100 transition-colors duration-150 bg-red-700 rounded-lg focus:shadow-outline hover:bg-red-800">
 		<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
   <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
 </svg>
@@ -61,6 +64,56 @@
   </tbody>
 </table>
 </div>
+{% match chosen_user %}
+{% when Some with (chosen_user) %}
+<form class="w-full max-w-lg" method="post" action="/user/modification">
+	    <input hidden name="id" value="{{chosen_user.id}}"/>
+	    <input hidden name="page" value="{{page}}"/>
+	    <input hidden name="per_page" value="{{per_page}}"/>
+  <div class="flex flex-wrap -mx-3 mb-6">
+    <div class="w-full px-3">
+      <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" for="Login">
+        Login
+      </label>
+      <input class="appearance-none block w-full bg-gray-100 text-gray-700 border border-gray-200 rounded py-3 px-4 mb-3 leading-tight" name="login" placeholder="{{chosen_user.login}}" value="{{chosen_user.login}}" readonly>
+    </div>
+    <div class="w-full px-3">
+      <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" for="name">
+        Name
+      </label>
+      <input class="appearance-none block w-full text-gray-700 border border-gray-200 rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white focus:border-gray-500" name="name" placeholder="{{chosen_user.name}}" value="{{chosen_user.name}}">
+    </div>
+
+    <div class="w-full px-3">
+	    {% if chosen_user.is_authorized == 1 %}
+	    <input name="is_authorized" class="mr-2 leading-tight" type="checkbox" checked />
+	    {% else %}
+	    <input name="is_authorized" class="mr-2 leading-tight" type="checkbox"/>
+	    {% endif %}
+      <label class="text-sm">
+	      Is authorized
+      </span>
+    </div>
+    <div class="mt-3 flex">
+	    <button class="h-10 px-5 m-2 text-red-100 transition-colors duration-150 bg-blue-700 rounded-lg focus:shadow-outline hover:bg-blue-800" type="submit">
+			Save
+	    </button>
+</form>
+	    <form method="post" action="/user/deletion">
+	    <input hidden name="id" value="{{chosen_user.id}}"/>
+	    <input hidden name="login" value="{{chosen_user.login}}"/>
+	    <input hidden name="page" value="{{page}}"/>
+	    <input hidden name="per_page" value="{{per_page}}"/>
+	    <button class="h-10 px-5 m-2 text-red-100 transition-colors duration-150 bg-red-700 rounded-lg focus:shadow-outline hover:bg-red-800" type="submit">Delete
+	    </button>
+</form>
+    </div>
+  </div>
+  </div>
+  </div>
+</form>
+{% when None %}
+{% endmatch %}
 </div>
 {% endif %}
 <div class= "mt-5 flex">

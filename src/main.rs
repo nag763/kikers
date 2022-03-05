@@ -17,6 +17,7 @@ use crate::error::ApplicationError;
 use crate::middleware::cookie_approval::CookieChecker;
 use crate::middleware::role_checker::RoleChecker;
 use crate::pages::admin::admin_dashboard;
+use crate::pages::game::games;
 use crate::pages::unauth::{cookies, index, signup};
 use actix_files as fs;
 use actix_web::middleware::Logger;
@@ -33,14 +34,8 @@ async fn main() -> std::io::Result<()> {
     HttpServer::new(|| {
         App::new()
             .wrap(Logger::new("[%a]->'%U'(%s)"))
-            .service(
-                fs::Files::new("/styles", "./styles")
-                    .use_last_modified(true),
-            )
-            .service(
-                fs::Files::new("/assets", "./assets")
-                    .use_last_modified(true),
-            )
+            .service(fs::Files::new("/styles", "./styles").use_last_modified(true))
+            .service(fs::Files::new("/assets", "./assets").use_last_modified(true))
             .default_service(web::route().to(|| ApplicationError::NotFound.error_response()))
             .service(cookies_approved)
             .service(
@@ -55,6 +50,7 @@ async fn main() -> std::io::Result<()> {
                     .service(
                         web::scope("")
                             .wrap(RoleChecker::default())
+                            .service(games)
                             .service(admin_dashboard)
                             .service(user_search)
                             .service(user_activation)

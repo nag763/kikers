@@ -32,7 +32,8 @@ pub async fn user_activation(
     let user_to_update: User = user::Entity::find_by_id(user_activation_form.id)
         .filter(Condition::all().add(user::Column::Role.lt(jwt_user.role)))
         .one(&conn)
-        .await?.ok_or(ApplicationError::NotFound)?;
+        .await?
+        .ok_or(ApplicationError::NotFound)?;
 
     let mut user_to_update: user::ActiveModel = user_to_update.into();
     user_to_update.is_authorized = Set(user_activation_form.value);
@@ -76,18 +77,16 @@ pub async fn user_deletion(
         .one(&conn)
         .await?
         .ok_or(ApplicationError::NotFound)?;
-            user_to_delete.delete(&conn).await?;
-                Ok(HttpResponse::Found()
-                    .header(
-                        "Location",
-                        format!(
-                            "/admin?info=User {} has been deleted&page={}&per_page={}",
-                            user_deletion_form.login,
-                            user_deletion_form.page,
-                            user_deletion_form.per_page
-                        ),
-                    )
-                    .finish())
+    user_to_delete.delete(&conn).await?;
+    Ok(HttpResponse::Found()
+        .header(
+            "Location",
+            format!(
+                "/admin?info=User {} has been deleted&page={}&per_page={}",
+                user_deletion_form.login, user_deletion_form.page, user_deletion_form.per_page
+            ),
+        )
+        .finish())
 }
 
 #[derive(serde::Deserialize)]

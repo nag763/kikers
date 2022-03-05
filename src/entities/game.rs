@@ -16,7 +16,7 @@ pub struct Model {
     pub away_team_odds: Option<f32>,
     pub away_team_score: Option<i32>,
     pub edition_id: i32,
-    pub played_on: Option<DateTime>,
+    pub played_on: Option<DateTimeUtc>,
     pub result: Option<Result>,
 }
 

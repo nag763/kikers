@@ -7,7 +7,6 @@ use actix_web::{post, HttpRequest, HttpResponse, Responder};
 use sea_orm::ActiveModelTrait;
 use sea_orm::ColumnTrait;
 use sea_orm::Condition;
-use sea_orm::DeleteResult;
 use sea_orm::EntityTrait;
 use sea_orm::ModelTrait;
 use sea_orm::QueryFilter;
@@ -30,19 +29,10 @@ pub async fn user_activation(
     let jwt_user: JwtUser = JwtUser::from_request(req)?;
     let db_url = std::env::var("DATABASE_URL")?;
     let conn = sea_orm::Database::connect(&db_url).await?;
-    let user_to_update: User = match user::Entity::find_by_id(user_activation_form.id)
+    let user_to_update: User = user::Entity::find_by_id(user_activation_form.id)
         .filter(Condition::all().add(user::Column::Role.lt(jwt_user.role)))
         .one(&conn)
-        .await?
-    {
-        Some(user_to_update) => user_to_update,
-        None => return Err(ApplicationError::NotFound),
-    };
-
-    if jwt_user.role < user_to_update.role {
-        error!("User {} tried to change activation status (to {}) of a user (#{}) with greater or same role than him ", jwt_user.login, user_activation_form.value, user_activation_form.id);
-        return Err(ApplicationError::BadRequest);
-    }
+        .await?.ok_or(ApplicationError::NotFound)?;
 
     let mut user_to_update: user::ActiveModel = user_to_update.into();
     user_to_update.is_authorized = Set(user_activation_form.value);
@@ -81,14 +71,12 @@ pub async fn user_deletion(
     let db_url = std::env::var("DATABASE_URL")?;
     let conn = sea_orm::Database::connect(&db_url).await?;
     let jwt_user: JwtUser = JwtUser::from_request(req)?;
-    let user_to_delete: Option<User> = user::Entity::find_by_id(user_deletion_form.id)
+    let user_to_delete: User = user::Entity::find_by_id(user_deletion_form.id)
         .filter(Condition::all().add(user::Column::Role.lt(jwt_user.role)))
         .one(&conn)
-        .await?;
-    return match user_to_delete {
-        Some(user_to_delete) => {
-            let res: DeleteResult = user_to_delete.delete(&conn).await?;
-            if res.rows_affected == 1 {
+        .await?
+        .ok_or(ApplicationError::NotFound)?;
+            user_to_delete.delete(&conn).await?;
                 Ok(HttpResponse::Found()
                     .header(
                         "Location",
@@ -100,12 +88,6 @@ pub async fn user_deletion(
                         ),
                     )
                     .finish())
-            } else {
-                Err(ApplicationError::InternalError)
-            }
-        }
-        None => Err(ApplicationError::InternalError),
-    };
 }
 
 #[derive(serde::Deserialize)]

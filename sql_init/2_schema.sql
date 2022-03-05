@@ -120,6 +120,7 @@ CREATE TABLE `GAME` (
   `away_team_id` int NOT NULL,
   `away_team_odds` float DEFAULT NULL,
   `away_team_score` int unsigned DEFAULT NULL,
+  `draw_odds` float DEFAULT NULL,
   `edition_id` int NOT NULL,
   `played_on` timestamp NULL DEFAULT NULL,
   `result` enum('W','A','D','C') DEFAULT NULL,
@@ -247,4 +248,4 @@ CREATE TABLE `seaql_migrations` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2022-03-05 20:26:10
+-- Dump completed on 2022-03-05 23:08:09

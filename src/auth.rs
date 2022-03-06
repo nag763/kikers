@@ -4,6 +4,7 @@ use crate::entities::navaccess;
 use crate::entities::role_navaccess;
 use crate::entities::user;
 use crate::error::ApplicationError;
+use crate::database::Database;
 use actix_web::{HttpMessage, HttpRequest};
 use hmac::{Hmac, Mac};
 use jwt::{Header, SignWithKey, Token, VerifyWithKey};
@@ -27,8 +28,7 @@ pub struct JwtUser {
 
 impl JwtUser {
     pub async fn emit(login: &str, password: &str) -> Result<Option<String>, ApplicationError> {
-        let db_url = std::env::var("DATABASE_URL")?;
-        let conn = sea_orm::Database::connect(&db_url).await?;
+        let conn = Database::acquire_connection().await?;
         let user_unwrapped: Option<User> = user::Entity::find()
             .filter(
                 Condition::all()

@@ -2,6 +2,8 @@
 extern crate magic_crypt;
 #[macro_use]
 extern crate log;
+#[macro_use]
+extern crate lazy_static;
 
 mod auth;
 mod controllers;
@@ -9,6 +11,7 @@ mod entities;
 mod error;
 mod middleware;
 mod pages;
+mod database;
 
 use crate::controllers::auth::{login, logout, register_user};
 use crate::controllers::cookies::cookies_approved;

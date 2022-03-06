@@ -3,9 +3,9 @@
 {% block body %}
 {% for game in three_next_games %}
 <p class="hidden">{{game.id}}</p>
-<p>{{game.competition_name}}</p>
-<p>Home team name : {{game.home_team_name}}</p>
-<p>Away team name : {{game.away_team_name}}</p>
+<img src="/assets/img/crests/{{game.competition_logo}}" width="16" height="16"><p>{{game.competition_name}}</p>
+<img src="/assets/img/crests/{{game.home_team_logo}}" width="16" height="16"><p>Home team name : {{game.home_team_name}}</p>
+<img src="/assets/img/crests/{{game.away_team_logo}}" width="16" height="16"><p>Away team name : {{game.away_team_name}}</p>
 <p>Home team odds : {{game.home_team_odds}}</p>
 <p>Away team odds : {{game.away_team_odds}}</p>
 <p>Draw odds : {{game.draw_odds}}</p>

@@ -26,11 +26,14 @@ struct GameCustom {
     away_team_odds: f32,
     draw_odds: f32,
     home_team_name: String,
+    home_team_logo: String,
     away_team_name: String,
+    away_team_logo: String,
     stadium_name: String,
     stadium_city: String,
     stadium_country: String,
     competition_name: String,
+    competition_logo: String,
     played_on: chrono::DateTime<chrono::FixedOffset>,
 }
 
@@ -53,11 +56,14 @@ pub async fn games(
   `GAME`.`away_team_odds`,
   `GAME`.`draw_odds`,
    home.`name` AS `home_team_name`,
+   home.`logo_path` AS `home_team_logo`,
    away.`name` AS `away_team_name`,
+   away.`logo_path` AS `away_team_logo`,
   `STADIUM`.`name` AS `stadium_name`,
   `STADIUM`.`city` AS `stadium_city`,
   `STADIUM`.`country` AS `stadium_country`,
   `COMPETITION`.`name` AS `competition_name`,
+  `COMPETITION`.`logo_path` AS `competition_logo`,
   `GAME`.`played_on`
 FROM
   `GAME`

@@ -89,7 +89,7 @@ pub async fn register_user(
         return Ok(HttpResponse::Found().header("Location", "?error=The given login isn't associed to any kik login, please ensure you use an existing kik login").finish());
     }
 
-    let conn = Database::acquire_connection().await?;
+    let conn = Database::acquire_sql_connection().await?;
     let mc = new_magic_crypt!(std::env::var("ENCRYPT_KEY")?, 256);
     let encrypted_password: String = mc.encrypt_str_to_base64(sign_up_form.password.as_str());
 

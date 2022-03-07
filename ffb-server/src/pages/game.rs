@@ -42,7 +42,7 @@ pub async fn games(
     req: HttpRequest,
     context_query: web::Query<ContextQuery>,
 ) -> Result<HttpResponse, ApplicationError> {
-    let conn = Database::acquire_connection().await?;
+    let conn = Database::acquire_sql_connection().await?;
     let jwt_user: JwtUser = JwtUser::from_request(req)?;
     let now = time::OffsetDateTime::now_utc();
     // Join aliases not implemented yet for sea_orm:6.0

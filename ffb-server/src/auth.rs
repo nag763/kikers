@@ -28,7 +28,7 @@ pub struct JwtUser {
 
 impl JwtUser {
     pub async fn emit(login: &str, password: &str) -> Result<Option<String>, ApplicationError> {
-        let conn = Database::acquire_connection().await?;
+        let conn = Database::acquire_sql_connection().await?;
         let user_unwrapped: Option<User> = user::Entity::find()
             .filter(
                 Condition::all()

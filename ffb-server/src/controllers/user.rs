@@ -28,7 +28,7 @@ pub async fn user_activation(
     user_activation_form: Form<UserActivation>,
 ) -> Result<impl Responder, ApplicationError> {
     let jwt_user: JwtUser = JwtUser::from_request(req)?;
-    let conn = Database::acquire_connection().await?;
+    let conn = Database::acquire_sql_connection().await?;
     let user_to_update: User = user::Entity::find_by_id(user_activation_form.id)
         .filter(Condition::all().add(user::Column::Role.lt(jwt_user.role)))
         .one(&conn)
@@ -69,7 +69,7 @@ pub async fn user_deletion(
     req: HttpRequest,
     user_deletion_form: Form<UserDeletion>,
 ) -> Result<impl Responder, ApplicationError> {
-    let conn = Database::acquire_connection().await?;
+    let conn = Database::acquire_sql_connection().await?;
     let jwt_user: JwtUser = JwtUser::from_request(req)?;
     let user_to_delete: User = user::Entity::find_by_id(user_deletion_form.id)
         .filter(Condition::all().add(user::Column::Role.lt(jwt_user.role)))
@@ -103,7 +103,7 @@ pub async fn user_modification(
     req: HttpRequest,
     user_modification_form: Form<UserModification>,
 ) -> Result<impl Responder, ApplicationError> {
-    let conn = Database::acquire_connection().await?;
+    let conn = Database::acquire_sql_connection().await?;
     let jwt_user: JwtUser = JwtUser::from_request(req)?;
     let user: User = user::Entity::find_by_id(user_modification_form.id)
         .filter(Condition::all().add(user::Column::Role.lt(jwt_user.role)))
@@ -140,7 +140,7 @@ pub async fn user_search(
     req: HttpRequest,
     user_search_form: Form<UserSearch>,
 ) -> Result<impl Responder, ApplicationError> {
-    let conn = Database::acquire_connection().await?;
+    let conn = Database::acquire_sql_connection().await?;
     let jwt_user: JwtUser = JwtUser::from_request(req)?;
     let user: Option<User> = user::Entity::find()
         .filter(

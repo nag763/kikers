@@ -1,5 +1,5 @@
-/target
-/styles/*
-/migration/target
-/log
-.env
+**/target
+/ffb-server/styles/*
+**/migration/target
+**/log
+**/.env

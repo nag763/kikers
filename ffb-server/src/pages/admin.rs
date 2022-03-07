@@ -30,7 +30,7 @@ pub async fn admin_dashboard(
     req: HttpRequest,
     context_query: web::Query<ContextQuery>,
 ) -> Result<HttpResponse, ApplicationError> {
-    let conn = Database::acquire_connection().await?;
+    let conn = Database::acquire_sql_connection().await?;
     let jwt_user: JwtUser = JwtUser::from_request(req)?;
     let page: usize = context_query.page.unwrap_or(0);
     let per_page: usize = context_query.per_page.unwrap_or(10);

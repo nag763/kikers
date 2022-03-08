@@ -1,4 +1,5 @@
 use crate::auth::JwtUser;
+use crate::database::Database;
 use crate::entities::user;
 use crate::entities::user::Model as User;
 use crate::error::ApplicationError;
@@ -13,7 +14,6 @@ use sea_orm::EntityTrait;
 use sea_orm::QueryFilter;
 use sea_orm::Set;
 use std::thread;
-use crate::database::Database;
 
 #[derive(serde::Deserialize)]
 pub struct LoginForm {

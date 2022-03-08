@@ -1,15 +1,21 @@
 {% extends "../base.html" %}
 {% block title %}Games{% endblock %}
 {% block body %}
-{% for game in three_next_games %}
-<p class="hidden">{{game.id}}</p>
-<img src="/assets/img/crests/{{game.competition_logo}}" width="16" height="16"><p>{{game.competition_name}}</p>
-<img src="/assets/img/crests/{{game.home_team_logo}}" width="16" height="16"><p>Home team name : {{game.home_team_name}}</p>
-<img src="/assets/img/crests/{{game.away_team_logo}}" width="16" height="16"><p>Away team name : {{game.away_team_name}}</p>
-<p>Home team odds : {{game.home_team_odds}}</p>
-<p>Away team odds : {{game.away_team_odds}}</p>
-<p>Draw odds : {{game.draw_odds}}</p>
-<p>Played in : {{game.stadium_name}}, {{game.stadium_city}} ({{game.stadium_country}})</p>
-<p>Played on : {{game.played_on}}</p>
+<div class="grid grid-cols-3">
+	<div>
+{% if let Some(next_three_games) = next_three_games %}
+{% for game in next_three_games %}
+<img src="{{game.league.logo}}" width="16" height="16"><p>{{game.league.name}}</p>
+<img src="{{game.teams.home.logo}}" width="16" height="16"><p>Home team name : {{game.teams.home.name}}</p>
+<img src="{{game.teams.away.logo}}" width="16" height="16"><p>Away team name : {{game.teams.away.name}}</p>
+<p> Played in {{game.fixture.date}}
 {% endfor %}
+{% else %}
+<p> No more games for today ... come back tomorow !</p>
+{% endif %}
+	</div>
+	<div>
+		<p>foo</p>
+	</div>
+</div>
 {% endblock %}

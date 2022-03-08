@@ -122,3 +122,17 @@ impl From<hmac::digest::InvalidLength> for ApplicationError {
         ApplicationError::InternalError
     }
 }
+
+impl From<redis::RedisError> for ApplicationError {
+    fn from(redis_err: redis::RedisError) -> Self {
+        error!("A redis error happened : {}", redis_err);
+        ApplicationError::InternalError
+    }
+}
+
+impl From<serde_json::Error> for ApplicationError {
+    fn from(serde_err: serde_json::Error) -> Self {
+        error!("A serde error happened : {}", serde_err);
+        ApplicationError::InternalError
+    }
+}

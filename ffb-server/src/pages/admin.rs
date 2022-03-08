@@ -1,6 +1,6 @@
 use crate::auth::JwtUser;
-use crate::pages::ContextQuery;
 use crate::database::Database;
+use crate::pages::ContextQuery;
 use askama::Template;
 
 use crate::error::ApplicationError;

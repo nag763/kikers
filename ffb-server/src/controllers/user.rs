@@ -1,6 +1,6 @@
 use crate::auth::JwtUser;
-use crate::entities::user;
 use crate::database::Database;
+use crate::entities::user;
 use crate::entities::user::Model as User;
 use crate::error::ApplicationError;
 use actix_web::web::Form;

@@ -1,10 +1,10 @@
 use super::entities::navaccess::Model as NavAccess;
 use super::entities::user::Model as User;
+use crate::database::Database;
 use crate::entities::navaccess;
 use crate::entities::role_navaccess;
 use crate::entities::user;
 use crate::error::ApplicationError;
-use crate::database::Database;
 use actix_web::{HttpMessage, HttpRequest};
 use hmac::{Hmac, Mac};
 use jwt::{Header, SignWithKey, Token, VerifyWithKey};

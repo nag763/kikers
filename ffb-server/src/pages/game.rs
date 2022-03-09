@@ -18,6 +18,7 @@ struct GamesTemplate {
     error: Option<String>,
     info: Option<String>,
     next_three_games: Option<Vec<Games>>,
+    now:DateTime<Utc>
 }
 
 #[derive(serde::Deserialize, Clone)]
@@ -65,6 +66,7 @@ pub async fn games(
         user: Some(jwt_user),
         error: context_query.error.clone(),
         info: context_query.info.clone(),
+        now,
         next_three_games
     };
     Ok(HttpResponse::Ok().body(index.render()?))

@@ -11,14 +11,22 @@ use crate::api_structs::{Fixture, League, Teams};
 use chrono::{DateTime, Utc};
 
 #[derive(Template)]
+#[template(path = "games/game_row.html")]
+struct GamesRowTemplate {
+    games: Vec<Games>,
+    now:DateTime<Utc>
+}
+
+#[derive(Template)]
 #[template(path = "games/games.html")]
 struct GamesTemplate {
     title: String,
     user: Option<JwtUser>,
     error: Option<String>,
     info: Option<String>,
-    next_three_games: Option<Vec<Games>>,
-    now:DateTime<Utc>
+    next_three_games: Option<GamesRowTemplate>,
+    yesterday_three_games: Option<GamesRowTemplate>,
+    tomorow_three_games: Option<GamesRowTemplate>
 }
 
 #[derive(serde::Deserialize, Clone)]
@@ -36,14 +44,18 @@ pub async fn games(
     let now: DateTime<Utc> = Utc::now();
     let mut now_as_simple_date: String = now.to_rfc3339();
     now_as_simple_date.truncate(10);
+    let mut yesterday_as_simple_date: String = (now - chrono::Duration::days(1)).to_rfc3339();
+    yesterday_as_simple_date.truncate(10);
+    let mut tomorow_as_simple_date: String = (now + chrono::Duration::days(1)).to_rfc3339();
+    tomorow_as_simple_date.truncate(10);
     let now_as_simple_date : String = now_as_simple_date;
     let jwt_user: JwtUser = JwtUser::from_request(req)?;
     let mut redis_conn = Database::acquire_redis_connection()?;
 
-    let games_as_string: Option<String> =
+    let next_three_games_as_string: Option<String> =
         redis::cmd("GET").arg(format!("fixtures-{}", now_as_simple_date)).query(&mut redis_conn)?;
 
-    let next_three_games: Option<Vec<Games>> = match games_as_string {
+    let next_three_games: Option<GamesRowTemplate> = match next_three_games_as_string {
         Some(v) => {
             let games: Vec<Games> = serde_json::from_str(v.as_str())?;
             let mut next_games : Vec<Games> = games
@@ -55,7 +67,39 @@ pub async fn games(
             if next_games.is_empty() {
                 None
             } else {
-                Some(next_games)
+                Some(GamesRowTemplate { games : next_games, now })
+            }
+        },
+        None => None,
+    };
+
+    let yesterday_games_as_string: Option<String> =
+        redis::cmd("GET").arg(format!("fixtures-{}", yesterday_as_simple_date)).query(&mut redis_conn)?;
+
+    let yesterday_three_games: Option<GamesRowTemplate> = match yesterday_games_as_string {
+        Some(v) => {
+            let mut games: Vec<Games> = serde_json::from_str(v.as_str())?;
+            games.truncate(3);
+            if games.is_empty() {
+                None
+            } else {
+                Some(GamesRowTemplate { games, now })
+            }
+        },
+        None => None,
+    };
+
+    let tomorow_games_as_string: Option<String> =
+        redis::cmd("GET").arg(format!("fixtures-{}", tomorow_as_simple_date)).query(&mut redis_conn)?;
+
+    let tomorow_three_games: Option<GamesRowTemplate> = match tomorow_games_as_string {
+        Some(v) => {
+            let mut games: Vec<Games> = serde_json::from_str(v.as_str())?;
+            games.truncate(3);
+            if games.is_empty() {
+                None
+            } else {
+                Some(GamesRowTemplate { games, now })
             }
         },
         None => None,
@@ -66,8 +110,9 @@ pub async fn games(
         user: Some(jwt_user),
         error: context_query.error.clone(),
         info: context_query.info.clone(),
-        now,
-        next_three_games
+        next_three_games,
+        yesterday_three_games,
+        tomorow_three_games
     };
     Ok(HttpResponse::Ok().body(index.render()?))
 }

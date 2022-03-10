@@ -1,0 +1,26 @@
+{% for game in games %}
+<div class="max-w-sm bg-white rounded-lg border border-gray-700 shadow-md">
+    <div class="flex justify-end px-4 pt-4">
+    </div>
+        <img class="ml-1 mb-2 w-8 h-8 rounded-full shadow-lg" src="{{game.league.logo}}"/>
+    <div class="flex flex-col items-center pb-5">
+	    <h5 class="mb-1 text-xl font-medium text-gray-500 py-4 px-2 text-center">{{game.league.name}} ({{game.league.country}})</h5>
+	    <span class="text-sm text-gray-500 dark:text-gray-400">{{game.league.round}}</span>
+        <div class="flex mt-4 space-x-3 lg:mt-6">
+		<img width="48" src="{{game.teams.home.logo}}" title="{{game.teams.home.name}}"/>
+		<img width="48" src="{{game.teams.away.logo}}" title="{{game.teams.away.name}}"/>
+        </div>
+        <div class="flex mt-4 space-x-3 lg:mt-6">
+		<small>Starts in 
+		{% let diff = (game.fixture.date - now) %}
+		{% if diff.num_minutes() < 60 %}
+			{{diff.num_minutes()}} minutes
+		{% else %}
+		{{diff.num_hours()}} hours and {{diff.num_minutes()}} minutes
+		{% endif %}
+		</small>
+		
+	</div>
+    </div>
+</div>
+{% endfor %}

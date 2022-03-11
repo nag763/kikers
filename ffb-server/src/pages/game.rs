@@ -14,7 +14,9 @@ use chrono::{DateTime, Utc};
 #[template(path = "games/game_row.html")]
 struct GamesRowTemplate {
     games: Vec<Games>,
-    now:DateTime<Utc>
+    now:DateTime<Utc>,
+    fetched_date:String,
+    title: String
 }
 
 #[derive(Template)]
@@ -54,7 +56,7 @@ pub async fn games(
     let mut redis_conn = Database::acquire_redis_connection()?;
 
     let next_three_games_as_string: Option<String> =
-        redis::cmd("HGET").arg("fixtures").arg(now_as_simple_date).query(&mut redis_conn)?;
+        redis::cmd("HGET").arg("fixtures").arg(now_as_simple_date.clone()).query(&mut redis_conn)?;
 
     let next_three_games: Option<GamesRowTemplate> = match next_three_games_as_string {
         Some(v) => {
@@ -68,14 +70,14 @@ pub async fn games(
             if next_games.is_empty() {
                 None
             } else {
-                Some(GamesRowTemplate { games : next_games, now })
+                Some(GamesRowTemplate { games : next_games, now, fetched_date: now_as_simple_date.clone(), title: "Next three games".to_string() })
             }
         },
         None => None,
     };
 
     let yesterday_games_as_string: Option<String> =
-        redis::cmd("HGET").arg("fixtures").arg(yesterday_as_simple_date).query(&mut redis_conn)?;
+        redis::cmd("HGET").arg("fixtures").arg(yesterday_as_simple_date.clone()).query(&mut redis_conn)?;
 
     let yesterday_three_games: Option<GamesRowTemplate> = match yesterday_games_as_string {
         Some(v) => {
@@ -84,14 +86,14 @@ pub async fn games(
             if games.is_empty() {
                 None
             } else {
-                Some(GamesRowTemplate { games, now })
+                Some(GamesRowTemplate { games, now, fetched_date: yesterday_as_simple_date.clone(), title: "Yesterday games".to_string() })
             }
         },
         None => None,
     };
 
     let tomorow_games_as_string: Option<String> =
-        redis::cmd("HGET").arg("fixtures").arg(tomorow_as_simple_date).query(&mut redis_conn)?;
+        redis::cmd("HGET").arg("fixtures").arg(tomorow_as_simple_date.clone()).query(&mut redis_conn)?;
 
     let tomorow_three_games: Option<GamesRowTemplate> = match tomorow_games_as_string {
         Some(v) => {
@@ -100,7 +102,7 @@ pub async fn games(
             if games.is_empty() {
                 None
             } else {
-                Some(GamesRowTemplate { games, now })
+                Some(GamesRowTemplate { games, now, fetched_date: tomorow_as_simple_date.clone(), title: "Tomorow games".to_string()})
             }
         },
         None => None,

@@ -3,6 +3,7 @@ pub mod error;
 use clap::{Parser, Subcommand};
 use dotenv::dotenv;
 use error::CliError;
+use redis::Connection;
 
 extern crate redis;
 
@@ -15,7 +16,10 @@ struct Args {
 #[derive(Subcommand)]
 enum Getter {
     Leagues,
-    Fixtures,
+    Fixtures {
+        #[clap(default_value = "0")]
+        day_diff: i64,
+    },
 }
 
 #[tokio::main]
@@ -36,48 +40,47 @@ async fn main() {
 
 async fn run_main() -> Result<(), CliError> {
     dotenv().ok();
-    let now = chrono::Utc::now();
-    let mut date_now: String = now.to_rfc3339();
-    date_now.truncate(10);
-    let mut date_yesterday = (now - chrono::Duration::days(1)).to_rfc3339();
-    date_yesterday.truncate(10);
-    let mut date_tomorow = (now + chrono::Duration::days(1)).to_rfc3339();
-    date_tomorow.truncate(10);
 
     let args = Args::parse();
     let client = redis::Client::open(std::env::var("REDIS_URL")?)?;
     let mut con = client.get_connection()?;
-    let client = reqwest::Client::builder().build()?;
-    let map_endpoint_path: Vec<(String, String)> = match args.get {
-        Getter::Leagues => vec![("leagues?current=true".into(), "leagues".into())],
-        Getter::Fixtures => vec![(
-            format!("fixtures?date={}", date_now),
-            format!("fixtures-{}", date_now),
-        ),
-        (
-            format!("fixtures?date={}", date_yesterday),
-            format!("fixtures-{}", date_yesterday),
-        ),
-        (
-            format!("fixtures?date={}", date_tomorow),
-            format!("fixtures-{}", date_tomorow),
-        ),
-        ],
-    };
-    for (endpoint, redis_path) in map_endpoint_path {
-        let res = client
-            .get(std::env::var("API_PROVIDER")? + endpoint.as_str())
-            .header("x-rapidapi-host", "api-football-v1.p.rapidapi.com")
-            .header("x-rapidapi-key", std::env::var("API_TOKEN")?)
-            .send()
-            .await?
-            .json::<serde_json::Value>()
-            .await?;
-
-        redis::cmd("SET")
-            .arg(redis_path)
-            .arg(res["response"].to_string())
-            .query(&mut con)?;
+    match args.get {
+        Getter::Leagues => fetch_leagues(&mut con).await?,
+        Getter::Fixtures { day_diff } => fetch_fixtures(&mut con, day_diff).await?,
     }
     Ok(())
+}
+
+async fn fetch_leagues(con: &mut Connection) -> Result<(), CliError> {
+    let res = call_api_endpoint("leagues".into()).await?;
+    redis::cmd("SET")
+        .arg("leagues")
+        .arg(res["response"].to_string())
+        .query(con)?;
+    Ok(())
+}
+
+async fn fetch_fixtures(con: &mut Connection, day_diff: i64) -> Result<(), CliError> {
+    let now = chrono::Utc::now();
+    let mut date_diff = (now + chrono::Duration::days(day_diff)).to_rfc3339();
+    date_diff.truncate(10);
+    let res = call_api_endpoint(format!("fixtures?date={}", date_diff)).await?;
+    redis::cmd("HSET")
+        .arg("fixtures")
+        .arg(date_diff)
+        .arg(res["response"].to_string())
+        .query(con)?;
+    Ok(())
+}
+
+async fn call_api_endpoint(endpoint: String) -> Result<serde_json::Value, CliError> {
+    let client = reqwest::Client::builder().build()?;
+    Ok(client
+        .get(std::env::var("API_PROVIDER")? + endpoint.as_str())
+        .header("x-rapidapi-host", "api-football-v1.p.rapidapi.com")
+        .header("x-rapidapi-key", std::env::var("API_TOKEN")?)
+        .send()
+        .await?
+        .json::<serde_json::Value>()
+        .await?)
 }

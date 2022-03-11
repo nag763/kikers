@@ -1,9 +1,9 @@
 {% extends "../base.html" %}
 {% block title %}Games{% endblock %}
 {% block body %}
-<div class="grid grid-cols-3 divide-x">
+<div class="grid grid-cols-3">
 	<div class="flex flex-col space-y-4 px-4">
-		<h2 class="text-xl">Next three games <a href="">(see more)</a></h2>
+		<h2 class="text-xl">Next three games <a class="text-indigo-600" href="">(see more)</a></h2>
 {% if let Some(next_three_games) = next_three_games %}
 {{next_three_games|safe}}
 {% else %}
@@ -11,7 +11,7 @@
 {% endif %}
 	</div>
 	<div class="flex flex-col space-y-4 px-4">
-		<h2 class="text-xl">Yesterday games <a href="">(see more)</a></h2>
+		<h2 class="text-xl">Yesterday games <a class="text-indigo-600" href="">(see more)</a></h2>
 {% if let Some(yesterday_three_games) = yesterday_three_games %}
 {{yesterday_three_games|safe}}
 {% else %}
@@ -19,7 +19,7 @@
 {% endif %}
 	</div>
 	<div class="flex flex-col space-y-4 px-4">
-		<h2 class="text-xl">Tomorow games <a href="">(see more)</a></h2>
+		<h2 class="text-xl">Tomorow games <a class="text-indigo-600" href="">(see more)</a></h2>
 {% if let Some(tomorow_three_games) = tomorow_three_games %}
 {{tomorow_three_games|safe}}
 {% else %}

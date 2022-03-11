@@ -7,17 +7,41 @@
 	    <h5 class="mb-1 text-xl font-medium text-gray-500 py-4 px-2 text-center">{{game.league.name}} ({{game.league.country}})</h5>
 	    <span class="text-sm text-gray-500 dark:text-gray-400">{{game.league.round}}</span>
         <div class="flex mt-4 space-x-3 lg:mt-6">
-		<img width="48" src="{{game.teams.home.logo}}" title="{{game.teams.home.name}}"/>
-		<img width="48" src="{{game.teams.away.logo}}" title="{{game.teams.away.name}}"/>
+		<img width="48" src="{{game.teams.home.logo}}" title="{{game.teams.home.name}}" 
+		{% if let Some(winner) = game.teams.home.winner %}
+		{% if winner %}
+		class="ring-offset-2 ring-2 ring-green-500 rounded-xl"
+		{% endif %}
+		{% endif%}/>
+		<img width="48" src="{{game.teams.away.logo}}" title="{{game.teams.away.name}}"
+		{% if let Some(winner) = game.teams.away.winner %}
+		{% if winner %}
+		class="ring-offset-2 ring-2 ring-green-100 rounded-xl"
+		{% endif %}
+		{% endif%}/>
         </div>
         <div class="flex mt-4 space-x-3 lg:mt-6">
-		<small>Starts in 
 		{% let diff = (game.fixture.date - now) %}
-		{% if diff.num_minutes() < 60 %}
+		{% if 0 < diff.num_minutes() %}
+		<small>Starts in 
+		{% if diff.num_minutes() < 60 && 0 < diff.num_minutes()%}
 			{{diff.num_minutes()}} minutes
 		{% else %}
-		{{diff.num_hours()}} hours and {{diff.num_minutes()}} minutes
+		{{diff.num_hours()}} hours and {{diff.num_minutes() % 60}} minutes
 		{% endif %}
+	     {% else %}
+	     {% if game.goals.home.is_some() && game.goals.away.is_some() %}
+	     {% if let Some(goals_home) = game.goals.home %}
+	     {{goals_home}} -
+	     {% endif %}
+	     {% if let Some(goals_away) = game.goals.away %}
+	     {{goals_away}}
+	     
+	     {% endif %}
+	     {% else %}
+	     Result unknown for this game
+	     {% endif %}
+	     {% endif %}
 		</small>
 		
 	</div>

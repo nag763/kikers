@@ -7,7 +7,7 @@ use crate::error::ApplicationError;
 use actix_web::web;
 use actix_web::{get, HttpRequest, HttpResponse};
 
-use crate::api_structs::{Fixture, League, Teams};
+use crate::api_structs::{Fixture, League, Teams, Goals};
 use chrono::{DateTime, Utc};
 
 #[derive(Template)]
@@ -34,6 +34,7 @@ struct Games {
     fixture: Fixture,
     league: League,
     teams: Teams,
+    goals: Goals
 }
 
 #[get("/games")]
@@ -53,7 +54,7 @@ pub async fn games(
     let mut redis_conn = Database::acquire_redis_connection()?;
 
     let next_three_games_as_string: Option<String> =
-        redis::cmd("GET").arg(format!("fixtures-{}", now_as_simple_date)).query(&mut redis_conn)?;
+        redis::cmd("HGET").arg("fixtures").arg(now_as_simple_date).query(&mut redis_conn)?;
 
     let next_three_games: Option<GamesRowTemplate> = match next_three_games_as_string {
         Some(v) => {
@@ -74,7 +75,7 @@ pub async fn games(
     };
 
     let yesterday_games_as_string: Option<String> =
-        redis::cmd("GET").arg(format!("fixtures-{}", yesterday_as_simple_date)).query(&mut redis_conn)?;
+        redis::cmd("HGET").arg("fixtures").arg(yesterday_as_simple_date).query(&mut redis_conn)?;
 
     let yesterday_three_games: Option<GamesRowTemplate> = match yesterday_games_as_string {
         Some(v) => {
@@ -90,7 +91,7 @@ pub async fn games(
     };
 
     let tomorow_games_as_string: Option<String> =
-        redis::cmd("GET").arg(format!("fixtures-{}", tomorow_as_simple_date)).query(&mut redis_conn)?;
+        redis::cmd("HGET").arg("fixtures").arg(tomorow_as_simple_date).query(&mut redis_conn)?;
 
     let tomorow_three_games: Option<GamesRowTemplate> = match tomorow_games_as_string {
         Some(v) => {

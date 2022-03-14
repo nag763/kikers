@@ -27,6 +27,7 @@ CREATE TABLE `CLUB` (
   `name` varchar(32) NOT NULL,
   `short` varchar(4) NOT NULL,
   `home_stadium_id` int DEFAULT NULL,
+  `logo_path` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
   PRIMARY KEY (`id`),
   KEY `home_stadium_id` (`home_stadium_id`),
   CONSTRAINT `CLUB_ibfk_1` FOREIGN KEY (`home_stadium_id`) REFERENCES `STADIUM` (`id`) ON DELETE SET NULL ON UPDATE CASCADE
@@ -44,6 +45,7 @@ CREATE TABLE `COMPETITION` (
   `id` int NOT NULL AUTO_INCREMENT,
   `name` varchar(32) NOT NULL,
   `federation_id` int NOT NULL,
+  `logo_path` varchar(64) NOT NULL,
   PRIMARY KEY (`id`),
   KEY `federation_id` (`federation_id`),
   CONSTRAINT `COMPETITION_ibfk_1` FOREIGN KEY (`federation_id`) REFERENCES `FEDERATION` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
@@ -150,7 +152,7 @@ CREATE TABLE `NAVACCESS` (
   `position` int DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `position` (`position`)
-) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -184,7 +186,7 @@ CREATE TABLE `ROLE_NAVACCESS` (
   KEY `role_id` (`role_id`),
   CONSTRAINT `ROLE_NAVACCESS_ibfk_1` FOREIGN KEY (`navaccess_id`) REFERENCES `NAVACCESS` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `ROLE_NAVACCESS_ibfk_2` FOREIGN KEY (`role_id`) REFERENCES `ROLE` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=15 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=21 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -248,4 +250,4 @@ CREATE TABLE `seaql_migrations` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2022-03-05 23:08:09
+-- Dump completed on 2022-03-14 20:27:37

@@ -2,7 +2,7 @@
 <html lang="en">
 	<head>
 		<meta charset="utf-8">
-		<title>{% block title %}{% endblock %}</title>
+		<title>FFB - {{title}}</title>
 		<link rel="stylesheet" href="/styles/tailwind.css"/>
 		<link rel="shortcut icon" type="image/jpg" href="/assets/favicon.ico"/>
 	</head>
@@ -11,7 +11,7 @@
 			<div class="flex justify-center">
           <div class="w-4/5 py-4 px-8 bg-white shadow-xl rounded-xl my-10">
             <div class="mb-5">
-		    <h2 class="text-gray-800 text-3xl font-semibold mb-2">{{title|escape}}</h2>
+		    <h2 class="text-gray-800 text-3xl font-semibold mb-2">{{title}}</h2>
               <hr class="mb-5">
 		{% match info %}
   			{% when Some with (val) %}

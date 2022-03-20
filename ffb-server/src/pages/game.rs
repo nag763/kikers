@@ -4,7 +4,6 @@ use crate::pages::ContextQuery;
 use askama::Template;
 
 use crate::error::ApplicationError;
-use actix_web::web;
 use actix_web::{get, HttpRequest, HttpResponse};
 
 use crate::api_structs::{Fixture, Goals, League, Teams};
@@ -20,7 +19,7 @@ struct GamesRowTemplate {
 }
 
 #[derive(Template)]
-#[template(path = "games/games.html")]
+#[template(path = "games/games_dashboard.html")]
 struct GamesTemplate {
     title: String,
     user: Option<JwtUser>,
@@ -29,6 +28,16 @@ struct GamesTemplate {
     next_three_games: Option<GamesRowTemplate>,
     yesterday_three_games: Option<GamesRowTemplate>,
     tomorow_three_games: Option<GamesRowTemplate>,
+}
+
+#[derive(Template)]
+#[template(path = "games/games_of_day.html")]
+struct GamesOfDayTemplate {
+    title: String,
+    user: Option<JwtUser>,
+    error: Option<String>,
+    info: Option<String>,
+    day_games: Option<GamesRowTemplate>,
 }
 
 #[derive(serde::Deserialize, Clone)]
@@ -42,9 +51,46 @@ struct Games {
 #[get("/games")]
 pub async fn games(
     req: HttpRequest,
-    context_query: web::Query<ContextQuery>,
+    context_query: actix_web_validator::Query<ContextQuery>,
 ) -> Result<HttpResponse, ApplicationError> {
+    let mut redis_conn = Database::acquire_redis_connection()?;
+    let jwt_user: JwtUser = JwtUser::from_request(req)?;
     let now: DateTime<Utc> = Utc::now();
+    match &context_query.date {
+        Some(v) => {
+            let games_of_the_day_as_string: Option<String> = redis::cmd("HGET")
+                .arg("fixtures")
+                .arg(v)
+                .query(&mut redis_conn)?;
+            let games_of_the_day: Option<GamesRowTemplate> = match games_of_the_day_as_string {
+                Some(games) => {
+                    let games: Vec<Games> = serde_json::from_str(games.as_str())?;
+                    if games.is_empty() {
+                        None
+                    } else {
+                        Some(GamesRowTemplate {
+                            games,
+                            now,
+                            fetched_date: v.clone(),
+                            title: format!("Game for the {0}", v),
+                        })
+                    }
+                }
+                None => None,
+            };
+            return Ok(HttpResponse::Ok().body(
+                GamesOfDayTemplate {
+                    title: "Games".into(),
+                    user: Some(jwt_user),
+                    error: context_query.error.clone(),
+                    info: context_query.info.clone(),
+                    day_games: games_of_the_day,
+                }
+                .render()?,
+            ));
+        }
+        None => {}
+    }
     let mut now_as_simple_date: String = now.to_rfc3339();
     now_as_simple_date.truncate(10);
     let mut yesterday_as_simple_date: String = (now - chrono::Duration::days(1)).to_rfc3339();
@@ -52,8 +98,6 @@ pub async fn games(
     let mut tomorow_as_simple_date: String = (now + chrono::Duration::days(1)).to_rfc3339();
     tomorow_as_simple_date.truncate(10);
     let now_as_simple_date: String = now_as_simple_date;
-    let jwt_user: JwtUser = JwtUser::from_request(req)?;
-    let mut redis_conn = Database::acquire_redis_connection()?;
 
     let next_three_games_as_string: Option<String> = redis::cmd("HGET")
         .arg("fixtures")

@@ -1,0 +1,10 @@
+{% extends "../base.html" %}
+{% block title %}Games{% endblock %}
+{% block body %}
+{% if let Some(day_games) = day_games %}
+{{day_games|safe}}
+{% else %}
+No games available for that day
+{% endif %}
+</div>
+{% endblock %}

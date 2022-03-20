@@ -2,6 +2,7 @@ use std::pin::Pin;
 use std::task::{Context, Poll};
 
 use crate::auth::JwtUser;
+use crate::database::Database;
 use crate::entities::navaccess::Model as Navaccess;
 use actix_service::{Service, Transform};
 use actix_web::HttpMessage;
@@ -57,16 +58,31 @@ where
         let jwt_path: String =
             std::env::var("JWT_TOKEN_PATH").unwrap_or_else(|_| "jwt-token".to_string());
         let navaccess: Vec<Navaccess> = match req.cookie(jwt_path.as_str()) {
-            Some(token) => match JwtUser::check_token(token.value()) {
-                Ok(jwt_user) => jwt_user.nav,
-                Err(_) => {
+            Some(token) => {
+                let mut redis_conn = Database::acquire_redis_connection().unwrap();
+                let tokens: Vec<String> = redis::cmd("HVALS")
+                    .arg("token")
+                    .query(&mut redis_conn)
+                    .unwrap();
+
+                if !tokens.iter().any(|t| t == token.value()) {
                     return Box::pin(async move {
                         Ok(req.into_response(
                             ApplicationError::IllegalToken.error_response().into_body(),
                         ))
                     });
                 }
-            },
+                match JwtUser::check_token(token.value()) {
+                    Ok(jwt_user) => jwt_user.nav,
+                    Err(_) => {
+                        return Box::pin(async move {
+                            Ok(req.into_response(
+                                ApplicationError::IllegalToken.error_response().into_body(),
+                            ))
+                        });
+                    }
+                }
+            }
             None => {
                 return Box::pin(async move {
                     Ok(req.into_response(

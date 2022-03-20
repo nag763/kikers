@@ -39,6 +39,14 @@ pub async fn user_activation(
     user_to_update.is_authorized = Set(user_activation_form.value);
     user_to_update.update(&conn).await?;
 
+    if user_activation_form.value == 0 {
+        let mut redis_conn = Database::acquire_redis_connection()?;
+        redis::cmd("HDEL")
+            .arg("token")
+            .arg(user_activation_form.login.as_str())
+            .query(&mut redis_conn)?;
+    }
+
     info!(
         "User {} updated activation status (to {}) of user (#{})",
         jwt_user.login, user_activation_form.value, user_activation_form.id
@@ -77,6 +85,11 @@ pub async fn user_deletion(
         .await?
         .ok_or(ApplicationError::NotFound)?;
     user_to_delete.delete(&conn).await?;
+    let mut redis_conn = Database::acquire_redis_connection()?;
+    redis::cmd("HDEL")
+        .arg("token")
+        .arg(user_deletion_form.login.as_str())
+        .query(&mut redis_conn)?;
     Ok(HttpResponse::Found()
         .header(
             "Location",
@@ -114,6 +127,11 @@ pub async fn user_modification(
     user.name = Set(user_modification_form.name.clone());
     user.is_authorized = Set(user_modification_form.is_authorized.is_some() as i8);
     user.update(&conn).await?;
+    let mut redis_conn = Database::acquire_redis_connection()?;
+    redis::cmd("HDEL")
+        .arg("token")
+        .arg(user_modification_form.login.as_str())
+        .query(&mut redis_conn)?;
     Ok(HttpResponse::Found()
         .header(
             "Location",

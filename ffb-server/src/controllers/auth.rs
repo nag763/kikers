@@ -29,13 +29,21 @@ pub async fn login(
     let mc = new_magic_crypt!(std::env::var("ENCRYPT_KEY")?, 256);
     let encrypted_password: String = mc.encrypt_str_to_base64(login_form.password.as_str());
     match JwtUser::emit(login_form.login.as_str(), encrypted_password.as_str()).await? {
-        Some(token) => Ok(HttpResponse::Found()
-            .header("Location", "/")
-            .cookie(Cookie::new(
-                std::env::var("JWT_TOKEN_PATH")?.as_str(),
-                token,
-            ))
-            .finish()),
+        Some(token) => {
+            let mut redis_conn = Database::acquire_redis_connection()?;
+            redis::cmd("HSET")
+                .arg("token")
+                .arg(login_form.login.as_str())
+                .arg(token.as_str())
+                .query(&mut redis_conn)?;
+            Ok(HttpResponse::Found()
+                .header("Location", "/")
+                .cookie(Cookie::new(
+                    std::env::var("JWT_TOKEN_PATH")?.as_str(),
+                    token,
+                ))
+                .finish())
+        }
         None => {
             warn!(
                 "{:?} tried to connect with login {} without success",
@@ -56,6 +64,12 @@ pub async fn login(
 #[get("/logout")]
 pub async fn logout(req: HttpRequest) -> Result<impl Responder, ApplicationError> {
     if let Some(jwt_cookie) = req.cookie(std::env::var("JWT_TOKEN_PATH")?.as_str()) {
+        let jwt_user = JwtUser::from_request(req)?;
+        let mut redis_conn = Database::acquire_redis_connection()?;
+        redis::cmd("HDEL")
+            .arg("token")
+            .arg(jwt_user.login)
+            .query(&mut redis_conn)?;
         Ok(HttpResponse::Found()
             .header("Location", "/?info=You have been logged out successfully")
             .del_cookie(&jwt_cookie)

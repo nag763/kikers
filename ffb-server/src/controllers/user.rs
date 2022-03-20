@@ -3,7 +3,6 @@ use crate::database::Database;
 use crate::entities::user;
 use crate::entities::user::Model as User;
 use crate::error::ApplicationError;
-use actix_web::web::Form;
 use actix_web::{post, HttpRequest, HttpResponse, Responder};
 use sea_orm::ActiveModelTrait;
 use sea_orm::ColumnTrait;
@@ -13,19 +12,24 @@ use sea_orm::ModelTrait;
 use sea_orm::QueryFilter;
 use sea_orm::Set;
 
-#[derive(serde::Deserialize)]
+#[derive(serde::Deserialize, validator::Validate)]
 pub struct UserActivation {
+    #[validate(range(min=0))]
     id: i32,
+    #[validate(range(min=0, max=1))]
     value: i8,
+    #[validate(range(min=0))]
     page: i32,
+    #[validate(range(min=0))]
     per_page: i32,
+    #[validate(length(min=2))]
     login: String,
 }
 
 #[post("/user/activation")]
 pub async fn user_activation(
     req: HttpRequest,
-    user_activation_form: Form<UserActivation>,
+    user_activation_form: actix_web_validator::Form<UserActivation>,
 ) -> Result<impl Responder, ApplicationError> {
     let jwt_user: JwtUser = JwtUser::from_request(req)?;
     let conn = Database::acquire_sql_connection().await?;
@@ -64,18 +68,22 @@ pub async fn user_activation(
         .finish())
 }
 
-#[derive(serde::Deserialize)]
+#[derive(serde::Deserialize, validator::Validate)]
 pub struct UserDeletion {
+    #[validate(range(min=0))]
     id: i32,
+    #[validate(length(min=2))]
     login: String,
+    #[validate(range(min=0))]
     page: i32,
+    #[validate(range(min=0))]
     per_page: i32,
 }
 
 #[post("/user/deletion")]
 pub async fn user_deletion(
     req: HttpRequest,
-    user_deletion_form: Form<UserDeletion>,
+    user_deletion_form: actix_web_validator::Form<UserDeletion>,
 ) -> Result<impl Responder, ApplicationError> {
     let conn = Database::acquire_sql_connection().await?;
     let jwt_user: JwtUser = JwtUser::from_request(req)?;
@@ -101,20 +109,25 @@ pub async fn user_deletion(
         .finish())
 }
 
-#[derive(serde::Deserialize)]
+#[derive(serde::Deserialize, validator::Validate)]
 pub struct UserModification {
+    #[validate(range(min=0))]
     id: i32,
+    #[validate(length(min=2))]
     login: String,
+    #[validate(length(min=2))]
     name: String,
     is_authorized: Option<String>,
+    #[validate(range(min=0))]
     page: i32,
+    #[validate(range(min=0))]
     per_page: i32,
 }
 
 #[post("/user/modification")]
 pub async fn user_modification(
     req: HttpRequest,
-    user_modification_form: Form<UserModification>,
+    user_modification_form: actix_web_validator::Form<UserModification>,
 ) -> Result<impl Responder, ApplicationError> {
     let conn = Database::acquire_sql_connection().await?;
     let jwt_user: JwtUser = JwtUser::from_request(req)?;
@@ -146,17 +159,20 @@ pub async fn user_modification(
         .finish())
 }
 
-#[derive(serde::Deserialize)]
+#[derive(serde::Deserialize, validator::Validate)]
 pub struct UserSearch {
+    #[validate(length(min=1))]
     login: String,
+    #[validate(range(min=0))]
     page: i32,
+    #[validate(range(min=0))]
     per_page: i32,
 }
 
 #[post("/user/search")]
 pub async fn user_search(
     req: HttpRequest,
-    user_search_form: Form<UserSearch>,
+    user_search_form: actix_web_validator::Form<UserSearch>,
 ) -> Result<impl Responder, ApplicationError> {
     let conn = Database::acquire_sql_connection().await?;
     let jwt_user: JwtUser = JwtUser::from_request(req)?;

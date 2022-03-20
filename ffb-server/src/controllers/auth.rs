@@ -4,7 +4,6 @@ use crate::entities::user;
 use crate::entities::user::Model as User;
 use crate::error::ApplicationError;
 use actix_web::http::Cookie;
-use actix_web::web::Form;
 use actix_web::{get, post, HttpMessage, HttpRequest, HttpResponse, Responder};
 use magic_crypt::MagicCryptTrait;
 use sea_orm::ActiveModelTrait;
@@ -15,16 +14,18 @@ use sea_orm::QueryFilter;
 use sea_orm::Set;
 use std::thread;
 
-#[derive(serde::Deserialize)]
+#[derive(serde::Deserialize, validator::Validate)]
 pub struct LoginForm {
+    #[validate(length(min=3, max=64))]
     login: String,
+    #[validate(length(min=4, max=128))]
     password: String,
 }
 
 #[post("/login")]
 pub async fn login(
     req: HttpRequest,
-    login_form: Form<LoginForm>,
+    login_form: actix_web_validator::Form<LoginForm>,
 ) -> Result<HttpResponse, ApplicationError> {
     let mc = new_magic_crypt!(std::env::var("ENCRYPT_KEY")?, 256);
     let encrypted_password: String = mc.encrypt_str_to_base64(login_form.password.as_str());
@@ -79,17 +80,20 @@ pub async fn logout(req: HttpRequest) -> Result<impl Responder, ApplicationError
     }
 }
 
-#[derive(serde::Deserialize)]
+#[derive(serde::Deserialize, validator::Validate)]
 pub struct SignUpForm {
+    #[validate(length(min=3, max=64))]
     login: String,
-    name: String,
+    #[validate(length(min=4, max=128))]
     password: String,
+    #[validate(length(min=2))]
+    name: String,
 }
 
 #[post("/signup")]
 pub async fn register_user(
     req: HttpRequest,
-    sign_up_form: Form<SignUpForm>,
+    sign_up_form: actix_web_validator::Form<SignUpForm>,
 ) -> Result<impl Responder, ApplicationError> {
     if minreq::get(format!("https://ws2.kik.com/user/{}", sign_up_form.login))
         .send()?

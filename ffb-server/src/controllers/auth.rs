@@ -16,9 +16,9 @@ use std::thread;
 
 #[derive(serde::Deserialize, validator::Validate)]
 pub struct LoginForm {
-    #[validate(length(min=3, max=64))]
+    #[validate(length(min = 3, max = 64))]
     login: String,
-    #[validate(length(min=4, max=128))]
+    #[validate(length(min = 4, max = 128))]
     password: String,
 }
 
@@ -32,9 +32,8 @@ pub async fn login(
     match JwtUser::emit(login_form.login.as_str(), encrypted_password.as_str()).await? {
         Some(token) => {
             let mut redis_conn = Database::acquire_redis_connection()?;
-            redis::cmd("HSET")
-                .arg("token")
-                .arg(login_form.login.as_str())
+            redis::cmd("SADD")
+                .arg(format!("token:{}", login_form.login.as_str()))
                 .arg(token.as_str())
                 .query(&mut redis_conn)?;
             Ok(HttpResponse::Found()
@@ -67,9 +66,9 @@ pub async fn logout(req: HttpRequest) -> Result<impl Responder, ApplicationError
     if let Some(jwt_cookie) = req.cookie(std::env::var("JWT_TOKEN_PATH")?.as_str()) {
         let jwt_user = JwtUser::from_request(req)?;
         let mut redis_conn = Database::acquire_redis_connection()?;
-        redis::cmd("HDEL")
-            .arg("token")
-            .arg(jwt_user.login)
+        redis::cmd("SREM")
+            .arg(format!("token:{}", jwt_user.login))
+            .arg(jwt_cookie.value())
             .query(&mut redis_conn)?;
         Ok(HttpResponse::Found()
             .header("Location", "/?info=You have been logged out successfully")
@@ -82,11 +81,11 @@ pub async fn logout(req: HttpRequest) -> Result<impl Responder, ApplicationError
 
 #[derive(serde::Deserialize, validator::Validate)]
 pub struct SignUpForm {
-    #[validate(length(min=3, max=64))]
+    #[validate(length(min = 3, max = 64))]
     login: String,
-    #[validate(length(min=4, max=128))]
+    #[validate(length(min = 4, max = 128))]
     password: String,
-    #[validate(length(min=2))]
+    #[validate(length(min = 2))]
     name: String,
 }
 
@@ -95,18 +94,6 @@ pub async fn register_user(
     req: HttpRequest,
     sign_up_form: actix_web_validator::Form<SignUpForm>,
 ) -> Result<impl Responder, ApplicationError> {
-    if minreq::get(format!("https://ws2.kik.com/user/{}", sign_up_form.login))
-        .send()?
-        .status_code
-        != 200
-    {
-        warn!(
-            "User {} has requested an account creation but isn't an existing kik user",
-            sign_up_form.login
-        );
-        return Ok(HttpResponse::Found().header("Location", "?error=The given login isn't associed to any kik login, please ensure you use an existing kik login").finish());
-    }
-
     let conn = Database::acquire_sql_connection().await?;
     let mc = new_magic_crypt!(std::env::var("ENCRYPT_KEY")?, 256);
     let encrypted_password: String = mc.encrypt_str_to_base64(sign_up_form.password.as_str());

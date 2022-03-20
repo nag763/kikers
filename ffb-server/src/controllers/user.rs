@@ -14,15 +14,15 @@ use sea_orm::Set;
 
 #[derive(serde::Deserialize, validator::Validate)]
 pub struct UserActivation {
-    #[validate(range(min=0))]
+    #[validate(range(min = 0))]
     id: i32,
-    #[validate(range(min=0, max=1))]
+    #[validate(range(min = 0, max = 1))]
     value: i8,
-    #[validate(range(min=0))]
+    #[validate(range(min = 0))]
     page: i32,
-    #[validate(range(min=0))]
+    #[validate(range(min = 0))]
     per_page: i32,
-    #[validate(length(min=2))]
+    #[validate(length(min = 2))]
     login: String,
 }
 
@@ -45,9 +45,8 @@ pub async fn user_activation(
 
     if user_activation_form.value == 0 {
         let mut redis_conn = Database::acquire_redis_connection()?;
-        redis::cmd("HDEL")
-            .arg("token")
-            .arg(user_activation_form.login.as_str())
+        redis::cmd("DEL")
+            .arg(format!("token:{}", user_activation_form.login.as_str()))
             .query(&mut redis_conn)?;
     }
 
@@ -70,13 +69,13 @@ pub async fn user_activation(
 
 #[derive(serde::Deserialize, validator::Validate)]
 pub struct UserDeletion {
-    #[validate(range(min=0))]
+    #[validate(range(min = 0))]
     id: i32,
-    #[validate(length(min=2))]
+    #[validate(length(min = 2))]
     login: String,
-    #[validate(range(min=0))]
+    #[validate(range(min = 0))]
     page: i32,
-    #[validate(range(min=0))]
+    #[validate(range(min = 0))]
     per_page: i32,
 }
 
@@ -94,9 +93,8 @@ pub async fn user_deletion(
         .ok_or(ApplicationError::NotFound)?;
     user_to_delete.delete(&conn).await?;
     let mut redis_conn = Database::acquire_redis_connection()?;
-    redis::cmd("HDEL")
-        .arg("token")
-        .arg(user_deletion_form.login.as_str())
+        redis::cmd("DEL")
+            .arg(format!("token:{}", user_deletion_form.login.as_str()))
         .query(&mut redis_conn)?;
     Ok(HttpResponse::Found()
         .header(
@@ -111,16 +109,16 @@ pub async fn user_deletion(
 
 #[derive(serde::Deserialize, validator::Validate)]
 pub struct UserModification {
-    #[validate(range(min=0))]
+    #[validate(range(min = 0))]
     id: i32,
-    #[validate(length(min=2))]
+    #[validate(length(min = 2))]
     login: String,
-    #[validate(length(min=2))]
+    #[validate(length(min = 2))]
     name: String,
     is_authorized: Option<String>,
-    #[validate(range(min=0))]
+    #[validate(range(min = 0))]
     page: i32,
-    #[validate(range(min=0))]
+    #[validate(range(min = 0))]
     per_page: i32,
 }
 
@@ -141,9 +139,8 @@ pub async fn user_modification(
     user.is_authorized = Set(user_modification_form.is_authorized.is_some() as i8);
     user.update(&conn).await?;
     let mut redis_conn = Database::acquire_redis_connection()?;
-    redis::cmd("HDEL")
-        .arg("token")
-        .arg(user_modification_form.login.as_str())
+        redis::cmd("DEL")
+            .arg(format!("token:{}", user_modification_form.login.as_str()))
         .query(&mut redis_conn)?;
     Ok(HttpResponse::Found()
         .header(
@@ -161,11 +158,11 @@ pub async fn user_modification(
 
 #[derive(serde::Deserialize, validator::Validate)]
 pub struct UserSearch {
-    #[validate(length(min=1))]
+    #[validate(length(min = 1))]
     login: String,
-    #[validate(range(min=0))]
+    #[validate(range(min = 0))]
     page: i32,
-    #[validate(range(min=0))]
+    #[validate(range(min = 0))]
     per_page: i32,
 }
 

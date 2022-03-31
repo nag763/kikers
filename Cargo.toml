@@ -1,9 +1,7 @@
 [workspace]
 
 members = [
-    "ffb_server",
-    "ffb_cli",
-    "ffb_structs",
-    "ffb_structs/migration"
+    "ffb-server",
+    "ffb-cli"
 ]
 

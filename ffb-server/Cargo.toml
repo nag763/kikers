@@ -1,0 +1,32 @@
+
+[package]
+name = "ffb-server"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+actix-web = "3.3.3"
+askama = "0.11.1"
+sea-orm = { version ="0.6" , features = ["runtime-async-std-native-tls" ,"sqlx-mysql"]}
+dotenv = "0.15.0"
+sha2 = "0.10.2"
+serde = "1.0.136"
+jwt = "0.16.0"
+actix-files = "0.5.0"
+hmac = "0.12.1"
+magic-crypt = "3.1.9"
+minreq = { version = "2.5.1" , features = [ "https" ] } 
+log = "0.4.14"
+futures = "0.3.21"
+actix-service = "1.0.6"
+log4rs = {version = "1.0.0",  features = ["rolling_file_appender", "compound_policy", "size_trigger", "fixed_window_roller"] }
+lazy_static = "1.4.0"
+time = "0.2.2"
+chrono = "0.4.0"
+redis = "0.21.5"
+serde_json = "1.0.49"
+validator = { version = "0.12.0", features = ["derive"] }
+actix-web-validator = "2.2.0"
+regex = "1.5.5"

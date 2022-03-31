@@ -12,4 +12,3 @@ pub use super::role_navaccess::Entity as RoleNavaccess;
 pub use super::seaql_migrations::Entity as SeaqlMigrations;
 pub use super::stadium::Entity as Stadium;
 pub use super::user::Entity as User;
-pub use super::user_fav_club::Entity as UserFavClub;

@@ -12,23 +12,12 @@ pub struct Model {
     pub country: String,
 }
 
-#[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
-pub enum Relation {
-    #[sea_orm(has_many = "super::club::Entity")]
-    Club,
-    #[sea_orm(has_many = "super::game::Entity")]
-    Game,
-}
+#[derive(Copy, Clone, Debug, EnumIter)]
+pub enum Relation {}
 
-impl Related<super::club::Entity> for Entity {
-    fn to() -> RelationDef {
-        Relation::Club.def()
-    }
-}
-
-impl Related<super::game::Entity> for Entity {
-    fn to() -> RelationDef {
-        Relation::Game.def()
+impl RelationTrait for Relation {
+    fn def(&self) -> RelationDef {
+        panic!("No RelationDef")
     }
 }
 

@@ -31,7 +31,7 @@ UNLOCK TABLES;
 
 LOCK TABLES `NAVACCESS` WRITE;
 /*!40000 ALTER TABLE `NAVACCESS` DISABLE KEYS */;
-INSERT INTO `NAVACCESS` VALUES (1,'Leaderboard','/leaderboard',0),(2,'My bets','/mybets',1),(3,'Administration','/admin',3),(4,'Activation of users','/user/activation',NULL),(5,'Deletion of users','/user/deletion',NULL),(6,'User modification','/user/modification',NULL),(7,'User search','/user/search',NULL),(8,'Games','/games',2),(10,'See profile','/profile',NULL);
+INSERT INTO `NAVACCESS` VALUES (1,'Leaderboard','/leaderboard',0),(2,'My bets','/mybets',1),(3,'Administration','/admin',3),(4,'Activation of users','/user/activation',NULL),(5,'Deletion of users','/user/deletion',NULL),(6,'User modification','/user/modification',NULL),(7,'User search','/user/search',NULL),(8,'Games','/games',2),(10,'See profile','/profile/edit',NULL),(11,'Favorite user\'s leagues','/profile/leagues',NULL);
 /*!40000 ALTER TABLE `NAVACCESS` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -41,68 +41,8 @@ UNLOCK TABLES;
 
 LOCK TABLES `ROLE_NAVACCESS` WRITE;
 /*!40000 ALTER TABLE `ROLE_NAVACCESS` DISABLE KEYS */;
-INSERT INTO `ROLE_NAVACCESS` VALUES (1,1,1),(3,2,1),(5,3,1),(4,2,2),(6,3,2),(7,3,3),(8,3,4),(9,3,5),(10,3,6),(11,3,7),(12,1,8),(13,2,8),(14,3,8),(18,1,10),(19,2,10),(20,3,10);
+INSERT INTO `ROLE_NAVACCESS` VALUES (1,1,1),(3,2,1),(5,3,1),(4,2,2),(6,3,2),(7,3,3),(8,3,4),(9,3,5),(10,3,6),(11,3,7),(12,1,8),(13,2,8),(14,3,8),(18,1,10),(19,2,10),(20,3,10),(21,1,11),(22,2,11),(23,3,11);
 /*!40000 ALTER TABLE `ROLE_NAVACCESS` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
--- Dumping data for table `CLUB`
---
-
-LOCK TABLES `CLUB` WRITE;
-/*!40000 ALTER TABLE `CLUB` DISABLE KEYS */;
-INSERT INTO `CLUB` VALUES (1,'Marseille','OM',1,'om.png'),(2,'Paris Saint-Germain','PSG',2,'psg.png');
-/*!40000 ALTER TABLE `CLUB` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
--- Dumping data for table `COMPETITION`
---
-
-LOCK TABLES `COMPETITION` WRITE;
-/*!40000 ALTER TABLE `COMPETITION` DISABLE KEYS */;
-INSERT INTO `COMPETITION` VALUES (1,'Ligue 1',1,'ligue1.svg'),(2,'Champions League',2,'');
-/*!40000 ALTER TABLE `COMPETITION` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
--- Dumping data for table `EDITION`
---
-
-LOCK TABLES `EDITION` WRITE;
-/*!40000 ALTER TABLE `EDITION` DISABLE KEYS */;
-INSERT INTO `EDITION` VALUES (1,1,2021,2022,NULL),(2,2,2021,2022,NULL);
-/*!40000 ALTER TABLE `EDITION` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
--- Dumping data for table `FEDERATION`
---
-
-LOCK TABLES `FEDERATION` WRITE;
-/*!40000 ALTER TABLE `FEDERATION` DISABLE KEYS */;
-INSERT INTO `FEDERATION` VALUES (1,'FFF'),(2,'UEFA'),(3,'FIFA');
-/*!40000 ALTER TABLE `FEDERATION` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
--- Dumping data for table `FEDERATION_CLUB`
---
-
-LOCK TABLES `FEDERATION_CLUB` WRITE;
-/*!40000 ALTER TABLE `FEDERATION_CLUB` DISABLE KEYS */;
-INSERT INTO `FEDERATION_CLUB` VALUES (1,1,1),(2,2,1),(3,1,2),(4,2,2);
-/*!40000 ALTER TABLE `FEDERATION_CLUB` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
--- Dumping data for table `STADIUM`
---
-
-LOCK TABLES `STADIUM` WRITE;
-/*!40000 ALTER TABLE `STADIUM` DISABLE KEYS */;
-INSERT INTO `STADIUM` VALUES (1,'Orange Vélodrome','Marseille','France'),(2,'Parc des Princes','Paris','France');
-/*!40000 ALTER TABLE `STADIUM` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
@@ -114,4 +54,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2022-03-14 20:27:37
+-- Dump completed on 2022-04-02 23:20:56

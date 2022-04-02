@@ -2,16 +2,9 @@
 
 pub mod prelude;
 
-pub mod club;
-pub mod competition;
-pub mod edition;
-pub mod federation;
-pub mod federation_club;
-pub mod game;
 pub mod navaccess;
 pub mod role;
 pub mod role_navaccess;
-pub mod sea_orm_active_enums;
 pub mod seaql_migrations;
 pub mod stadium;
 pub mod user;

@@ -5,8 +5,10 @@
     </div>
         <img class="ml-1 mb-2 w-8 h-8 rounded-full shadow-lg" src="{{game.league.logo}}"/>
     <div class="flex flex-col items-center pb-5">
-	    <h5 class="mb-1 text-xl font-medium text-gray-500 py-4 px-2 text-center">{{game.league.name}} ({{game.league.country}})</h5>
-	    <span class="text-sm text-gray-500 dark:text-gray-400">{{game.league.round}}</span>
+	    <h5 class="mb-1 text-xl font-medium text-gray-500 py-4 px-2 text-center">{{game.league.name}} {% if let Some(country) = game.league.country %} ({{country}}) {% endif %}</h5>
+	    {% if let Some(round) = game.league.round %}
+	    <span class="text-sm text-gray-500 dark:text-gray-400">{{round}}</span>
+	    {% endif %}
         <div class="flex mt-4 space-x-3 lg:mt-6">
 		<img width="48" src="{{game.teams.home.logo}}" title="{{game.teams.home.name}}" 
 		{% if let Some(winner) = game.teams.home.winner %}
@@ -17,7 +19,7 @@
 		<img width="48" src="{{game.teams.away.logo}}" title="{{game.teams.away.name}}"
 		{% if let Some(winner) = game.teams.away.winner %}
 		{% if winner %}
-		class="ring-offset-2 ring-2 ring-green-100 rounded-xl"
+		class="ring-offset-2 ring-2 ring-green-500 rounded-xl"
 		{% endif %}
 		{% endif%}/>
         </div>

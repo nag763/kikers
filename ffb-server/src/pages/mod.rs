@@ -15,6 +15,7 @@ pub struct ContextQuery {
     page: Option<usize>,
     #[validate(range(min = 0))]
     id: Option<i32>,
+    code: Option<String>,
     #[validate(regex = "RE_TABLE_NAME")]
     date: Option<String>,
     per_page: Option<usize>,

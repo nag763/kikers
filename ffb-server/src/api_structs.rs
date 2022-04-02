@@ -28,11 +28,10 @@ pub struct Fixture {
 pub struct League {
     pub id: i64,
     pub name: String,
-    pub country: String,
+    pub country: Option<String>,
     pub logo: String,
     pub flag: Option<String>,
-    pub season: i64,
-    pub round: String,
+    pub round: Option<String>,
 }
 
 #[derive(Debug, Clone, serde::Deserialize)]
@@ -53,4 +52,17 @@ pub struct Teams {
 pub struct Goals {
     pub home: Option<u8>,
     pub away: Option<u8>,
+}
+
+#[derive(Debug, Clone, serde::Deserialize)]
+pub struct Country {
+    pub name: String,
+    pub code: Option<String>,
+    pub flag: Option<String>,
+}
+
+#[derive(Debug, Clone, serde::Deserialize)]
+pub struct APILeague {
+    pub league: League,
+    pub country: Country
 }

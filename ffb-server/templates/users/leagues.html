@@ -1,0 +1,49 @@
+{% extends "users/user.html" %}
+{%block rcontent%}
+<div class="grid grid-cols-2 gap-2">
+	<div>
+		{% if let Some(leagues) = leagues %}
+<h2 class="text-gray-800 text-xl font-semibold mb-15">Pick the leagues for the chosen country</h2>
+<p>Click on the star to add a league to your favorites, or remove it if it is already in your list</p>
+<hr/>
+	<div class="overflow-auto  h-64">
+		{% for league in leagues %}
+	<div class="flex items-center gap-4 p-4">
+        <img class="w-12 h-12" src="{{league.league.logo}}" alt="logo">
+      <div class="flex flex-col">
+              <strong class="text-sm font-medium">{{league.league.name}}</strong>
+      </div>
+</div>
+		{%endfor%}
+	</div>
+		{% else %}
+		Your fav leagues here
+		{% endif %}
+</div>
+<div>
+<h2 class="text-gray-800 text-xl font-semibold">Pick a country first if you want to add a league to your favorites</h2>
+<p>The country world gathers all the competition that aren't linked with a country in a particular, for instance UCL and WC games can be picked if you click on World</p>
+<hr/>
+<div class="overflow-auto h-64">
+{% for country in countries %}
+	{% if let Some(code) = country.code %}
+	<a href="?code={{code}}">
+	{% else %}
+	<a href="?code=">
+	{% endif %}
+<div class="flex items-center gap-4 p-4">
+	{% if let Some(flag) = country.flag %}
+	<img class="w-12 h-12" src="{{flag}}" alt="flag">
+	{% else %}
+	<img class="w-12 h-12" src="/assets/img/world.webp" alt="flag">
+	{% endif %}
+      <div class="flex flex-col">
+	      <strong class="text-sm font-medium">{{country.name}}</strong>
+      </div>
+</div>
+</a>
+{% endfor %}
+</div>
+</div>
+</div>
+{%endblock%}

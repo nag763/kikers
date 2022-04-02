@@ -1,8 +1,8 @@
 {% extends "base.html" %}
 {% macro sideli(href, svgd, label) %}
          <li>
-		 <a href="{{href}}" class="flex items-center p-2 text-base font-normal text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700">
-			 <svg class="flex-shrink-0 w-6 h-6 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="{{svgd}}" clip-rule="evenodd"></path></svg>
+		 <a href="{{href}}" class="flex items-center p-2 text-base font-normal text-gray-900 rounded-lg hover:bg-gray-100">
+			 <svg class="flex-shrink-0 w-6 h-6 text-gray-500 transition duration-75 group-hover:text-gray-900" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="{{svgd}}" clip-rule="evenodd"></path></svg>
 			 <span class="flex-1 ml-3 whitespace-nowrap">{{label}}</span>
             </a>
          </li>
@@ -10,9 +10,10 @@
 
 {% block title %}Your personnal informations{% endblock %}
 {% block body %}
-{% if let Some(user) = user %}
-<aside class="w-64" aria-label="Sidebar">
-   <div class="overflow-y-auto py-4 px-3 bg-gray-50 rounded dark:bg-gray-800">
+<div class="grid grid-cols-4 gap-4">
+	<div>
+<aside aria-label="Sidebar">
+   <div class="overflow-y-auto py-4 px-3 rounded">
       <ul class="space-y-2">
 	
 	      {% call sideli("/profile/edit", "M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z", "Your informations") %}
@@ -20,5 +21,9 @@
       </ul>
    </div>
 </aside>
-{% endif %}
+	</div>
+	<div class="col-span-3">
+	{% block rcontent %}{% endblock %}
+	</div>
+</div>
 {% endblock %}

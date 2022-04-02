@@ -16,6 +16,7 @@ struct Args {
 #[derive(Subcommand)]
 enum Getter {
     Leagues,
+    Countries,
     Fixtures {
         #[clap(default_value = "0")]
         day_diff: i64,
@@ -46,6 +47,7 @@ async fn run_main() -> Result<(), CliError> {
     let mut con = client.get_connection()?;
     match args.get {
         Getter::Leagues => fetch_leagues(&mut con).await?,
+        Getter::Countries => fetch_countries(&mut con).await?,
         Getter::Fixtures { day_diff } => fetch_fixtures(&mut con, day_diff).await?,
     }
     Ok(())
@@ -55,6 +57,15 @@ async fn fetch_leagues(con: &mut Connection) -> Result<(), CliError> {
     let res = call_api_endpoint("leagues".into()).await?;
     redis::cmd("SET")
         .arg("leagues")
+        .arg(res["response"].to_string())
+        .query(con)?;
+    Ok(())
+}
+
+async fn fetch_countries(con: &mut Connection) -> Result<(), CliError> {
+    let res = call_api_endpoint("countries".into()).await?;
+    redis::cmd("SET")
+        .arg("countries")
         .arg(res["response"].to_string())
         .query(con)?;
     Ok(())

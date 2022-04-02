@@ -8,6 +8,8 @@ WORKDIR /usr/src/friendly-football-bets
 
 COPY ./ .
 
+RUN cargo install --path ffb-cli/
+
 WORKDIR /usr/src/friendly-football-bets/ffb-server
 
 RUN bash install_styles.sh

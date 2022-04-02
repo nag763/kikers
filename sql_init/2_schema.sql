@@ -16,129 +16,6 @@
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
--- Table structure for table `CLUB`
---
-
-DROP TABLE IF EXISTS `CLUB`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `CLUB` (
-  `id` int NOT NULL AUTO_INCREMENT,
-  `name` varchar(32) NOT NULL,
-  `short` varchar(4) NOT NULL,
-  `home_stadium_id` int DEFAULT NULL,
-  `logo_path` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
-  PRIMARY KEY (`id`),
-  KEY `home_stadium_id` (`home_stadium_id`),
-  CONSTRAINT `CLUB_ibfk_1` FOREIGN KEY (`home_stadium_id`) REFERENCES `STADIUM` (`id`) ON DELETE SET NULL ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `COMPETITION`
---
-
-DROP TABLE IF EXISTS `COMPETITION`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `COMPETITION` (
-  `id` int NOT NULL AUTO_INCREMENT,
-  `name` varchar(32) NOT NULL,
-  `federation_id` int NOT NULL,
-  `logo_path` varchar(64) NOT NULL,
-  PRIMARY KEY (`id`),
-  KEY `federation_id` (`federation_id`),
-  CONSTRAINT `COMPETITION_ibfk_1` FOREIGN KEY (`federation_id`) REFERENCES `FEDERATION` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `EDITION`
---
-
-DROP TABLE IF EXISTS `EDITION`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `EDITION` (
-  `id` int NOT NULL AUTO_INCREMENT,
-  `competition_id` int NOT NULL,
-  `year_begin` int NOT NULL,
-  `year_end` int DEFAULT NULL,
-  `winner_id` int DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  KEY `competition_id` (`competition_id`),
-  KEY `winner_id` (`winner_id`),
-  CONSTRAINT `EDITION_ibfk_1` FOREIGN KEY (`competition_id`) REFERENCES `COMPETITION` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `EDITION_ibfk_2` FOREIGN KEY (`winner_id`) REFERENCES `CLUB` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `FEDERATION`
---
-
-DROP TABLE IF EXISTS `FEDERATION`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `FEDERATION` (
-  `id` int NOT NULL AUTO_INCREMENT,
-  `name` varchar(32) NOT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `FEDERATION_CLUB`
---
-
-DROP TABLE IF EXISTS `FEDERATION_CLUB`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `FEDERATION_CLUB` (
-  `id` int NOT NULL AUTO_INCREMENT,
-  `federation_id` int NOT NULL,
-  `club_id` int NOT NULL,
-  PRIMARY KEY (`id`,`federation_id`,`club_id`),
-  KEY `club_id` (`club_id`),
-  KEY `federation_id` (`federation_id`),
-  CONSTRAINT `FEDERATION_CLUB_ibfk_1` FOREIGN KEY (`club_id`) REFERENCES `CLUB` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `FEDERATION_CLUB_ibfk_2` FOREIGN KEY (`federation_id`) REFERENCES `FEDERATION` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `GAME`
---
-
-DROP TABLE IF EXISTS `GAME`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `GAME` (
-  `id` int NOT NULL AUTO_INCREMENT,
-  `stadium_id` int DEFAULT NULL,
-  `home_team_id` int NOT NULL,
-  `home_team_odds` float DEFAULT NULL,
-  `home_team_score` int unsigned DEFAULT NULL,
-  `away_team_id` int NOT NULL,
-  `away_team_odds` float DEFAULT NULL,
-  `away_team_score` int unsigned DEFAULT NULL,
-  `draw_odds` float DEFAULT NULL,
-  `edition_id` int NOT NULL,
-  `played_on` timestamp NULL DEFAULT NULL,
-  `result` enum('W','A','D','C') DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `home_team_id` (`home_team_id`,`away_team_id`,`edition_id`),
-  KEY `GAME_ibfk_2` (`away_team_id`),
-  KEY `edition_id` (`edition_id`),
-  KEY `stadium_id` (`stadium_id`),
-  CONSTRAINT `GAME_ibfk_1` FOREIGN KEY (`home_team_id`) REFERENCES `CLUB` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `GAME_ibfk_2` FOREIGN KEY (`away_team_id`) REFERENCES `CLUB` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `GAME_ibfk_3` FOREIGN KEY (`edition_id`) REFERENCES `EDITION` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `GAME_ibfk_4` FOREIGN KEY (`stadium_id`) REFERENCES `STADIUM` (`id`) ON DELETE SET NULL ON UPDATE SET NULL
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
 -- Table structure for table `NAVACCESS`
 --
 
@@ -152,7 +29,7 @@ CREATE TABLE `NAVACCESS` (
   `position` int DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `position` (`position`)
-) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -186,7 +63,7 @@ CREATE TABLE `ROLE_NAVACCESS` (
   KEY `role_id` (`role_id`),
   CONSTRAINT `ROLE_NAVACCESS_ibfk_1` FOREIGN KEY (`navaccess_id`) REFERENCES `NAVACCESS` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `ROLE_NAVACCESS_ibfk_2` FOREIGN KEY (`role_id`) REFERENCES `ROLE` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=21 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=24 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -224,7 +101,24 @@ CREATE TABLE `USER` (
   UNIQUE KEY `login` (`login`),
   KEY `role` (`role`),
   CONSTRAINT `USER_ibfk_1` FOREIGN KEY (`role`) REFERENCES `ROLE` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT
-) ENGINE=InnoDB AUTO_INCREMENT=26 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=30 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `USER_FAV_CLUB`
+--
+
+DROP TABLE IF EXISTS `USER_FAV_CLUB`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `USER_FAV_CLUB` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `user_id` int NOT NULL,
+  `club_id` int NOT NULL,
+  PRIMARY KEY (`id`,`user_id`,`club_id`),
+  KEY `user_id` (`user_id`),
+  CONSTRAINT `USER_FAV_CLUB_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `USER` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -250,4 +144,4 @@ CREATE TABLE `seaql_migrations` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2022-03-14 20:27:37
+-- Dump completed on 2022-04-02 23:20:56

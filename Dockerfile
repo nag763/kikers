@@ -8,8 +8,10 @@ WORKDIR /usr/src/friendly-football-bets
 
 COPY ./ .
 
+WORKDIR /usr/src/friendly-football-bets/ffb-server
+
 RUN bash install_styles.sh
 
 RUN cargo b --release
 
-CMD cargo r --release
+CMD cargo r --bin ffb-server --release

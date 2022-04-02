@@ -1,9 +1,14 @@
 version: "3.3"
 services:
+  redis:
+    image: redis:5.0.14
+    restart: unless-stopped
+    volumes: 
+      - cache:/data
   mysqldb:
     image: mysql:8.0
     restart: unless-stopped
-    env_file: ./.env
+    env_file: .env
     environment:
       - MYSQL_ROOT_PASSWORD=foopassword
       - MYSQL_DATABASE=fbets
@@ -14,17 +19,19 @@ services:
       - db:/var/lib/mysql
   app:
     build:
-            context: .
-            dockerfile: Dockerfile
+        context: .
+        dockerfile: Dockerfile
     links:
+        - redis:redishost
         - mysqldb:dbhost
     depends_on:
         - mysqldb
     restart: unless-stopped
-    env_file: ./.env
+    env_file: ./ffb-server/.env
     ports:
       - 80:8080/tcp
     volumes:
       - ./log:/usr/src/friendly-football-bets/log
 volumes:
   db:
+  cache:

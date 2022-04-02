@@ -27,7 +27,7 @@ services:
     depends_on:
         - mysqldb
     restart: unless-stopped
-    env_file: ./ffb-server/.env
+    env_file: .env
     ports:
       - 80:8080/tcp
     volumes:

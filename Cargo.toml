@@ -2,6 +2,7 @@
 
 members = [
     "ffb-server",
-    "ffb-cli"
+    "ffb-cli",
+    "migration"
 ]
 

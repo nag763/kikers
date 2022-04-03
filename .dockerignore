@@ -1,3 +1,4 @@
 migration
+**/target
 target
-styles
+**/styles

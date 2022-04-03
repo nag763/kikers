@@ -1259,7 +1259,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "ffb-server"
+name = "ffb_server"
 version = "0.1.0"
 dependencies = [
  "actix-files",

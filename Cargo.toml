@@ -1,8 +1,8 @@
 [workspace]
 
 members = [
-    "ffb-server",
-    "ffb-cli",
+    "ffb_server",
+    "ffb_cli",
     "migration"
 ]
 

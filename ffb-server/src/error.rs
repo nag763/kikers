@@ -97,13 +97,6 @@ impl From<std::env::VarError> for ApplicationError {
     }
 }
 
-impl From<minreq::Error> for ApplicationError {
-    fn from(min_req_err: minreq::Error) -> Self {
-        error!("A var error happened : {}", min_req_err.to_string());
-        ApplicationError::InternalError
-    }
-}
-
 impl From<sea_orm::DbErr> for ApplicationError {
     fn from(sea_orm: sea_orm::DbErr) -> ApplicationError {
         error!("A database error happened : {}", sea_orm.to_string());

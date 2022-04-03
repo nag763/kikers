@@ -1,0 +1,17 @@
+<form method="post" action="login" class="mt-5">
+  <div class="mb-4">
+    <label class="block text-md font-light mb-2" for="username">Login</label>
+    <input class="w-full bg-drabya-gray border-gray-500 appearance-none border p-4 font-light leading-tight focus:outline-none focus:shadow-outline focus:ring-2 focus:ring-blue-600 rounded-lg" type="text" name="login" id="login" placeholder="Username" minlength="3" required>
+  </div>
+  <div class="mb-4">
+    <label class="block text-md font-light mb-2" for="password">Password</label>
+    <input class="w-full bg-drabya-gray border-gray-500 appearance-none border p-4 font-light leading-tight focus:outline-none focus:shadow-outline focus:ring-2 focus:ring-blue-600 rounded-lg" type="password" name="password" id="password" placeholder="Password" minlength="4" required>
+  </div>
+
+  <div class="flex items-center flex justify-end mb-5 mr-3">
+    <button class="bg-indigo-600 hover:bg-blue-700 text-white font-light py-2 px-6 rounded focus:outline-none focus:shadow-outline" type="submit">
+      LOGIN
+    </button>
+  </div>
+  <small class="text-center text-md font-light">Don't have an account? <a class="font-light text-md text-indigo-600 text-right" href="/signup">Create</a></small>
+</form>

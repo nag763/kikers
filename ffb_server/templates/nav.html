@@ -1,0 +1,61 @@
+<script>
+function hamburgerInteraction() {
+	let navList = document.getElementById("nav-list").classList;
+	if(navList.contains('hidden')){
+		navList.remove('hidden');
+	} else {
+		navList.add('hidden');
+	}
+}
+</script>
+
+<nav class="flex items-center justify-between flex-wrap bg-gray-800 p-6">
+  <a href="/" class="flex items-center flex-shrink-0 text-white mr-6">
+	  <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+</svg>
+	  <span class="font-semibold text-xl tracking-tight">FFB</span>
+  </a>
+  <div class="block lg:hidden">
+    <button class="flex items-center px-3 py-2 border rounded text-indigo-200 border-indigo-400 hover:text-white hover:border-white" onclick="hamburgerInteraction()">
+      <svg class="fill-current h-3 w-3" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><title>Menu</title><path d="M0 3h20v2H0V3zm0 6h20v2H0V9zm0 6h20v2H0v-2z"/></svg>
+    </button>
+  </div>
+  <div id="nav-list" class="hidden w-full block flex-grow lg:flex lg:items-center lg:w-auto">
+  {% match user %}
+  		{% when Some with (val) %}
+    <div class="text-sm lg:flex-grow">
+	    {% for ref in val.nav %}
+		{% if ref.position.is_some() %}
+	    <a href="{{ref.href}}" class="block mt-4 lg:inline-block lg:mt-0 text-indigo-200 hover:text-white mr-4">
+		    {{ref.label}}
+      </a>
+		{% endif %}
+      {% endfor %}
+    </div>
+     <div>
+	     <a href="/profile/edit" class="inline-block text-sm px-4 py-2 leading-none text-white">
+		     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+  <path stroke-linecap="round" stroke-linejoin="round" d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+</svg>
+
+	     </a>
+	     <a href="/logout" class="inline-block text-sm px-4 py-2 leading-none text-white">
+		     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+  <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+</svg>
+
+	     </a>
+    </div>
+  	{% when None %}
+    <div class="text-sm lg:flex-grow">
+      <a href="/" class="block mt-4 lg:inline-block lg:mt-0 text-indigo-200 hover:text-white mr-4">
+        Sign in
+      </a>
+      <a href="/signup" class="block mt-4 lg:inline-block lg:mt-0 text-indigo-200 hover:text-white mr-4">
+        Sign up
+      </a>
+    </div>
+	{% endmatch %}
+  </div>
+</nav>

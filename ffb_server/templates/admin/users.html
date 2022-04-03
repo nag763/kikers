@@ -1,0 +1,149 @@
+{% if data.is_empty() %}
+<p>There are no more results, go back if you need to see again the list of users</p>
+{% else %}
+      <form action="/user/search" method="post">
+<div class="flex sm:justify-center lg:justify-end">
+  <div class="mb-3 xl:w-96">
+    <div class="input-group relative flex items-stretch w-full mb-4">
+      <input hidden name="page" value="{{page}}"/>
+      <input hidden name="per_page" value="{{per_page}}"/>
+      <input type="search" class="form-control relative flex-auto min-w-0 block w-full px-3 py-1.5 text-base font-normal text-gray-700 bg-white bg-clip-padding border border-solid border-gray-300 rounded transition ease-in-out m-0 focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none" placeholder="Search login" aria-label="Search" aria-describedby="button-addon2" name="login">
+      <button class="btn inline-block px-6 py-2.5 bg-blue-600 text-white font-medium text-xs leading-tight uppercase rounded shadow-md hover:bg-blue-700 hover:shadow-lg focus:bg-blue-700  focus:shadow-lg focus:outline-none focus:ring-0 active:bg-blue-800 active:shadow-lg transition duration-150 ease-in-out flex items-center" type="submit">
+        <svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="search" class="w-4" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+          <path fill="currentColor" d="M505 442.7L405.3 343c-4.5-4.5-10.6-7-17-7H372c27.6-35.3 44-79.7 44-128C416 93.1 322.9 0 208 0S0 93.1 0 208s93.1 208 208 208c48.3 0 92.7-16.4 128-44v16.3c0 6.4 2.5 12.5 7 17l99.7 99.7c9.4 9.4 24.6 9.4 33.9 0l28.3-28.3c9.4-9.4 9.4-24.6.1-34zM208 336c-70.7 0-128-57.2-128-128 0-70.7 57.2-128 128-128 70.7 0 128 57.2 128 128 0 70.7-57.2 128-128 128z"></path>
+        </svg>
+      </button>
+      </form>
+    </div>
+  </div>
+</div>
+<div class="grid grid-cols-2 gap-2">
+<div class="overflow-auto">
+<table class="table-auto">
+  <thead>
+    <tr>
+      <th class="px-4 py-2">Login</th>
+      <th class="px-4 py-2">Name</th>
+      <th class="px-4 py-2">Edit</th>
+      <th class="px-4 py-2">Activation</th>
+      <th class="px-4 py-2">Deletion</th>
+    </tr>
+  </thead>
+  <tbody>
+	  {% for (i, app_user) in data.iter().enumerate() %}
+	  {% if i%2 == 0 %}
+    <tr>
+	   {% else %}
+    <tr class="bg-gray-100">
+	   {% endif %}
+	    <td class="border px-4 py-2">{{app_user.login}}</td>
+	    <td class="border px-4 py-2">{{app_user.name}}</td>
+	    <td class="border px-4 py-2">
+		    <a href="?id={{app_user.id}}&page={{page}}&per_page={{per_page}}">
+			    <button class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-green-300 font-medium rounded-full text-sm px-5 py-2.5 text-center mr-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+		<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+  <path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z" />
+  <path fill-rule="evenodd" d="M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" clip-rule="evenodd" />
+</svg>
+			    </button>
+		    </a>
+	    </td>
+	    <td class="border px-4 py-2" style="text-align:center">
+	    <form method="post" action="/user/activation">
+	    <input hidden name="id" value="{{app_user.id}}"/>
+	    <input hidden name="login" value="{{app_user.login}}"/>
+	    <input hidden name="page" value="{{page}}"/>
+	    <input hidden name="per_page" value="{{per_page}}"/>
+	    {% if app_user.is_authorized == 1 %}
+	    <input hidden name="value" value="0"/>
+	    <button type="submit" class="text-white bg-yellow-400 hover:bg-yellow-500 focus:ring-4 focus:ring-yellow-300 font-medium rounded-full text-sm px-5 py-2.5 text-center mr-2 mb-2 dark:focus:ring-yellow-900">Deactivate</button>
+	    {% else %}
+	    <input hidden name="value" value="1"/>
+	    <button type="submit" class="text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-full text-sm px-5 py-2.5 text-center mr-2 mb-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800">Activate</button>
+	    {% endif %}
+	    </form>
+	    </td>
+	    <form method="post" action="/user/deletion">
+	    <input hidden name="id" value="{{app_user.id}}"/>
+	    <input hidden name="login" value="{{app_user.login}}"/>
+	    <input hidden name="page" value="{{page}}"/>
+	    <input hidden name="per_page" value="{{per_page}}"/>
+	    <td class="border px-4 py-2">
+		    <a><button class="h-10 px-5 m-2 text-red-100 transition-colors duration-150 bg-red-700 rounded-lg focus:shadow-outline hover:bg-red-800">
+		<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+  <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+</svg>
+			    </button></a></td>
+	    </form>
+    </tr>
+     	{% endfor %}
+  </tbody>
+</table>
+</div>
+{% match chosen_user %}
+{% when Some with (chosen_user) %}
+  <div class="flex flex-wrap -mx-3 border px-2 py-3 mr-2 ml-2 mt-3">
+	<form class="w-full" method="post" action="/user/modification">
+	    <input hidden name="id" value="{{chosen_user.id}}"/>
+	    <input hidden name="page" value="{{page}}"/>
+	    <input hidden name="per_page" value="{{per_page}}"/>
+    	    <div class="w-full px-3">
+      <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" for="Login">
+        Login
+      </label>
+      <input class="appearance-none block w-full bg-gray-100 text-gray-700 border border-gray-200 rounded py-3 px-4 mb-3 leading-tight" name="login" placeholder="{{chosen_user.login}}" value="{{chosen_user.login}}" readonly>
+    </div>
+    <div class="w-full px-3">
+      <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" for="name">
+        Name
+      </label>
+      <input class="appearance-none block w-full text-gray-700 border border-gray-200 rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white focus:border-gray-500" name="name" placeholder="{{chosen_user.name}}" value="{{chosen_user.name}}" minlength="3">
+    </div>
+
+    <div class="w-full px-3">
+	    {% if chosen_user.is_authorized == 1 %}
+	    <input name="is_authorized" class="mr-2 leading-tight" type="checkbox" checked />
+	    {% else %}
+	    <input name="is_authorized" class="mr-2 leading-tight" type="checkbox"/>
+	    {% endif %}
+      <label>
+	Can access application
+      </span>
+    </div>
+    <div class="mt-5 flex flex-row-reverse">
+	    <button class="h-10 px-5 m-2 text-red-100 transition-colors duration-150 bg-blue-700 rounded-lg focus:shadow-outline hover:bg-blue-800" type="submit">
+			Save
+	    </button>
+</form>
+	    <form method="post" action="/user/deletion">
+	    <input hidden name="id" value="{{chosen_user.id}}"/>
+	    <input hidden name="login" value="{{chosen_user.login}}"/>
+	    <input hidden name="page" value="{{page}}"/>
+	    <input hidden name="per_page" value="{{per_page}}"/>
+	    <button class="h-10 px-5 m-2 text-red-100 transition-colors duration-150 bg-red-700 rounded-lg focus:shadow-outline hover:bg-red-800" type="submit">Delete
+	    </button>
+</form>
+    </div>
+  </div>
+{% when None %}
+<div>
+</div>
+{% endmatch %}
+  </div>
+{% endif %}
+<div class= "mt-5 grid grid-cols-2">
+	<div class="justify-self-start">
+	{% if page != 0 %}
+		<a href="?page={{page-1}}&per_page={{per_page}}">
+<button type="button" class="text-white bg-gradient-to-r from-blue-400 to-green-600 hover:bg-gradient-to-br focus:ring-4 focus:ring-teal-300 dark:focus:ring-teal-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-2 mb-2">Previous</button>
+	</a>
+	{% endif %}
+	</div>
+	<div class="justify-self-end">
+	{% if page < num_pages %}
+	<a href="?page={{page+1}}&per_page={{per_page}}" class="text-right">
+	<button type="button" class="text-white bg-gradient-to-br from-green-400 to-blue-600 hover:bg-gradient-to-bl focus:ring-4 focus:ring-green-200 dark:focus:ring-green-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-2 mb-2">Next</button>
+	</a>
+	{% endif %}
+	</div>
+</div>

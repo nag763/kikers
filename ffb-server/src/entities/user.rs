@@ -26,8 +26,8 @@ pub enum Relation {
         on_delete = "Restrict"
     )]
     Role,
-    #[sea_orm(has_many = "super::user_fav_club::Entity")]
-    UserFavClub,
+    #[sea_orm(has_many = "super::user_league::Entity")]
+    UserLeague,
 }
 
 impl Related<super::role::Entity> for Entity {
@@ -36,9 +36,9 @@ impl Related<super::role::Entity> for Entity {
     }
 }
 
-impl Related<super::user_fav_club::Entity> for Entity {
+impl Related<super::user_league::Entity> for Entity {
     fn to() -> RelationDef {
-        Relation::UserFavClub.def()
+        Relation::UserLeague.def()
     }
 }
 

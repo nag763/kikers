@@ -16,14 +16,16 @@ mod pages;
 
 use crate::controllers::auth::{login, logout, register_user};
 use crate::controllers::cookies::cookies_approved;
-use crate::controllers::user::{user_activation, user_deletion, user_modification, user_search};
+use crate::controllers::user::{
+    user_activation, user_change_leagues, user_deletion, user_modification, user_search,
+};
 use crate::error::ApplicationError;
 use crate::middleware::cookie_approval::CookieChecker;
 use crate::middleware::role_checker::RoleChecker;
 use crate::pages::admin::admin_dashboard;
 use crate::pages::game::games;
 use crate::pages::unauth::{cookies, index, signup};
-use crate::pages::user::{user_profile, user_leagues};
+use crate::pages::user::{user_leagues, user_profile};
 use actix_files as fs;
 use actix_web::middleware::Logger;
 use actix_web::web;
@@ -58,6 +60,7 @@ async fn main() -> std::io::Result<()> {
                             .service(games)
                             .service(user_profile)
                             .service(user_leagues)
+                            .service(user_change_leagues)
                             .service(admin_dashboard)
                             .service(user_search)
                             .service(user_activation)

@@ -2,7 +2,11 @@ use crate::auth::JwtUser;
 use crate::database::Database;
 use crate::entities::user;
 use crate::entities::user::Model as User;
+use crate::entities::user_league;
+use crate::entities::user_league::Model as UserLeague;
 use crate::error::ApplicationError;
+use actix_web::http::Cookie;
+use actix_web::HttpMessage;
 use actix_web::{post, HttpRequest, HttpResponse, Responder};
 use sea_orm::ActiveModelTrait;
 use sea_orm::ColumnTrait;
@@ -93,8 +97,8 @@ pub async fn user_deletion(
         .ok_or(ApplicationError::NotFound)?;
     user_to_delete.delete(&conn).await?;
     let mut redis_conn = Database::acquire_redis_connection()?;
-        redis::cmd("DEL")
-            .arg(format!("token:{}", user_deletion_form.login.as_str()))
+    redis::cmd("DEL")
+        .arg(format!("token:{}", user_deletion_form.login.as_str()))
         .query(&mut redis_conn)?;
     Ok(HttpResponse::Found()
         .header(
@@ -139,8 +143,8 @@ pub async fn user_modification(
     user.is_authorized = Set(user_modification_form.is_authorized.is_some() as i8);
     user.update(&conn).await?;
     let mut redis_conn = Database::acquire_redis_connection()?;
-        redis::cmd("DEL")
-            .arg(format!("token:{}", user_modification_form.login.as_str()))
+    redis::cmd("DEL")
+        .arg(format!("token:{}", user_modification_form.login.as_str()))
         .query(&mut redis_conn)?;
     Ok(HttpResponse::Found()
         .header(
@@ -152,6 +156,78 @@ pub async fn user_modification(
                 user_modification_form.per_page,
                 user_modification_form.id
             ),
+        )
+        .finish())
+}
+
+#[derive(serde::Deserialize, validator::Validate)]
+pub struct UserChangeLeague {
+    #[validate(range(min = 0))]
+    league_id: i32,
+    #[validate(range(min = 0))]
+    user_id: i32,
+    code: Option<String>,
+    action: String,
+    name: String,
+}
+
+#[post("/profile/leagues")]
+pub async fn user_change_leagues(
+    req: HttpRequest,
+    user_change_league_form: actix_web_validator::Form<UserChangeLeague>,
+) -> Result<impl Responder, ApplicationError> {
+    let conn = Database::acquire_sql_connection().await?;
+    let res_msg: String = match user_change_league_form.action.as_str() {
+        "add" => {
+            let user_league = user_league::ActiveModel {
+                league_id: Set(user_change_league_form.league_id),
+                user_id: Set(user_change_league_form.user_id),
+                ..Default::default()
+            };
+            user_league.insert(&conn).await?;
+            format!(
+                "{} has been added as favorite",
+                user_change_league_form.name
+            )
+        }
+        "remove" => {
+            let user_league_to_delete: UserLeague = user_league::Entity::find()
+                .filter(
+                    Condition::all()
+                        .add(user_league::Column::UserId.eq(user_change_league_form.user_id))
+                        .add(user_league::Column::LeagueId.eq(user_change_league_form.league_id)),
+                )
+                .one(&conn)
+                .await?
+                .ok_or(ApplicationError::NotFound)?;
+            user_league_to_delete.delete(&conn).await?;
+            format!(
+                "{} has been removed from the favorite list",
+                user_change_league_form.name
+            )
+        }
+        _ => return Err(ApplicationError::BadRequest),
+    };
+
+    let jwt_path: String = std::env::var("JWT_TOKEN_PATH")?;
+    let current_token: Cookie = req
+        .cookie(jwt_path.as_str())
+        .ok_or(ApplicationError::IllegalToken)?;
+    let mut refreshed_token: Cookie = Cookie::new(
+        jwt_path.as_str(),
+        JwtUser::refresh_token(current_token.value()).await?,
+    );
+    refreshed_token.set_path("/");
+    let code_redirect: String = match &user_change_league_form.code {
+        Some(v) => format!("&code={}", v),
+        None => String::new(),
+    };
+    Ok(HttpResponse::Found()
+        .del_cookie(&current_token)
+        .cookie(refreshed_token)
+        .header(
+            "Location",
+            format!("/profile/leagues?info={}{}", res_msg, code_redirect),
         )
         .finish())
 }

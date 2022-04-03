@@ -2,7 +2,7 @@ use chrono::{DateTime, Utc};
 
 #[derive(Debug, Clone, serde::Deserialize)]
 pub struct Venue {
-    pub id: Option<i64>,
+    pub id: Option<i32>,
     pub name: Option<String>,
     pub city: Option<String>,
 }
@@ -11,12 +11,12 @@ pub struct Venue {
 pub struct Status {
     pub long: String,
     pub short: String,
-    pub elapsed: Option<i64>,
+    pub elapsed: Option<i32>,
 }
 
 #[derive(Debug, Clone, serde::Deserialize)]
 pub struct Fixture {
-    pub id: i64,
+    pub id: i32,
     pub referee: Option<String>,
     pub timezone: String,
     pub date: DateTime<Utc>,
@@ -26,7 +26,7 @@ pub struct Fixture {
 
 #[derive(Debug, Clone, serde::Deserialize)]
 pub struct League {
-    pub id: i64,
+    pub id: i32,
     pub name: String,
     pub country: Option<String>,
     pub logo: String,
@@ -36,7 +36,7 @@ pub struct League {
 
 #[derive(Debug, Clone, serde::Deserialize)]
 pub struct Team {
-    pub id: i64,
+    pub id: i32,
     pub name: String,
     pub logo: String,
     pub winner: Option<bool>,
@@ -64,5 +64,5 @@ pub struct Country {
 #[derive(Debug, Clone, serde::Deserialize)]
 pub struct APILeague {
     pub league: League,
-    pub country: Country
+    pub country: Country,
 }

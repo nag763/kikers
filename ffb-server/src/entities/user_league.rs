@@ -3,14 +3,12 @@
 use sea_orm::entity::prelude::*;
 
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel)]
-#[sea_orm(table_name = "USER_FAV_CLUB")]
+#[sea_orm(table_name = "USER_LEAGUE")]
 pub struct Model {
     #[sea_orm(primary_key)]
     pub id: i32,
-    #[sea_orm(primary_key, auto_increment = false)]
     pub user_id: i32,
-    #[sea_orm(primary_key, auto_increment = false)]
-    pub club_id: i32,
+    pub league_id: i32,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]

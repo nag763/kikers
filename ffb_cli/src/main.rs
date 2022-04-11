@@ -4,6 +4,9 @@ use clap::{Parser, Subcommand};
 use dotenv::dotenv;
 use error::CliError;
 use redis::Connection;
+use serde_json::json;
+
+extern crate serde;
 
 extern crate redis;
 
@@ -75,16 +78,17 @@ async fn fetch_fixtures(con: &mut Connection, day_diff: i64) -> Result<(), CliEr
     let now = chrono::Utc::now();
     let mut date_diff = (now + chrono::Duration::days(day_diff)).to_rfc3339();
     date_diff.truncate(10);
-    let res = call_api_endpoint(format!("fixtures?date={}", date_diff)).await?;
+    let mut res = call_api_endpoint(format!("fixtures?date={}", date_diff)).await?;
+    res["response"] = json!(
+        {
+            "games": res["response"],
+            "fetched_on": now.to_rfc2822(),
+        }
+    );
     redis::cmd("HSET")
         .arg("fixtures")
         .arg(&date_diff)
         .arg(res["response"].to_string())
-        .query(con)?;
-    redis::cmd("HSET")
-        .arg("fixtures_fetched_date")
-        .arg(&date_diff)
-        .arg(now.to_rfc2822())
         .query(con)?;
     Ok(())
 }

@@ -6,13 +6,13 @@ use askama::Template;
 use crate::error::ApplicationError;
 use actix_web::{get, HttpRequest, HttpResponse};
 
-use crate::api_structs::{Fixture, Goals, League, Teams};
+use crate::api_structs::{Game, Games};
 use chrono::{DateTime, Utc};
 
 #[derive(Template)]
 #[template(path = "games/game_row.html")]
 struct GamesRowTemplate {
-    games: Vec<Games>,
+    games: Games,
     now: DateTime<Utc>,
     fetched_date: String,
     title: String,
@@ -40,14 +40,6 @@ struct GamesOfDayTemplate {
     day_games: Option<GamesRowTemplate>,
 }
 
-#[derive(serde::Deserialize, Clone)]
-struct Games {
-    fixture: Fixture,
-    league: League,
-    teams: Teams,
-    goals: Goals,
-}
-
 #[get("/games")]
 pub async fn games(
     req: HttpRequest,
@@ -64,8 +56,8 @@ pub async fn games(
                 .query(&mut redis_conn)?;
             let games_of_the_day: Option<GamesRowTemplate> = match games_of_the_day_as_string {
                 Some(games) => {
-                    let games: Vec<Games> = serde_json::from_str(games.as_str())?;
-                    if games.is_empty() {
+                    let games: Games = serde_json::from_str(games.as_str())?;
+                    if games.games.is_empty() {
                         None
                     } else {
                         Some(GamesRowTemplate {
@@ -106,8 +98,9 @@ pub async fn games(
 
     let next_three_games: Option<GamesRowTemplate> = match next_three_games_as_string {
         Some(v) => {
-            let games: Vec<Games> = serde_json::from_str(v.as_str())?;
-            let mut next_games: Vec<Games> = games
+            let mut games: Games = serde_json::from_str(v.as_str())?;
+            let mut next_games: Vec<Game> = games
+                .games
                 .iter()
                 .filter(|game| now < game.fixture.date)
                 .cloned()
@@ -116,8 +109,9 @@ pub async fn games(
             if next_games.is_empty() {
                 None
             } else {
+                games.games = next_games;
                 Some(GamesRowTemplate {
-                    games: next_games,
+                    games: games,
                     now,
                     fetched_date: now_as_simple_date.clone(),
                     title: "Next three games".to_string(),
@@ -134,9 +128,9 @@ pub async fn games(
 
     let yesterday_three_games: Option<GamesRowTemplate> = match yesterday_games_as_string {
         Some(v) => {
-            let mut games: Vec<Games> = serde_json::from_str(v.as_str())?;
-            games.truncate(3);
-            if games.is_empty() {
+            let mut games: Games = serde_json::from_str(v.as_str())?;
+            games.games.truncate(3);
+            if games.games.is_empty() {
                 None
             } else {
                 Some(GamesRowTemplate {
@@ -157,9 +151,9 @@ pub async fn games(
 
     let tomorow_three_games: Option<GamesRowTemplate> = match tomorow_games_as_string {
         Some(v) => {
-            let mut games: Vec<Games> = serde_json::from_str(v.as_str())?;
-            games.truncate(3);
-            if games.is_empty() {
+            let mut games: Games = serde_json::from_str(v.as_str())?;
+            games.games.truncate(3);
+            if games.games.is_empty() {
                 None
             } else {
                 Some(GamesRowTemplate {

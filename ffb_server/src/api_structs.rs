@@ -66,3 +66,17 @@ pub struct APILeague {
     pub league: League,
     pub country: Country,
 }
+
+#[derive(serde::Deserialize, Clone)]
+pub struct Game {
+    pub fixture: Fixture,
+    pub league: League,
+    pub teams: Teams,
+    pub goals: Goals,
+}
+
+#[derive(serde::Deserialize, Clone)]
+pub struct Games {
+    pub games: Vec<Game>,
+    pub fetched_on: Option<String>,
+}

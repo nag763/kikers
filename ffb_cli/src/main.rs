@@ -78,20 +78,26 @@ async fn fetch_fixtures(con: &mut Connection, day_diff: i64) -> Result<(), CliEr
     let res = call_api_endpoint(format!("fixtures?date={}", date_diff)).await?;
     redis::cmd("HSET")
         .arg("fixtures")
-        .arg(date_diff)
+        .arg(&date_diff)
         .arg(res["response"].to_string())
+        .query(con)?;
+    redis::cmd("HSET")
+        .arg("fixtures_fetched_date")
+        .arg(&date_diff)
+        .arg(now.to_rfc2822())
         .query(con)?;
     Ok(())
 }
 
 async fn call_api_endpoint(endpoint: String) -> Result<serde_json::Value, CliError> {
     let client = reqwest::Client::builder().build()?;
-    Ok(client
+    let value : serde_json::Value = client
         .get(std::env::var("API_PROVIDER")? + endpoint.as_str())
         .header("x-rapidapi-host", "api-football-v1.p.rapidapi.com")
         .header("x-rapidapi-key", std::env::var("API_TOKEN")?)
         .send()
         .await?
         .json::<serde_json::Value>()
-        .await?)
+        .await?;
+    Ok(value)
 }

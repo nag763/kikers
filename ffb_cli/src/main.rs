@@ -78,8 +78,8 @@ async fn fetch_fixtures(con: &mut Connection, day_diff: i64) -> Result<(), CliEr
     let now = chrono::Utc::now();
     let mut date_diff = (now + chrono::Duration::days(day_diff)).to_rfc3339();
     date_diff.truncate(10);
-    let mut res = call_api_endpoint(format!("fixtures?date={}", date_diff)).await?;
-    res["response"] = json!(
+    let res = call_api_endpoint(format!("fixtures?date={}", date_diff)).await?;
+    let stored_fixture : serde_json::Value = json!(
         {
             "games": res["response"],
             "fetched_on": now.to_rfc2822(),
@@ -88,7 +88,7 @@ async fn fetch_fixtures(con: &mut Connection, day_diff: i64) -> Result<(), CliEr
     redis::cmd("HSET")
         .arg("fixtures")
         .arg(&date_diff)
-        .arg(res["response"].to_string())
+        .arg(stored_fixture.to_string())
         .query(con)?;
     Ok(())
 }

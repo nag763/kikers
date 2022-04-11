@@ -14,9 +14,14 @@ use sea_orm::QueryFilter;
 use sea_orm::Set;
 use std::thread;
 
+lazy_static! {
+    static ref RE_VALID_LOGIN: regex::Regex =
+        regex::Regex::new(r####"^(?:[0-9a-zA-Z\-_]{3,32})$"####).unwrap();
+}
+
 #[derive(serde::Deserialize, validator::Validate)]
 pub struct LoginForm {
-    #[validate(length(min = 3, max = 64))]
+    #[validate(regex = "RE_VALID_LOGIN")]
     login: String,
     #[validate(length(min = 4, max = 128))]
     password: String,
@@ -81,7 +86,7 @@ pub async fn logout(req: HttpRequest) -> Result<impl Responder, ApplicationError
 
 #[derive(serde::Deserialize, validator::Validate)]
 pub struct SignUpForm {
-    #[validate(length(min = 3, max = 64))]
+    #[validate(regex = "RE_VALID_LOGIN")]
     login: String,
     #[validate(length(min = 4, max = 128))]
     password: String,

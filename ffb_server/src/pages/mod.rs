@@ -4,7 +4,7 @@ pub mod unauth;
 pub mod user;
 
 lazy_static! {
-    static ref RE_TABLE_NAME: regex::Regex =
+    static ref RE_VALID_DATE: regex::Regex =
         regex::Regex::new(r####"^\d{4}-[0-1][0-9]-[0-3][0-9]$"####).unwrap();
 }
 
@@ -16,7 +16,7 @@ pub struct ContextQuery {
     #[validate(range(min = 0))]
     id: Option<i32>,
     code: Option<String>,
-    #[validate(regex = "RE_TABLE_NAME")]
+    #[validate(regex = "RE_VALID_DATE")]
     date: Option<String>,
     per_page: Option<usize>,
 }

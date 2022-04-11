@@ -1218,7 +1218,6 @@ dependencies = [
  "lazy_static",
  "redis",
  "reqwest",
- "serde",
  "serde_json",
  "tokio 1.17.0",
 ]

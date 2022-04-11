@@ -1,12 +1,10 @@
-pub mod error;
+pub(crate) mod error;
 
 use clap::{Parser, Subcommand};
 use dotenv::dotenv;
 use error::CliError;
 use redis::Connection;
 use serde_json::json;
-
-extern crate serde;
 
 extern crate redis;
 
@@ -79,7 +77,7 @@ async fn fetch_fixtures(con: &mut Connection, day_diff: i64) -> Result<(), CliEr
     let mut date_diff = (now + chrono::Duration::days(day_diff)).to_rfc3339();
     date_diff.truncate(10);
     let res = call_api_endpoint(format!("fixtures?date={}", date_diff)).await?;
-    let stored_fixture : serde_json::Value = json!(
+    let stored_fixture: serde_json::Value = json!(
         {
             "games": res["response"],
             "fetched_on": now.to_rfc2822(),
@@ -95,7 +93,7 @@ async fn fetch_fixtures(con: &mut Connection, day_diff: i64) -> Result<(), CliEr
 
 async fn call_api_endpoint(endpoint: String) -> Result<serde_json::Value, CliError> {
     let client = reqwest::Client::builder().build()?;
-    let value : serde_json::Value = client
+    let value: serde_json::Value = client
         .get(std::env::var("API_PROVIDER")? + endpoint.as_str())
         .header("x-rapidapi-host", "api-football-v1.p.rapidapi.com")
         .header("x-rapidapi-key", std::env::var("API_TOKEN")?)

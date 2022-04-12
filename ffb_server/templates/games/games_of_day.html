@@ -1,10 +1,12 @@
 {% extends "../base.html" %}
 {% block title %}Games{% endblock %}
 {% block body %}
+{% include "./game_picker_pills.html" %}
 {% if let Some(day_games) = day_games %}
 {{day_games|safe}}
 {% else %}
-No games available for that day
+<p>No games available for that day, or you might have not added games to your favorites yet if you aren't in see all games mode.</p>
+<p>To add more leagues to your favorite, click <a class="font-light text-md text-indigo-600" href="/profile/leagues">here</a></p>
 {% endif %}
 </div>
 {% endblock %}

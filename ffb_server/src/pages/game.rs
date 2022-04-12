@@ -28,6 +28,7 @@ struct GamesTemplate {
     next_three_games: Option<GamesRowTemplate>,
     yesterday_three_games: Option<GamesRowTemplate>,
     tomorow_three_games: Option<GamesRowTemplate>,
+    fetched_date: Option<String>,
 }
 
 #[derive(Template)]
@@ -37,6 +38,7 @@ struct GamesOfDayTemplate {
     user: Option<JwtUser>,
     error: Option<String>,
     info: Option<String>,
+    fetched_date: Option<String>,
     day_games: Option<GamesRowTemplate>,
 }
 
@@ -48,6 +50,8 @@ pub async fn games(
     let mut redis_conn = Database::acquire_redis_connection()?;
     let jwt_user: JwtUser = JwtUser::from_request(req)?;
     let now: DateTime<Utc> = Utc::now();
+    let all_games: bool = context_query.all.unwrap_or(false);
+    let fav_leagues: Vec<i32> = jwt_user.clone().fav_leagues;
     match &context_query.date {
         Some(v) => {
             let games_of_the_day_as_string: Option<String> = redis::cmd("HGET")
@@ -56,7 +60,14 @@ pub async fn games(
                 .query(&mut redis_conn)?;
             let games_of_the_day: Option<GamesRowTemplate> = match games_of_the_day_as_string {
                 Some(games) => {
-                    let games: Games = serde_json::from_str(games.as_str())?;
+                    let mut games: Games = serde_json::from_str(games.as_str())?;
+                    if !all_games {
+                        let list_of_games: Vec<Game> = games.games;
+                        games.games = list_of_games
+                            .into_iter()
+                            .filter(|game| *&fav_leagues.contains(&game.league.id))
+                            .collect();
+                    }
                     if games.games.is_empty() {
                         None
                     } else {
@@ -75,6 +86,7 @@ pub async fn games(
                     title: "Games".into(),
                     user: Some(jwt_user),
                     error: context_query.error.clone(),
+                    fetched_date: Some(v.clone()),
                     info: context_query.info.clone(),
                     day_games: games_of_the_day,
                 }
@@ -105,6 +117,12 @@ pub async fn games(
                 .filter(|game| now < game.fixture.date)
                 .cloned()
                 .collect();
+            if !all_games {
+                next_games = next_games
+                    .into_iter()
+                    .filter(|game| *&fav_leagues.contains(&game.league.id))
+                    .collect();
+            }
             next_games.truncate(3);
             if next_games.is_empty() {
                 None
@@ -129,6 +147,13 @@ pub async fn games(
     let yesterday_three_games: Option<GamesRowTemplate> = match yesterday_games_as_string {
         Some(v) => {
             let mut games: Games = serde_json::from_str(v.as_str())?;
+            if !all_games {
+                let list_of_games: Vec<Game> = games.games;
+                games.games = list_of_games
+                    .into_iter()
+                    .filter(|game| *&fav_leagues.contains(&game.league.id))
+                    .collect();
+            }
             games.games.truncate(3);
             if games.games.is_empty() {
                 None
@@ -152,6 +177,13 @@ pub async fn games(
     let tomorow_three_games: Option<GamesRowTemplate> = match tomorow_games_as_string {
         Some(v) => {
             let mut games: Games = serde_json::from_str(v.as_str())?;
+            if !all_games {
+                let list_of_games: Vec<Game> = games.games;
+                games.games = list_of_games
+                    .into_iter()
+                    .filter(|game| *&fav_leagues.contains(&game.league.id))
+                    .collect();
+            }
             games.games.truncate(3);
             if games.games.is_empty() {
                 None
@@ -175,6 +207,7 @@ pub async fn games(
         next_three_games,
         yesterday_three_games,
         tomorow_three_games,
+        fetched_date: None,
     };
     Ok(HttpResponse::Ok().body(index.render()?))
 }

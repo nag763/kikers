@@ -19,4 +19,5 @@ pub struct ContextQuery {
     #[validate(regex = "RE_VALID_DATE")]
     date: Option<String>,
     per_page: Option<usize>,
+    all: Option<bool>,
 }

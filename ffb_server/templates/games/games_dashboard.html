@@ -1,6 +1,7 @@
 {% extends "../base.html" %}
 {% block title %}Games{% endblock %}
 {% block body %}
+{% include "./game_picker_pills.html" %}
 <div class="grid grid-cols-3">
 	<div class="flex flex-col space-y-4 px-4">
 {% if let Some(next_three_games) = next_three_games %}

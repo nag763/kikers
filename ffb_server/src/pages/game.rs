@@ -75,7 +75,7 @@ pub async fn games(
                             games,
                             now,
                             fetched_date: v.clone(),
-                            title: format!("Game for the {0}", v),
+                            title: format!("Games for the {0}", v),
                         })
                     }
                 }

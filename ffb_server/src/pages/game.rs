@@ -111,23 +111,17 @@ pub async fn games(
     let next_three_games: Option<GamesRowTemplate> = match next_three_games_as_string {
         Some(v) => {
             let mut games: Games = serde_json::from_str(v.as_str())?;
-            let mut next_games: Vec<Game> = games
-                .games
-                .iter()
-                .filter(|game| now < game.fixture.date)
-                .cloned()
-                .collect();
             if !all_games {
-                next_games = next_games
+                let list_of_games: Vec<Game> = games.games;
+                games.games = list_of_games
                     .into_iter()
                     .filter(|game| *&fav_leagues.contains(&game.league.id))
                     .collect();
             }
-            next_games.truncate(3);
-            if next_games.is_empty() {
+            games.games.truncate(3);
+            if games.games.is_empty() {
                 None
             } else {
-                games.games = next_games;
                 Some(GamesRowTemplate {
                     games: games,
                     now,

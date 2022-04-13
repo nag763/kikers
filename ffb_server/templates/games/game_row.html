@@ -23,7 +23,23 @@
 		{% endif %}
 		{% endif%}/>
         </div>
-        <div class="flex mt-4 space-x-3 lg:mt-6">
+		<div class="flex mt-4 space-x-3 lg:mt-6">
+			<small> 
+				{{game.fixture.status.long}}
+				{% match game.fixture.status.short.as_str() %}
+				{% when "FT" %}
+				{% when "HT" %}
+				{% when "AET" %}
+				after extra time
+				{% when _ %}
+				{% if let Some(elapsed) = game.fixture.status.elapsed %}
+				: {{elapsed}}'
+				{% endif %}
+
+				{% endmatch %}
+			</small>
+		</div>
+		<div>
 		{% let diff = (game.fixture.date - now) %}
 		{% if 0 < diff.num_minutes() %}
 		<small>Starts in 
@@ -46,8 +62,7 @@
 	     {% endif %}
 	     {% endif %}
 		</small>
-		
-	</div>
+		</div>
     </div>
 </div>
 {% endfor %}

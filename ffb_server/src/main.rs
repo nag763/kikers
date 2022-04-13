@@ -25,7 +25,7 @@ use crate::middleware::role_checker::RoleChecker;
 use crate::pages::admin::admin_dashboard;
 use crate::pages::game::games;
 use crate::pages::unauth::{cookies, index, signup};
-use crate::pages::user::{user_leagues, user_profile};
+use crate::pages::user::{user_leagues, user_profile, user_club};
 use actix_files as fs;
 use actix_web::middleware::Logger;
 use actix_web::web;
@@ -61,6 +61,7 @@ async fn main() -> std::io::Result<()> {
                             .service(user_profile)
                             .service(user_leagues)
                             .service(user_change_leagues)
+                            .service(user_club)
                             .service(admin_dashboard)
                             .service(user_search)
                             .service(user_activation)

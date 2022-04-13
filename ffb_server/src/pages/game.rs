@@ -9,6 +9,7 @@ use actix_web::{get, HttpRequest, HttpResponse};
 use crate::api_structs::{Game, Games};
 use chrono::{DateTime, Utc};
 
+
 #[derive(Template)]
 #[template(path = "games/game_row.html")]
 struct GamesRowTemplate {

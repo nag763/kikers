@@ -109,3 +109,27 @@ pub async fn user_leagues(
     };
     Ok(HttpResponse::Ok().body(index.render()?))
 }
+
+#[derive(Template)]
+#[template(path = "users/clubs.html")]
+struct UserClubsTemplate {
+    title: String,
+    user: Option<JwtUser>,
+    error: Option<String>,
+    info: Option<String>,
+}
+
+#[get("/profile/clubs")]
+pub async fn user_club(
+    req: HttpRequest,
+    context_query: web::Query<ContextQuery>,
+) -> Result<HttpResponse, ApplicationError> {
+    let jwt_user: JwtUser = JwtUser::from_request(req)?;
+    let index = UserClubsTemplate {
+        title: "Your favorite club".into(),
+        user: Some(jwt_user),
+        error: context_query.error.clone(),
+        info: context_query.info.clone(),
+    };
+    Ok(HttpResponse::Ok().body(index.render()?))
+}

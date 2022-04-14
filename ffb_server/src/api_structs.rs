@@ -73,7 +73,6 @@ pub struct Game {
     pub league: League,
     pub teams: Teams,
     pub goals: Goals,
-    pub timestamp : i32
 }
 
 #[derive(serde::Deserialize, Clone)]

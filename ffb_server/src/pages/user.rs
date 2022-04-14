@@ -2,7 +2,7 @@ use crate::auth::JwtUser;
 use crate::pages::ContextQuery;
 use askama::Template;
 
-use crate::api_structs::{APILeague, Country};
+use ffb_structs::api_structs::{APILeague, Country};
 use crate::database::Database;
 use crate::error::ApplicationError;
 use actix_web::web;

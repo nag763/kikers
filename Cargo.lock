@@ -1233,6 +1233,7 @@ dependencies = [
  "askama",
  "chrono",
  "dotenv",
+ "ffb_structs",
  "futures",
  "hmac",
  "jwt",
@@ -1248,6 +1249,14 @@ dependencies = [
  "sha2 0.10.2",
  "time 0.2.27",
  "validator",
+]
+
+[[package]]
+name = "ffb_structs"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "serde",
 ]
 
 [[package]]

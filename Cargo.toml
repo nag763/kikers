@@ -3,5 +3,6 @@
 members = [
     "ffb_server",
     "ffb_cli",
+    "ffb_structs"
 ]
 

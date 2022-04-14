@@ -6,7 +6,7 @@ use askama::Template;
 use crate::error::ApplicationError;
 use actix_web::{get, HttpRequest, HttpResponse};
 
-use crate::api_structs::{Game, Games};
+use ffb_structs::api_structs::{Game, Games};
 use chrono::{DateTime, Utc};
 
 

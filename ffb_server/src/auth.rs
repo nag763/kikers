@@ -1,11 +1,11 @@
-use super::entities::navaccess::Model as NavAccess;
-use super::entities::user::Model as User;
-use super::entities::user_league::Model as UserLeague;
+use ffb_structs::entities::navaccess::Model as NavAccess;
+use ffb_structs::entities::user::Model as User;
+use ffb_structs::entities::user_league::Model as UserLeague;
 use crate::database::Database;
-use crate::entities::navaccess;
-use crate::entities::role_navaccess;
-use crate::entities::user;
-use crate::entities::user_league;
+use ffb_structs::entities::navaccess;
+use ffb_structs::entities::role_navaccess;
+use ffb_structs::entities::user;
+use ffb_structs::entities::user_league;
 use crate::error::ApplicationError;
 use actix_web::{HttpMessage, HttpRequest};
 use hmac::{Hmac, Mac};

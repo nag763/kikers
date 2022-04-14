@@ -3,7 +3,7 @@ use std::task::{Context, Poll};
 
 use crate::auth::JwtUser;
 use crate::database::Database;
-use crate::entities::navaccess::Model as Navaccess;
+use ffb_structs::entities::navaccess::Model as Navaccess;
 use actix_service::{Service, Transform};
 use actix_web::HttpMessage;
 use actix_web::ResponseError;

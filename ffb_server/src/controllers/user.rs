@@ -1,9 +1,9 @@
 use crate::auth::JwtUser;
 use crate::database::Database;
-use crate::entities::user;
-use crate::entities::user::Model as User;
-use crate::entities::user_league;
-use crate::entities::user_league::Model as UserLeague;
+use ffb_structs::entities::user;
+use ffb_structs::entities::user::Model as User;
+use ffb_structs::entities::user_league;
+use ffb_structs::entities::user_league::Model as UserLeague;
 use crate::error::ApplicationError;
 use actix_web::http::Cookie;
 use actix_web::HttpMessage;

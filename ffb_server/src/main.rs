@@ -8,7 +8,6 @@ extern crate lazy_static;
 mod auth;
 mod controllers;
 mod database;
-mod entities;
 mod error;
 mod middleware;
 mod pages;

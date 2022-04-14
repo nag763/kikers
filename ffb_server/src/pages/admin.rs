@@ -7,7 +7,7 @@ use crate::error::ApplicationError;
 use actix_web::web;
 use actix_web::{get, HttpRequest, HttpResponse};
 
-use crate::entities::{user, user::Model as User};
+use ffb_structs::entities::{user, user::Model as User};
 use sea_orm::PaginatorTrait;
 use sea_orm::{ColumnTrait, Condition, EntityTrait, QueryFilter};
 

@@ -1,7 +1,7 @@
 use crate::auth::JwtUser;
 use crate::database::Database;
-use crate::entities::user;
-use crate::entities::user::Model as User;
+use ffb_structs::entities::user;
+use ffb_structs::entities::user::Model as User;
 use crate::error::ApplicationError;
 use actix_web::http::Cookie;
 use actix_web::{get, post, HttpMessage, HttpRequest, HttpResponse, Responder};

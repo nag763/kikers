@@ -96,7 +96,7 @@ pub async fn games(
         Some(games) if !games.games.is_empty() => Some(GamesRowTemplate {
             games,
             now,
-            fetched_date: now_as_simple_date.clone(),
+            fetched_date: now_as_simple_date,
             title: "Next three games".to_string(),
         }),
         _ => None,
@@ -119,7 +119,7 @@ pub async fn games(
     };
     let tomorow_three_games: Option<Games> = GamesEntity::find_all_for_date_truncate_games(
         tomorow_as_simple_date.as_str(),
-        fav_leagues.clone(),
+        fav_leagues,
         3,
     )?;
 

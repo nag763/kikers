@@ -14,6 +14,6 @@ impl Database {
 
     pub fn acquire_redis_connection() -> Result<redis::Connection, redis::RedisError> {
         let client = redis::Client::open(REDIS_URL.as_str())?;
-        Ok(client.get_connection()?)
+        client.get_connection()
     }
 }

@@ -3,10 +3,8 @@ pub(crate) mod error;
 use clap::{Parser, Subcommand};
 use dotenv::dotenv;
 use error::CliError;
-use redis::Connection;
 use serde_json::json;
-
-extern crate redis;
+use ffb_structs::{league, country, games};
 
 #[derive(Parser)]
 struct Args {
@@ -44,35 +42,29 @@ async fn run_main() -> Result<(), CliError> {
     dotenv().ok();
 
     let args = Args::parse();
-    let client = redis::Client::open(std::env::var("REDIS_URL")?)?;
-    let mut con = client.get_connection()?;
     match args.get {
-        Getter::Leagues => fetch_leagues(&mut con).await?,
-        Getter::Countries => fetch_countries(&mut con).await?,
-        Getter::Fixtures { day_diff } => fetch_fixtures(&mut con, day_diff).await?,
+        Getter::Leagues => fetch_leagues().await?,
+        Getter::Countries => fetch_countries().await?,
+        Getter::Fixtures { day_diff } => fetch_fixtures(day_diff).await?,
     }
     Ok(())
 }
 
-async fn fetch_leagues(con: &mut Connection) -> Result<(), CliError> {
+async fn fetch_leagues() -> Result<(), CliError> {
     let res = call_api_endpoint("leagues".into()).await?;
-    redis::cmd("SET")
-        .arg("leagues")
-        .arg(res["response"].to_string())
-        .query(con)?;
+    let response : String = res["response"].to_string();
+    league::Entity::store(&response)?;
     Ok(())
 }
 
-async fn fetch_countries(con: &mut Connection) -> Result<(), CliError> {
+async fn fetch_countries() -> Result<(), CliError> {
     let res = call_api_endpoint("countries".into()).await?;
-    redis::cmd("SET")
-        .arg("countries")
-        .arg(res["response"].to_string())
-        .query(con)?;
+    let response : String = res["response"].to_string();
+    country::Entity::store(&response)?;
     Ok(())
 }
 
-async fn fetch_fixtures(con: &mut Connection, day_diff: i64) -> Result<(), CliError> {
+async fn fetch_fixtures(day_diff: i64) -> Result<(), CliError> {
     let now = chrono::Utc::now();
     let mut date_diff = (now + chrono::Duration::days(day_diff)).to_rfc3339();
     date_diff.truncate(10);
@@ -83,11 +75,7 @@ async fn fetch_fixtures(con: &mut Connection, day_diff: i64) -> Result<(), CliEr
             "fetched_on": now.to_rfc2822(),
         }
     );
-    redis::cmd("HSET")
-        .arg("fixtures")
-        .arg(&date_diff)
-        .arg(stored_fixture.to_string())
-        .query(con)?;
+    games::Entity::store(&date_diff, &stored_fixture.to_string())?;
     Ok(())
 }
 

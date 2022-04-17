@@ -72,7 +72,7 @@ impl JwtUser {
             Some(user) => match user.is_authorized {
                 true => {
                     let token = Self::gen_token(user).await?;
-                    token::Entity::register(&login, &token)?;
+                    token::Entity::register(login, &token)?;
                     Ok(Some(token))
                 }
                 false => Err(ApplicationError::UserNotAuthorized(login.to_string())),

@@ -12,7 +12,7 @@ impl fmt::Display for ApplicationError {
         let reason : String = match &*self {
             Self::DatabaseError(db_err) => format!("A database error happened, it has been reported and will be resolved as soon as possible : {} ", db_err) ,
             Self::RedisError(redis_err) => format!("A redis error happened, it has been reported and will be resolved as soon as possible : {} ", redis_err) ,
-            Self::SerialError => format!("A serial error happened"),
+            Self::SerialError => "A serial error happened".into(),
         };
         write!(f, "{}", reason)
     }

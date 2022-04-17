@@ -16,7 +16,7 @@ impl fmt::Display for ApplicationError {
             Self::IllegalToken => "Your authentication token is not correct, please reconnect in order to regenarate it".into(),
             Self::NotFound => "The user hasn't been found".into(),
             Self::StructError(err) => err.into(),
-            Self::UserNotAuthorized(login) => format!("The user : {}'s access has either been revoked or not granted", login).into(),
+            Self::UserNotAuthorized(login) => format!("The user : {}'s access has either been revoked or not granted", login),
             Self::InternalError => "An internal error happened".into(),
         };
         write!(f, "{}", reason)

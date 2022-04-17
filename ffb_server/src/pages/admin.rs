@@ -29,7 +29,7 @@ pub async fn admin_dashboard(
 ) -> Result<HttpResponse, ApplicationError> {
     let jwt_user: JwtUser = JwtUser::from_request(req)?;
     let page: u32 = context_query.page.unwrap_or(0);
-    let per_page: u32 = context_query.per_page.unwrap_or_else(|| 10);
+    let per_page: u32 = context_query.per_page.unwrap_or(10);
     let data: Vec<User> =
         user::Entity::get_users_with_pagination(jwt_user.role, per_page, page).await?;
     let chosen_user: Option<User> = match context_query.id {

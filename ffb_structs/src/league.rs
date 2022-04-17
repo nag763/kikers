@@ -43,13 +43,22 @@ impl Entity {
                 .into_iter()
                 .filter(|league| {
                     if let Some(code) = &league.country.code {
-                        return code == country_code;
+                        code == country_code
                     } else {
-                        return false;
+                        false
                     }
                 })
                 .collect(),
         };
         Ok(leagues)
+    }
+
+    pub fn store(value: &str) -> Result<(), ApplicationError> {
+        let mut conn = Database::acquire_redis_connection()?;
+        redis::cmd("SET")
+            .arg("leagues")
+            .arg(value)
+            .query(&mut conn)?;
+        Ok(())
     }
 }

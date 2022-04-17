@@ -17,4 +17,12 @@ impl Entity {
         let model: Vec<Model> = serde_json::from_str(model_as_string.as_str())?;
         Ok(model)
     }
+    pub fn store(value: &str) -> Result<(), ApplicationError> {
+        let mut conn = Database::acquire_redis_connection()?;
+        redis::cmd("GET")
+            .arg("countries")
+            .arg(value)
+            .query(&mut conn)?;
+        Ok(())
+    }
 }

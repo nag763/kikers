@@ -27,7 +27,7 @@ impl Entity {
                     model.games = model
                         .games
                         .into_iter()
-                        .filter(|game| *&fav_leagues.contains(&game.league.id))
+                        .filter(|game| fav_leagues.contains(&game.league.id))
                         .collect();
                 }
                 Ok(Some(model))
@@ -49,5 +49,15 @@ impl Entity {
             }
             None => Ok(None),
         }
+    }
+
+    pub fn store(date: &str, value: &str) -> Result<(), ApplicationError> {
+        let mut conn = Database::acquire_redis_connection()?;
+        redis::cmd("HSET")
+            .arg("fixtures")
+            .arg(date)
+            .arg(value)
+            .query(&mut conn)?; 
+        Ok(())
     }
 }

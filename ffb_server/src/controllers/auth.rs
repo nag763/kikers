@@ -4,7 +4,6 @@ use crate::error::ApplicationError;
 use actix_web::http::Cookie;
 use actix_web::{get, post, HttpMessage, HttpRequest, HttpResponse, Responder};
 use ffb_structs::user;
-use ffb_structs::user::Model as User;
 use std::thread;
 
 lazy_static! {
@@ -54,7 +53,7 @@ pub async fn login(
 pub async fn logout(req: HttpRequest) -> Result<impl Responder, ApplicationError> {
     if let Some(jwt_cookie) = req.cookie(std::env::var("JWT_TOKEN_PATH")?.as_str()) {
         if let Ok(jwt_user) = JwtUser::from_request(req) {
-            JwtUser::revoke_session(&jwt_user.login, jwt_cookie.value());
+            JwtUser::revoke_session(&jwt_user.login, jwt_cookie.value())?;
         }
         Ok(HttpResponse::Found()
             .header("Location", "/?info=You have been logged out successfully")

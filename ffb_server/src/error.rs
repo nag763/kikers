@@ -8,9 +8,7 @@ use std::fmt;
 #[derive(Debug)]
 pub enum ApplicationError {
     InternalError,
-    DatabaseError(String),
     NotFound,
-    UserNotAuthorized(String),
     IllegalToken,
     BadRequest,
     TemplateError,
@@ -30,7 +28,7 @@ struct Error {
 impl ApplicationError {
     fn redirect_url(&self) -> Option<String> {
         match &*self {
-            Self::IllegalToken => Some("/logout".into()),
+            Self::AuthError(_) => Some("/logout".into()),
             Self::CookiesUnapproved => Some("/cookies".into()),
             _ => None,
         }
@@ -41,8 +39,6 @@ impl fmt::Display for ApplicationError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let reason : String = match &*self {
             Self::InternalError => "An internal error happened, it has been reported and will be resolved as soon as possible".into(),
-            Self::DatabaseError(db_err) => format!("A database error happened, it has been reported and will be resolved as soon as possible : {} ", db_err) ,
-            Self::UserNotAuthorized(user) => format!("The following user's access has not been granted or has been revoked : {} ", user) ,
             Self::NotFound => "One of the requested item hasn't been found, please ensure your request is correct".into(),
             Self::BadRequest => "You don't have access to this ressource, or the way you are trying to access it is wrong.".into(),
             Self::IllegalToken => "Your authentication token is not correct, please reconnect in order to regenarate it".into(),
@@ -71,14 +67,12 @@ impl actix_web::error::ResponseError for ApplicationError {
     fn status_code(&self) -> StatusCode {
         match *self {
             ApplicationError::InternalError
-            | ApplicationError::DatabaseError(_)
             | ApplicationError::TemplateError
             | ApplicationError::StructError(_)
             | ApplicationError::AuthError(_) => StatusCode::INTERNAL_SERVER_ERROR,
             ApplicationError::IllegalToken
             | ApplicationError::CookiesUnapproved
             | ApplicationError::BadRequest => StatusCode::BAD_REQUEST,
-            ApplicationError::UserNotAuthorized(_) => StatusCode::FORBIDDEN,
             ApplicationError::NotFound => StatusCode::NOT_FOUND,
         }
     }

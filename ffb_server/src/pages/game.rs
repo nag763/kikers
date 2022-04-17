@@ -49,7 +49,6 @@ pub async fn games(
 ) -> Result<HttpResponse, ApplicationError> {
     let jwt_user: JwtUser = JwtUser::from_request(req)?;
     let now: DateTime<Utc> = Utc::now();
-    let all_games: bool = context_query.all.unwrap_or(false);
     let fav_leagues: Option<Vec<u32>> = match context_query.all {
         Some(v) if v => None,
         _ => Some(jwt_user.fav_leagues.clone()),

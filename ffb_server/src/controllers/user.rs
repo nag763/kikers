@@ -63,10 +63,8 @@ pub struct UserDeletion {
 
 #[post("/user/deletion")]
 pub async fn user_deletion(
-    req: HttpRequest,
     user_deletion_form: actix_web_validator::Form<UserDeletion>,
 ) -> Result<impl Responder, ApplicationError> {
-    let jwt_user: JwtUser = JwtUser::from_request(req)?;
     user::Entity::delete_user_id(user_deletion_form.id).await?;
     JwtUser::revoke_all_session(&user_deletion_form.login)?;
     Ok(HttpResponse::Found()
@@ -97,10 +95,8 @@ pub struct UserModification {
 
 #[post("/user/modification")]
 pub async fn user_modification(
-    req: HttpRequest,
     user_modification_form: actix_web_validator::Form<UserModification>,
 ) -> Result<impl Responder, ApplicationError> {
-    let jwt_user: JwtUser = JwtUser::from_request(req)?;
     let mut user: User = user::Entity::find_by_id(user_modification_form.id)
         .await?
         .ok_or(ApplicationError::NotFound)?;
@@ -197,10 +193,8 @@ pub struct UserSearch {
 
 #[post("/user/search")]
 pub async fn user_search(
-    req: HttpRequest,
     user_search_form: actix_web_validator::Form<UserSearch>,
 ) -> Result<impl Responder, ApplicationError> {
-    let jwt_user: JwtUser = JwtUser::from_request(req)?;
     let user: Option<User> =
         user::Entity::get_user_by_login(user_search_form.login.clone()).await?;
     let result: String = match user {

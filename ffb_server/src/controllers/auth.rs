@@ -53,7 +53,9 @@ pub async fn login(
 #[get("/logout")]
 pub async fn logout(req: HttpRequest) -> Result<impl Responder, ApplicationError> {
     if let Some(jwt_cookie) = req.cookie(std::env::var("JWT_TOKEN_PATH")?.as_str()) {
-        let jwt_user = JwtUser::from_request(req)?;
+        if let Ok(jwt_user) = JwtUser::from_request(req) {
+            JwtUser::revoke_session(&jwt_user.login, jwt_cookie.value());
+        }
         Ok(HttpResponse::Found()
             .header("Location", "/?info=You have been logged out successfully")
             .del_cookie(&jwt_cookie)

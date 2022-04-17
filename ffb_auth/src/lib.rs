@@ -3,6 +3,7 @@ use crate::magic_crypt::MagicCryptTrait;
 use actix_web::{HttpMessage, HttpRequest};
 use ffb_structs::navaccess;
 use ffb_structs::navaccess::Model as NavAccess;
+use ffb_structs::token;
 use ffb_structs::user;
 use ffb_structs::user::Model as User;
 use hmac::{Hmac, Mac};
@@ -26,6 +27,7 @@ pub struct JwtUser {
     pub fav_leagues: Vec<u32>,
     pub is_authorized: bool,
     pub role: u32,
+    pub emited_on: i64,
 }
 
 impl JwtUser {
@@ -53,6 +55,7 @@ impl JwtUser {
                 is_authorized: user.is_authorized,
                 role: user.role_id,
                 fav_leagues,
+                emited_on: time::OffsetDateTime::now_utc().unix_timestamp(),
             },
         );
         info!("Token for {} has been emitted", user.login);
@@ -70,14 +73,27 @@ impl JwtUser {
 
         match user {
             Some(user) => match user.is_authorized {
-                true => Ok(Some(Self::gen_token(user).await?)),
+                true => {
+                    let token = Self::gen_token(user).await?;
+                    token::Entity::register(&login, &token)?;
+                    Ok(Some(token))
+                }
                 false => Err(ApplicationError::UserNotAuthorized(login.to_string())),
             },
             None => Ok(None),
         }
     }
 
-    pub fn check_token(token: &str) -> Result<JwtUser, ApplicationError> {
+    pub fn check_token(token: &str) -> Result<(), ApplicationError> {
+        let jwt_user: Self = Self::from_token(token)?;
+        if !token::Entity::verify(&jwt_user.login, token)? {
+            Err(ApplicationError::IllegalToken)
+        } else {
+            Ok(())
+        }
+    }
+
+    pub fn from_token(token: &str) -> Result<JwtUser, ApplicationError> {
         let jwt_key: String = std::env::var("JWT_KEY")?;
         let key: Hmac<Sha256> = Hmac::new_from_slice(jwt_key.as_bytes())?;
         let token: Token<Header, JwtUser, _> = VerifyWithKey::verify_with_key(token, &key)?;
@@ -86,17 +102,29 @@ impl JwtUser {
     }
 
     pub async fn refresh_token(token: &str) -> Result<String, ApplicationError> {
-        let jwt_user = JwtUser::check_token(token)?;
+        let jwt_user = JwtUser::from_token(token)?;
         let user: User = user::Entity::find_by_id(jwt_user.id)
             .await?
             .ok_or(ApplicationError::NotFound)?;
         let new_token = Self::gen_token(user).await?;
+        token::Entity::register(&jwt_user.login, &new_token)?;
         Ok(new_token)
     }
 
+    pub fn revoke_session(login: &str, token: &str) -> Result<(), ApplicationError> {
+        token::Entity::revoke_token(login, token)?;
+        Ok(())
+    }
+
+    pub fn revoke_all_session(login: &str) -> Result<(), ApplicationError> {
+        token::Entity::revoke_all(login)?;
+        Ok(())
+    }
+
     pub fn from_request(req: HttpRequest) -> Result<JwtUser, ApplicationError> {
+        info!("Passed here");
         match req.cookie(std::env::var("JWT_TOKEN_PATH")?.as_str()) {
-            Some(token) => Ok(JwtUser::check_token(token.value())?),
+            Some(token) => Ok(JwtUser::from_token(token.value())?),
             None => Err(ApplicationError::InternalError),
         }
     }

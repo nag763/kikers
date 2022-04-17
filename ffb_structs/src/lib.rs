@@ -10,4 +10,5 @@ pub mod error;
 pub mod games;
 pub mod league;
 pub mod navaccess;
+pub mod token;
 pub mod user;

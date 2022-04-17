@@ -1159,18 +1159,15 @@ dependencies = [
 name = "ffb_auth"
 version = "0.1.0"
 dependencies = [
- "actix-files",
- "actix-service",
  "actix-web",
- "actix-web-validator",
  "ffb_structs",
  "hmac",
  "jwt",
  "log",
- "log4rs",
  "magic-crypt",
  "serde",
  "sha2 0.10.2",
+ "time 0.2.27",
 ]
 
 [[package]]

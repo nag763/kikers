@@ -29,13 +29,9 @@ pub async fn user_activation(
     user::Entity::change_activation_status(user_activation_form.id, user_activation_form.value)
         .await?;
 
-    /*if user_activation_form.value == 0 {
-        let mut redis_conn = Database::acquire_redis_connection()?;
-        redis::cmd("DEL")
-            .arg(format!("token:{}", user_activation_form.login.as_str()))
-            .query(&mut redis_conn)?;
-    }*/
-
+    if !user_activation_form.value {
+        JwtUser::revoke_all_session(&user_activation_form.login)?;
+    }
     info!(
         "User {} updated activation status (to {}) of user (#{})",
         jwt_user.login, user_activation_form.value, user_activation_form.id
@@ -72,10 +68,7 @@ pub async fn user_deletion(
 ) -> Result<impl Responder, ApplicationError> {
     let jwt_user: JwtUser = JwtUser::from_request(req)?;
     user::Entity::delete_user_id(user_deletion_form.id).await?;
-    /*let mut redis_conn = Database::acquire_redis_connection()?;
-    redis::cmd("DEL")
-        .arg(format!("token:{}", user_deletion_form.login.as_str()))
-        .query(&mut redis_conn)?;*/
+    JwtUser::revoke_all_session(&user_deletion_form.login)?;
     Ok(HttpResponse::Found()
         .header(
             "Location",
@@ -114,10 +107,7 @@ pub async fn user_modification(
     user.name = user_modification_form.name.clone();
     user.is_authorized = user_modification_form.is_authorized.is_some();
     user::Entity::update(user).await?;
-    /*let mut redis_conn = Database::acquire_redis_connection()?;
-    redis::cmd("DEL")
-        .arg(format!("token:{}", user_modification_form.login.as_str()))
-        .query(&mut redis_conn)?;*/
+    JwtUser::revoke_all_session(&user_modification_form.login)?;
     Ok(HttpResponse::Found()
         .header(
             "Location",

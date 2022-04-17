@@ -24,7 +24,7 @@ pub async fn index(
     let index: Index;
     match req.cookie(std::env::var("JWT_TOKEN_PATH")?.as_str()) {
         Some(token) => {
-            let jwt_user = JwtUser::check_token(token.value())?;
+            let jwt_user = JwtUser::from_token(token.value())?;
             index = Index {
                 title: format!("Welcome back {0}", jwt_user.name),
                 user: Some(jwt_user),

@@ -65,11 +65,8 @@ impl JwtUser {
 
     pub async fn emit(login: &str, password: &str) -> Result<Option<String>, ApplicationError> {
         let encrypted_password: String = Self::encrypt_key(password)?;
-        let user: Option<User> = user::Entity::get_user_by_credentials(
-            login.to_string(),
-            encrypted_password.to_string(),
-        )
-        .await?;
+        let user: Option<User> =
+            user::Entity::get_user_by_credentials(login, &encrypted_password).await?;
 
         match user {
             Some(user) => match user.is_authorized {

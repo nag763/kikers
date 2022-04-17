@@ -49,24 +49,24 @@ impl Entity {
         Ok(model)
     }
 
-    pub async fn get_user_by_login(login: String) -> Result<Option<Model>, ApplicationError> {
+    pub async fn get_user_by_login(login: &str) -> Result<Option<Model>, ApplicationError> {
         let mut conn = Database::acquire_sql_connection().await?;
         let model = sqlx::query_as("SELECT * FROM USER WHERE login=? LIMIT 1")
-            .bind(&login)
+            .bind(login)
             .fetch_optional(&mut conn)
             .await?;
         Ok(model)
     }
 
     pub async fn get_user_by_credentials(
-        login: String,
-        password: String,
+        login: &str,
+        password: &str,
     ) -> Result<Option<Model>, ApplicationError> {
         let mut conn = Database::acquire_sql_connection().await?;
         let model =
             sqlx::query_as::<_, Model>("SELECT * FROM USER WHERE login=? AND password=? LIMIT 1")
-                .bind(&login)
-                .bind(&password)
+                .bind(login)
+                .bind(password)
                 .fetch_optional(&mut conn)
                 .await?;
         Ok(model)
@@ -82,15 +82,15 @@ impl Entity {
     }
 
     pub async fn insert_user(
-        login: String,
-        name: String,
-        password: String,
+        login: &str,
+        name: &str,
+        password: &str,
     ) -> Result<(), ApplicationError> {
         let mut conn = Database::acquire_sql_connection().await?;
         sqlx::query("INSERT INTO USER(login, name, password) VALUES(?,?,?)")
-            .bind(&login)
-            .bind(&name)
-            .bind(&password)
+            .bind(login)
+            .bind(name)
+            .bind(password)
             .execute(&mut conn)
             .await?;
         Ok(())
@@ -146,11 +146,11 @@ impl Entity {
         Ok(())
     }
 
-    pub async fn login_exists(login: String) -> Result<bool, ApplicationError> {
+    pub async fn login_exists(login: &str) -> Result<bool, ApplicationError> {
         let mut conn = Database::acquire_sql_connection().await?;
         let row: (bool,) =
             sqlx::query_as("SELECT IF(COUNT(id)!=0, TRUE, FALSE) FROM USER WHERE login=? LIMIT 1")
-                .bind(&login)
+                .bind(login)
                 .fetch_one(&mut conn)
                 .await?;
         Ok(row.0)

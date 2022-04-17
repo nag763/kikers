@@ -79,7 +79,7 @@ pub async fn register_user(
     req: HttpRequest,
     sign_up_form: actix_web_validator::Form<SignUpForm>,
 ) -> Result<impl Responder, ApplicationError> {
-    let user_with_same_login: bool = user::Entity::login_exists(sign_up_form.login.clone()).await?;
+    let user_with_same_login: bool = user::Entity::login_exists(&sign_up_form.login).await?;
     if user_with_same_login {
         warn!(
             "Peer {:?} tried to sign up but a user with the same username ({}) already exists",
@@ -90,9 +90,9 @@ pub async fn register_user(
     }
 
     user::Entity::insert_user(
-        sign_up_form.login.clone(),
-        sign_up_form.name.clone(),
-        JwtUser::encrypt_key(&sign_up_form.password)?,
+        &sign_up_form.login,
+        &sign_up_form.name,
+        &JwtUser::encrypt_key(&sign_up_form.password)?,
     )
     .await?;
     info!(

@@ -195,8 +195,7 @@ pub struct UserSearch {
 pub async fn user_search(
     user_search_form: actix_web_validator::Form<UserSearch>,
 ) -> Result<impl Responder, ApplicationError> {
-    let user: Option<User> =
-        user::Entity::get_user_by_login(user_search_form.login.clone()).await?;
+    let user: Option<User> = user::Entity::get_user_by_login(&user_search_form.login).await?;
     let result: String = match user {
         Some(v) => format!(
             "/admin?page={}&per_page={}&id={}",

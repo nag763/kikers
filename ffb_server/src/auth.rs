@@ -1,53 +1,30 @@
-use ffb_structs::entities::navaccess::Model as NavAccess;
-use ffb_structs::entities::user::Model as User;
-use ffb_structs::entities::user_league::Model as UserLeague;
-use crate::database::Database;
-use ffb_structs::entities::navaccess;
-use ffb_structs::entities::role_navaccess;
-use ffb_structs::entities::user;
-use ffb_structs::entities::user_league;
 use crate::error::ApplicationError;
 use actix_web::{HttpMessage, HttpRequest};
+use ffb_structs::navaccess;
+use ffb_structs::navaccess::Model as NavAccess;
+use ffb_structs::user;
+use ffb_structs::user::Model as User;
 use hmac::{Hmac, Mac};
 use jwt::{Header, SignWithKey, Token, VerifyWithKey};
-use sea_orm::{
-    ColumnTrait, Condition, EntityTrait, JoinType, QueryFilter, QueryOrder, QuerySelect,
-    RelationTrait,
-};
 use serde::{Deserialize, Serialize};
 use sha2::Sha256;
 
 #[derive(Debug, Default, Deserialize, Serialize, Clone)]
 pub struct JwtUser {
-    pub id: i32,
+    pub id: u32,
     pub login: String,
     pub name: String,
     pub nav: Vec<NavAccess>,
-    pub fav_leagues: Vec<i32>,
-    pub is_authorized: i8,
-    pub role: i32,
-    pub to_refresh_on: i64,
+    pub fav_leagues: Vec<u32>,
+    pub is_authorized: bool,
+    pub role: u32,
 }
 
 impl JwtUser {
     async fn gen_token(user: User) -> Result<String, ApplicationError> {
-        let conn = Database::acquire_sql_connection().await?;
-        let nav: Vec<NavAccess> = navaccess::Entity::find()
-            .join(
-                JoinType::InnerJoin,
-                navaccess::Relation::RoleNavaccess.def(),
-            )
-            .filter(Condition::all().add(role_navaccess::Column::RoleId.eq(user.role)))
-            .order_by_asc(navaccess::Column::Position)
-            .all(&conn)
-            .await?;
-        let fav_leagues: Vec<UserLeague> = user_league::Entity::find()
-            .filter(Condition::all().add(user_league::Column::UserId.eq(user.id)))
-            .all(&conn)
-            .await?;
-        let fav_leagues: Vec<i32> = fav_leagues.iter().map(|league| league.league_id).collect();
-        let to_refresh_on: i64 =
-            (time::OffsetDateTime::now_utc() + time::Duration::minutes(1)).unix_timestamp();
+        let nav: Vec<NavAccess> =
+            navaccess::Entity::get_navaccess_for_role_id(user.role_id).await?;
+        let fav_leagues: Vec<u32> = user::Entity::get_favorite_leagues_id(user.id).await?;
 
         let jwt_key: String = std::env::var("JWT_KEY")?;
         let key: Hmac<Sha256> = Hmac::new_from_slice(jwt_key.as_bytes())?;
@@ -61,8 +38,7 @@ impl JwtUser {
                 name: user.name,
                 nav,
                 is_authorized: user.is_authorized,
-                role: user.role,
-                to_refresh_on,
+                role: user.role_id,
                 fav_leagues,
             },
         );
@@ -72,37 +48,15 @@ impl JwtUser {
     }
 
     pub async fn emit(login: &str, password: &str) -> Result<Option<String>, ApplicationError> {
-        let conn = Database::acquire_sql_connection().await?;
-        let user_unwrapped: Option<User> = user::Entity::find()
-            .filter(
-                Condition::all()
-                    .add(user::Column::Login.eq(login))
-                    .add(user::Column::Password.eq(password))
-                    .add(user::Column::IsAuthorized.eq(1)),
-            )
-            .one(&conn)
-            .await?;
+        let user: Option<User> =
+            user::Entity::get_user_by_credentials(login.to_string(), password.to_string()).await?;
 
-        match user_unwrapped {
-            Some(user) => Ok(Some(Self::gen_token(user).await?)),
-            None => {
-                let user_unwrapped: Option<User> = user::Entity::find()
-                    .filter(
-                        Condition::all()
-                            .add(user::Column::Login.eq(login))
-                            .add(user::Column::Password.eq(password))
-                            .add(user::Column::IsAuthorized.eq(0)),
-                    )
-                    .one(&conn)
-                    .await?;
-                if user_unwrapped.is_some() {
-                    warn!("User {} tried to connect but isn't authorized yet", login);
-                    Err(ApplicationError::UserNotAuthorized(login.to_string()))
-                } else {
-                    warn!("User {} tried to connect but either his credentials are incorrect or he doesn't exist", login);
-                    Ok(None)
-                }
-            }
+        match user {
+            Some(user) => match user.is_authorized {
+                true => Ok(Some(Self::gen_token(user).await?)),
+                false => Err(ApplicationError::UserNotAuthorized(login.to_string())),
+            },
+            None => Ok(None),
         }
     }
 
@@ -116,21 +70,10 @@ impl JwtUser {
 
     pub async fn refresh_token(token: &str) -> Result<String, ApplicationError> {
         let jwt_user = JwtUser::check_token(token)?;
-        let conn = Database::acquire_sql_connection().await?;
         let user: User = user::Entity::find_by_id(jwt_user.id)
-            .one(&conn)
             .await?
             .ok_or(ApplicationError::NotFound)?;
         let new_token = Self::gen_token(user).await?;
-        let mut redis_conn = Database::acquire_redis_connection()?;
-        redis::cmd("SREM")
-            .arg(format!("token:{}", jwt_user.login))
-            .arg(token)
-            .query(&mut redis_conn)?;
-        redis::cmd("SADD")
-            .arg(format!("token:{}", jwt_user.login))
-            .arg(new_token.as_str())
-            .query(&mut redis_conn)?;
         Ok(new_token)
     }
 

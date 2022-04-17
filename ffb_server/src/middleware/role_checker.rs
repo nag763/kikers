@@ -2,12 +2,12 @@ use std::pin::Pin;
 use std::task::{Context, Poll};
 
 use crate::auth::JwtUser;
-use crate::database::Database;
-use ffb_structs::entities::navaccess::Model as Navaccess;
+
 use actix_service::{Service, Transform};
 use actix_web::HttpMessage;
 use actix_web::ResponseError;
 use actix_web::{dev::ServiceRequest, dev::ServiceResponse, Error};
+use ffb_structs::navaccess::Model as Navaccess;
 use futures::future::{ok, Ready};
 use futures::Future;
 
@@ -60,12 +60,12 @@ where
         let navaccess: Vec<Navaccess> = match req.cookie(jwt_path.as_str()) {
             Some(token) => match JwtUser::check_token(token.value()) {
                 Ok(jwt_user) => {
-                    let mut redis_conn = Database::acquire_redis_connection().unwrap();
-                    let is_token_valid: bool = redis::cmd("SISMEMBER")
-                        .arg(format!("token:{}", jwt_user.login))
-                        .arg(token.value())
-                        .query(&mut redis_conn)
-                        .unwrap();
+                    /*let mut redis_conn = Database::acquire_redis_connection().unwrap();*/
+                    let is_token_valid: bool = true; /*redis::cmd("SISMEMBER")
+                                                     .arg(format!("token:{}", jwt_user.login))
+                                                     .arg(token.value())
+                                                     .query(&mut redis_conn)
+                                                     .unwrap();*/
 
                     if !is_token_valid {
                         return Box::pin(async move {

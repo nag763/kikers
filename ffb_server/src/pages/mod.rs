@@ -12,12 +12,12 @@ lazy_static! {
 pub struct ContextQuery {
     info: Option<String>,
     error: Option<String>,
-    page: Option<usize>,
+    page: Option<u32>,
     #[validate(range(min = 0))]
-    id: Option<i32>,
+    id: Option<u32>,
     code: Option<String>,
     #[validate(regex = "RE_VALID_DATE")]
     date: Option<String>,
-    per_page: Option<usize>,
+    per_page: Option<u32>,
     all: Option<bool>,
 }

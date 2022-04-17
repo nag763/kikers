@@ -1,27 +1,17 @@
 use crate::auth::JwtUser;
-use crate::database::Database;
-use ffb_structs::entities::user;
-use ffb_structs::entities::user::Model as User;
-use ffb_structs::entities::user_league;
-use ffb_structs::entities::user_league::Model as UserLeague;
+
 use crate::error::ApplicationError;
 use actix_web::http::Cookie;
 use actix_web::HttpMessage;
 use actix_web::{post, HttpRequest, HttpResponse, Responder};
-use sea_orm::ActiveModelTrait;
-use sea_orm::ColumnTrait;
-use sea_orm::Condition;
-use sea_orm::EntityTrait;
-use sea_orm::ModelTrait;
-use sea_orm::QueryFilter;
-use sea_orm::Set;
+use ffb_structs::user;
+use ffb_structs::user::Model as User;
 
 #[derive(serde::Deserialize, validator::Validate)]
 pub struct UserActivation {
     #[validate(range(min = 0))]
-    id: i32,
-    #[validate(range(min = 0, max = 1))]
-    value: i8,
+    id: u32,
+    value: bool,
     #[validate(range(min = 0))]
     page: i32,
     #[validate(range(min = 0))]
@@ -36,23 +26,15 @@ pub async fn user_activation(
     user_activation_form: actix_web_validator::Form<UserActivation>,
 ) -> Result<impl Responder, ApplicationError> {
     let jwt_user: JwtUser = JwtUser::from_request(req)?;
-    let conn = Database::acquire_sql_connection().await?;
-    let user_to_update: User = user::Entity::find_by_id(user_activation_form.id)
-        .filter(Condition::all().add(user::Column::Role.lt(jwt_user.role)))
-        .one(&conn)
-        .await?
-        .ok_or(ApplicationError::NotFound)?;
+    user::Entity::change_activation_status(user_activation_form.id, user_activation_form.value)
+        .await?;
 
-    let mut user_to_update: user::ActiveModel = user_to_update.into();
-    user_to_update.is_authorized = Set(user_activation_form.value);
-    user_to_update.update(&conn).await?;
-
-    if user_activation_form.value == 0 {
+    /*if user_activation_form.value == 0 {
         let mut redis_conn = Database::acquire_redis_connection()?;
         redis::cmd("DEL")
             .arg(format!("token:{}", user_activation_form.login.as_str()))
             .query(&mut redis_conn)?;
-    }
+    }*/
 
     info!(
         "User {} updated activation status (to {}) of user (#{})",
@@ -74,7 +56,7 @@ pub async fn user_activation(
 #[derive(serde::Deserialize, validator::Validate)]
 pub struct UserDeletion {
     #[validate(range(min = 0))]
-    id: i32,
+    id: u32,
     #[validate(length(min = 2))]
     login: String,
     #[validate(range(min = 0))]
@@ -88,18 +70,12 @@ pub async fn user_deletion(
     req: HttpRequest,
     user_deletion_form: actix_web_validator::Form<UserDeletion>,
 ) -> Result<impl Responder, ApplicationError> {
-    let conn = Database::acquire_sql_connection().await?;
     let jwt_user: JwtUser = JwtUser::from_request(req)?;
-    let user_to_delete: User = user::Entity::find_by_id(user_deletion_form.id)
-        .filter(Condition::all().add(user::Column::Role.lt(jwt_user.role)))
-        .one(&conn)
-        .await?
-        .ok_or(ApplicationError::NotFound)?;
-    user_to_delete.delete(&conn).await?;
-    let mut redis_conn = Database::acquire_redis_connection()?;
+    user::Entity::delete_user_id(user_deletion_form.id).await?;
+    /*let mut redis_conn = Database::acquire_redis_connection()?;
     redis::cmd("DEL")
         .arg(format!("token:{}", user_deletion_form.login.as_str()))
-        .query(&mut redis_conn)?;
+        .query(&mut redis_conn)?;*/
     Ok(HttpResponse::Found()
         .header(
             "Location",
@@ -114,7 +90,7 @@ pub async fn user_deletion(
 #[derive(serde::Deserialize, validator::Validate)]
 pub struct UserModification {
     #[validate(range(min = 0))]
-    id: i32,
+    id: u32,
     #[validate(length(min = 2))]
     login: String,
     #[validate(length(min = 2))]
@@ -131,21 +107,17 @@ pub async fn user_modification(
     req: HttpRequest,
     user_modification_form: actix_web_validator::Form<UserModification>,
 ) -> Result<impl Responder, ApplicationError> {
-    let conn = Database::acquire_sql_connection().await?;
     let jwt_user: JwtUser = JwtUser::from_request(req)?;
-    let user: User = user::Entity::find_by_id(user_modification_form.id)
-        .filter(Condition::all().add(user::Column::Role.lt(jwt_user.role)))
-        .one(&conn)
+    let mut user: User = user::Entity::find_by_id(user_modification_form.id)
         .await?
         .ok_or(ApplicationError::NotFound)?;
-    let mut user: user::ActiveModel = user.into();
-    user.name = Set(user_modification_form.name.clone());
-    user.is_authorized = Set(user_modification_form.is_authorized.is_some() as i8);
-    user.update(&conn).await?;
-    let mut redis_conn = Database::acquire_redis_connection()?;
+    user.name = user_modification_form.name.clone();
+    user.is_authorized = user_modification_form.is_authorized.is_some();
+    user::Entity::update(user).await?;
+    /*let mut redis_conn = Database::acquire_redis_connection()?;
     redis::cmd("DEL")
         .arg(format!("token:{}", user_modification_form.login.as_str()))
-        .query(&mut redis_conn)?;
+        .query(&mut redis_conn)?;*/
     Ok(HttpResponse::Found()
         .header(
             "Location",
@@ -162,10 +134,8 @@ pub async fn user_modification(
 
 #[derive(serde::Deserialize, validator::Validate)]
 pub struct UserChangeLeague {
-    #[validate(range(min = 0))]
-    league_id: i32,
-    #[validate(range(min = 0))]
-    user_id: i32,
+    league_id: u32,
+    user_id: u32,
     code: Option<String>,
     action: String,
     name: String,
@@ -176,31 +146,24 @@ pub async fn user_change_leagues(
     req: HttpRequest,
     user_change_league_form: actix_web_validator::Form<UserChangeLeague>,
 ) -> Result<impl Responder, ApplicationError> {
-    let conn = Database::acquire_sql_connection().await?;
     let res_msg: String = match user_change_league_form.action.as_str() {
         "add" => {
-            let user_league = user_league::ActiveModel {
-                league_id: Set(user_change_league_form.league_id),
-                user_id: Set(user_change_league_form.user_id),
-                ..Default::default()
-            };
-            user_league.insert(&conn).await?;
+            user::Entity::add_leagues_as_favorite(
+                user_change_league_form.user_id,
+                user_change_league_form.league_id,
+            )
+            .await?;
             format!(
                 "{} has been added as favorite",
                 user_change_league_form.name
             )
         }
         "remove" => {
-            let user_league_to_delete: UserLeague = user_league::Entity::find()
-                .filter(
-                    Condition::all()
-                        .add(user_league::Column::UserId.eq(user_change_league_form.user_id))
-                        .add(user_league::Column::LeagueId.eq(user_change_league_form.league_id)),
-                )
-                .one(&conn)
-                .await?
-                .ok_or(ApplicationError::NotFound)?;
-            user_league_to_delete.delete(&conn).await?;
+            user::Entity::remove_leagues_as_favorite(
+                user_change_league_form.user_id,
+                user_change_league_form.league_id,
+            )
+            .await?;
             format!(
                 "{} has been removed from the favorite list",
                 user_change_league_form.name
@@ -247,16 +210,9 @@ pub async fn user_search(
     req: HttpRequest,
     user_search_form: actix_web_validator::Form<UserSearch>,
 ) -> Result<impl Responder, ApplicationError> {
-    let conn = Database::acquire_sql_connection().await?;
     let jwt_user: JwtUser = JwtUser::from_request(req)?;
-    let user: Option<User> = user::Entity::find()
-        .filter(
-            Condition::all()
-                .add(user::Column::Role.lt(jwt_user.role))
-                .add(user::Column::Login.eq(user_search_form.login.clone())),
-        )
-        .one(&conn)
-        .await?;
+    let user: Option<User> =
+        user::Entity::get_user_by_login(user_search_form.login.clone()).await?;
     let result: String = match user {
         Some(v) => format!(
             "/admin?page={}&per_page={}&id={}",

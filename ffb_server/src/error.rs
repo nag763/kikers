@@ -1,6 +1,7 @@
 use actix_web::{dev::HttpResponseBuilder, http::header, http::StatusCode, HttpResponse};
 use askama::Template;
 
+use ffb_structs::error::ApplicationError as StructApplicationError;
 use std::fmt;
 
 #[derive(Debug)]
@@ -97,18 +98,6 @@ impl From<std::env::VarError> for ApplicationError {
     }
 }
 
-impl From<sea_orm::DbErr> for ApplicationError {
-    fn from(sea_orm: sea_orm::DbErr) -> ApplicationError {
-        error!("A database error happened : {}", sea_orm.to_string());
-        match sea_orm {
-            sea_orm::DbErr::RecordNotFound(_) => ApplicationError::NotFound,
-            sea_orm::DbErr::Query(db_err) => ApplicationError::DatabaseError(db_err),
-            sea_orm::DbErr::Exec(db_err) => ApplicationError::DatabaseError(db_err),
-            _ => ApplicationError::InternalError,
-        }
-    }
-}
-
 impl From<hmac::digest::InvalidLength> for ApplicationError {
     fn from(digest_err: hmac::digest::InvalidLength) -> Self {
         error!("An error with the jwt digest happened : {}", digest_err);
@@ -116,16 +105,13 @@ impl From<hmac::digest::InvalidLength> for ApplicationError {
     }
 }
 
-impl From<redis::RedisError> for ApplicationError {
-    fn from(redis_err: redis::RedisError) -> Self {
-        error!("A redis error happened : {}", redis_err);
-        ApplicationError::InternalError
-    }
-}
+impl From<StructApplicationError> for ApplicationError {
+    fn from(struct_error: StructApplicationError) -> Self {
+        match struct_error {
+            StructApplicationError::SerialError => ApplicationError::InternalError,
 
-impl From<serde_json::Error> for ApplicationError {
-    fn from(serde_err: serde_json::Error) -> Self {
-        error!("A serde error happened : {}", serde_err);
-        ApplicationError::InternalError
+            StructApplicationError::DatabaseError(err) => ApplicationError::DatabaseError(err),
+            StructApplicationError::RedisError(err) => ApplicationError::DatabaseError(err),
+        }
     }
 }

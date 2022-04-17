@@ -54,11 +54,11 @@
 	    <input hidden name="login" value="{{app_user.login}}"/>
 	    <input hidden name="page" value="{{page}}"/>
 	    <input hidden name="per_page" value="{{per_page}}"/>
-	    {% if app_user.is_authorized == 1 %}
-	    <input hidden name="value" value="0"/>
+	    {% if app_user.is_authorized %}
+	    <input hidden name="value" value="false"/>
 	    <button type="submit" class="text-white bg-yellow-400 hover:bg-yellow-500 focus:ring-4 focus:ring-yellow-300 font-medium rounded-full text-sm px-5 py-2.5 text-center mr-2 mb-2 dark:focus:ring-yellow-900">Deactivate</button>
 	    {% else %}
-	    <input hidden name="value" value="1"/>
+	    <input hidden name="value" value="true"/>
 	    <button type="submit" class="text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-full text-sm px-5 py-2.5 text-center mr-2 mb-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800">Activate</button>
 	    {% endif %}
 	    </form>
@@ -101,7 +101,7 @@
     </div>
 
     <div class="w-full px-3">
-	    {% if chosen_user.is_authorized == 1 %}
+	    {% if chosen_user.is_authorized %}
 	    <input name="is_authorized" class="mr-2 leading-tight" type="checkbox" checked />
 	    {% else %}
 	    <input name="is_authorized" class="mr-2 leading-tight" type="checkbox"/>
@@ -140,7 +140,7 @@
 	{% endif %}
 	</div>
 	<div class="justify-self-end">
-	{% if page < num_pages %}
+	{% if data.len() != 0 %}
 	<a href="?page={{page+1}}&per_page={{per_page}}" class="text-right">
 	<button type="button" class="text-white bg-gradient-to-br from-green-400 to-blue-600 hover:bg-gradient-to-bl focus:ring-4 focus:ring-green-200 dark:focus:ring-green-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-2 mb-2">Next</button>
 	</a>

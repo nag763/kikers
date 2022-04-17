@@ -7,7 +7,6 @@ extern crate lazy_static;
 
 mod auth;
 mod controllers;
-mod database;
 mod error;
 mod middleware;
 mod pages;
@@ -23,7 +22,7 @@ use crate::middleware::role_checker::RoleChecker;
 use crate::pages::admin::admin_dashboard;
 use crate::pages::game::games;
 use crate::pages::unauth::{cookies, index, signup};
-use crate::pages::user::{user_leagues, user_profile, user_club};
+use crate::pages::user::{user_club, user_leagues, user_profile};
 use actix_files as fs;
 use actix_web::middleware::Logger;
 use actix_web::web;

@@ -2,8 +2,8 @@ use crate::auth::JwtUser;
 use crate::pages::ContextQuery;
 use askama::Template;
 
-use ffb_structs::api_structs::{APILeague, Country};
-use crate::database::Database;
+use ffb_structs::{country, country::Model as Country, league, league::Model as APILeague};
+
 use crate::error::ApplicationError;
 use actix_web::web;
 use actix_web::{get, HttpRequest, HttpResponse};
@@ -50,54 +50,17 @@ pub async fn user_leagues(
     context_query: web::Query<ContextQuery>,
 ) -> Result<HttpResponse, ApplicationError> {
     let jwt_user: JwtUser = JwtUser::from_request(req)?;
-    let mut redis_conn = Database::acquire_redis_connection()?;
     let (leagues, fav_leagues): (Option<Vec<APILeague>>, Option<Vec<APILeague>>) =
         match &context_query.code {
-            Some(v) => {
-                let leagues_as_string: String =
-                    redis::cmd("GET").arg("leagues").query(&mut redis_conn)?;
-                let leagues: Vec<APILeague> = serde_json::from_str(leagues_as_string.as_str())?;
-                if v.is_empty() {
-                    (
-                        Some(
-                            leagues
-                                .into_iter()
-                                .filter(|league| league.country.code.is_none())
-                                .collect::<Vec<APILeague>>(),
-                        ),
-                        None,
-                    )
-                } else {
-                    (
-                        Some(
-                            leagues
-                                .into_iter()
-                                .filter(|league| {
-                                    if let Some(code) = &league.country.code {
-                                        return code == v;
-                                    } else {
-                                        return false;
-                                    }
-                                })
-                                .collect(),
-                        ),
-                        None,
-                    )
-                }
-            }
-            None => {
-                let leagues_as_string: String =
-                    redis::cmd("GET").arg("leagues").query(&mut redis_conn)?;
-                let leagues: Vec<APILeague> = serde_json::from_str(leagues_as_string.as_str())?;
-                let fav_leagues: Vec<APILeague> = leagues
-                    .into_iter()
-                    .filter(|league| jwt_user.fav_leagues.contains(&league.league.id))
-                    .collect();
-                (None, Some(fav_leagues))
-            }
+            Some(v) => (Some(league::Entity::get_leagues_for_country_code(v)?), None),
+            None => (
+                None,
+                Some(league::Entity::get_fav_leagues_of_user(
+                    jwt_user.clone().fav_leagues,
+                )?),
+            ),
         };
-    let countries_as_string: String = redis::cmd("GET").arg("countries").query(&mut redis_conn)?;
-    let countries: Vec<Country> = serde_json::from_str(countries_as_string.as_str())?;
+    let countries: Vec<Country> = country::Entity::find_all()?;
     let index = UserLeagueTemplate {
         title: "Your informations".into(),
         user: Some(jwt_user),

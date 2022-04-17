@@ -23,10 +23,10 @@ DROP TABLE IF EXISTS `NAVACCESS`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `NAVACCESS` (
-  `id` int NOT NULL AUTO_INCREMENT,
+  `id` int unsigned NOT NULL AUTO_INCREMENT,
   `label` varchar(32) NOT NULL,
   `href` varchar(32) NOT NULL,
-  `position` int DEFAULT NULL,
+  `position` int unsigned DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `position` (`position`)
 ) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
@@ -40,7 +40,7 @@ DROP TABLE IF EXISTS `ROLE`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `ROLE` (
-  `id` int NOT NULL AUTO_INCREMENT,
+  `id` int unsigned NOT NULL AUTO_INCREMENT,
   `name` varchar(16) NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
@@ -54,9 +54,9 @@ DROP TABLE IF EXISTS `ROLE_NAVACCESS`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `ROLE_NAVACCESS` (
-  `id` int NOT NULL AUTO_INCREMENT,
-  `role_id` int NOT NULL,
-  `navaccess_id` int NOT NULL,
+  `id` int unsigned NOT NULL AUTO_INCREMENT,
+  `role_id` int unsigned NOT NULL,
+  `navaccess_id` int unsigned NOT NULL,
   PRIMARY KEY (`id`,`role_id`,`navaccess_id`),
   UNIQUE KEY `id` (`id`,`role_id`,`navaccess_id`),
   KEY `navaccess_id` (`navaccess_id`),
@@ -67,22 +67,6 @@ CREATE TABLE `ROLE_NAVACCESS` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Table structure for table `STADIUM`
---
-
-DROP TABLE IF EXISTS `STADIUM`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `STADIUM` (
-  `id` int NOT NULL AUTO_INCREMENT,
-  `name` varchar(32) NOT NULL,
-  `city` varchar(32) NOT NULL,
-  `country` varchar(32) NOT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
 -- Table structure for table `USER`
 --
 
@@ -90,18 +74,18 @@ DROP TABLE IF EXISTS `USER`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `USER` (
-  `id` int NOT NULL AUTO_INCREMENT COMMENT 'ID of user',
+  `id` int unsigned NOT NULL AUTO_INCREMENT COMMENT 'ID of user',
   `name` varchar(32) NOT NULL COMMENT 'User name',
   `login` varchar(32) NOT NULL,
   `password` varchar(64) NOT NULL,
   `is_authorized` tinyint(1) NOT NULL DEFAULT '0',
-  `role` int NOT NULL DEFAULT '1',
+  `role_id` int unsigned NOT NULL DEFAULT '1',
   `joined_on` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `login` (`login`),
-  KEY `role` (`role`),
-  CONSTRAINT `USER_ibfk_1` FOREIGN KEY (`role`) REFERENCES `ROLE` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT
-) ENGINE=InnoDB AUTO_INCREMENT=33 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+  KEY `role` (`role_id`),
+  CONSTRAINT `USER_ibfk_1` FOREIGN KEY (`role_id`) REFERENCES `ROLE` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT
+) ENGINE=InnoDB AUTO_INCREMENT=35 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -112,27 +96,13 @@ DROP TABLE IF EXISTS `USER_LEAGUE`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `USER_LEAGUE` (
-  `id` int NOT NULL AUTO_INCREMENT,
-  `user_id` int NOT NULL,
-  `league_id` int NOT NULL,
+  `id` int unsigned NOT NULL AUTO_INCREMENT,
+  `user_id` int unsigned NOT NULL,
+  `league_id` int unsigned NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `user_id` (`user_id`,`league_id`),
   CONSTRAINT `USER_LEAGUE_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `USER` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB AUTO_INCREMENT=28 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `seaql_migrations`
---
-
-DROP TABLE IF EXISTS `seaql_migrations`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `seaql_migrations` (
-  `version` varchar(255) NOT NULL,
-  `applied_at` bigint NOT NULL,
-  PRIMARY KEY (`version`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
@@ -144,4 +114,4 @@ CREATE TABLE `seaql_migrations` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2022-04-13 19:56:35
+-- Dump completed on 2022-04-16 17:54:24

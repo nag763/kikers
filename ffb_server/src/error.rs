@@ -1,6 +1,7 @@
 use actix_web::{dev::HttpResponseBuilder, http::header, http::StatusCode, HttpResponse};
 use askama::Template;
 
+use ffb_auth::error::ApplicationError as AuthApplicationError;
 use ffb_structs::error::ApplicationError as StructApplicationError;
 use std::fmt;
 
@@ -14,6 +15,8 @@ pub enum ApplicationError {
     BadRequest,
     TemplateError,
     CookiesUnapproved,
+    StructError(String),
+    AuthError(String),
 }
 
 #[derive(Template, Debug)]
@@ -45,6 +48,8 @@ impl fmt::Display for ApplicationError {
             Self::IllegalToken => "Your authentication token is not correct, please reconnect in order to regenarate it".into(),
             Self::CookiesUnapproved => "You haven't approved cookies yet, approve them prior any usage of the application".into(),
             Self::TemplateError => "An error happened regarding the display, this error has been reported".into(),
+            Self::StructError(err) => err.into(),
+            Self::AuthError(err) => err.into(),
         };
         write!(f, "{}", reason)
     }
@@ -67,7 +72,9 @@ impl actix_web::error::ResponseError for ApplicationError {
         match *self {
             ApplicationError::InternalError
             | ApplicationError::DatabaseError(_)
-            | ApplicationError::TemplateError => StatusCode::INTERNAL_SERVER_ERROR,
+            | ApplicationError::TemplateError
+            | ApplicationError::StructError(_)
+            | ApplicationError::AuthError(_) => StatusCode::INTERNAL_SERVER_ERROR,
             ApplicationError::IllegalToken
             | ApplicationError::CookiesUnapproved
             | ApplicationError::BadRequest => StatusCode::BAD_REQUEST,
@@ -98,20 +105,14 @@ impl From<std::env::VarError> for ApplicationError {
     }
 }
 
-impl From<hmac::digest::InvalidLength> for ApplicationError {
-    fn from(digest_err: hmac::digest::InvalidLength) -> Self {
-        error!("An error with the jwt digest happened : {}", digest_err);
-        ApplicationError::InternalError
+impl From<StructApplicationError> for ApplicationError {
+    fn from(struct_error: StructApplicationError) -> Self {
+        Self::StructError(struct_error.to_string())
     }
 }
 
-impl From<StructApplicationError> for ApplicationError {
-    fn from(struct_error: StructApplicationError) -> Self {
-        match struct_error {
-            StructApplicationError::SerialError => ApplicationError::InternalError,
-
-            StructApplicationError::DatabaseError(err) => ApplicationError::DatabaseError(err),
-            StructApplicationError::RedisError(err) => ApplicationError::DatabaseError(err),
-        }
+impl From<AuthApplicationError> for ApplicationError {
+    fn from(auth_error: AuthApplicationError) -> Self {
+        Self::AuthError(auth_error.to_string())
     }
 }

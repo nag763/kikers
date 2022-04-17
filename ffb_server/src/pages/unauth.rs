@@ -1,11 +1,11 @@
 use askama::Template;
 
-use crate::auth::JwtUser;
 use crate::error::ApplicationError;
 use crate::pages::ContextQuery;
 use actix_web::web;
 use actix_web::HttpMessage;
 use actix_web::{get, HttpRequest, HttpResponse};
+use ffb_auth::JwtUser;
 
 #[derive(Template, Debug)]
 #[template(path = "index.html")]

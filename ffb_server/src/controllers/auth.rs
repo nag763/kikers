@@ -1,11 +1,10 @@
-use crate::auth::JwtUser;
+use ffb_auth::JwtUser;
 
 use crate::error::ApplicationError;
 use actix_web::http::Cookie;
 use actix_web::{get, post, HttpMessage, HttpRequest, HttpResponse, Responder};
 use ffb_structs::user;
 use ffb_structs::user::Model as User;
-use magic_crypt::MagicCryptTrait;
 use std::thread;
 
 lazy_static! {
@@ -26,9 +25,7 @@ pub async fn login(
     req: HttpRequest,
     login_form: actix_web_validator::Form<LoginForm>,
 ) -> Result<HttpResponse, ApplicationError> {
-    let mc = new_magic_crypt!(std::env::var("ENCRYPT_KEY")?, 256);
-    let encrypted_password: String = mc.encrypt_str_to_base64(login_form.password.as_str());
-    match JwtUser::emit(login_form.login.as_str(), encrypted_password.as_str()).await? {
+    match JwtUser::emit(login_form.login.as_str(), login_form.password.as_str()).await? {
         Some(token) => Ok(HttpResponse::Found()
             .header("Location", "/")
             .cookie(Cookie::new(
@@ -81,8 +78,6 @@ pub async fn register_user(
     req: HttpRequest,
     sign_up_form: actix_web_validator::Form<SignUpForm>,
 ) -> Result<impl Responder, ApplicationError> {
-    let mc = new_magic_crypt!(std::env::var("ENCRYPT_KEY")?, 256);
-    let encrypted_password: String = mc.encrypt_str_to_base64(sign_up_form.password.as_str());
     let user_with_same_login: bool = user::Entity::login_exists(sign_up_form.login.clone()).await?;
     if user_with_same_login {
         warn!(
@@ -96,7 +91,7 @@ pub async fn register_user(
     user::Entity::insert_user(
         sign_up_form.login.clone(),
         sign_up_form.name.clone(),
-        encrypted_password,
+        JwtUser::encrypt_key(&sign_up_form.password)?,
     )
     .await?;
     info!(

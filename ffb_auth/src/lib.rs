@@ -1,4 +1,5 @@
 use crate::error::ApplicationError;
+use crate::magic_crypt::MagicCryptTrait;
 use actix_web::{HttpMessage, HttpRequest};
 use ffb_structs::navaccess;
 use ffb_structs::navaccess::Model as NavAccess;
@@ -8,6 +9,13 @@ use hmac::{Hmac, Mac};
 use jwt::{Header, SignWithKey, Token, VerifyWithKey};
 use serde::{Deserialize, Serialize};
 use sha2::Sha256;
+
+pub mod error;
+
+#[macro_use]
+extern crate magic_crypt;
+#[macro_use]
+extern crate log;
 
 #[derive(Debug, Default, Deserialize, Serialize, Clone)]
 pub struct JwtUser {
@@ -21,6 +29,11 @@ pub struct JwtUser {
 }
 
 impl JwtUser {
+    pub fn encrypt_key(key: &str) -> Result<String, ApplicationError> {
+        let mc = new_magic_crypt!(std::env::var("ENCRYPT_KEY")?, 256);
+        Ok(mc.encrypt_str_to_base64(key))
+    }
+
     async fn gen_token(user: User) -> Result<String, ApplicationError> {
         let nav: Vec<NavAccess> =
             navaccess::Entity::get_navaccess_for_role_id(user.role_id).await?;
@@ -48,8 +61,12 @@ impl JwtUser {
     }
 
     pub async fn emit(login: &str, password: &str) -> Result<Option<String>, ApplicationError> {
-        let user: Option<User> =
-            user::Entity::get_user_by_credentials(login.to_string(), password.to_string()).await?;
+        let encrypted_password: String = Self::encrypt_key(password)?;
+        let user: Option<User> = user::Entity::get_user_by_credentials(
+            login.to_string(),
+            encrypted_password.to_string(),
+        )
+        .await?;
 
         match user {
             Some(user) => match user.is_authorized {

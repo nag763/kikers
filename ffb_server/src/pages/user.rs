@@ -1,6 +1,6 @@
-use crate::auth::JwtUser;
 use crate::pages::ContextQuery;
 use askama::Template;
+use ffb_auth::JwtUser;
 
 use ffb_structs::{country, country::Model as Country, league, league::Model as APILeague};
 

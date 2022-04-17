@@ -1156,6 +1156,24 @@ dependencies = [
 ]
 
 [[package]]
+name = "ffb_auth"
+version = "0.1.0"
+dependencies = [
+ "actix-files",
+ "actix-service",
+ "actix-web",
+ "actix-web-validator",
+ "ffb_structs",
+ "hmac",
+ "jwt",
+ "log",
+ "log4rs",
+ "magic-crypt",
+ "serde",
+ "sha2 0.10.2",
+]
+
+[[package]]
 name = "ffb_cli"
 version = "0.1.0"
 dependencies = [
@@ -1181,17 +1199,15 @@ dependencies = [
  "askama",
  "chrono",
  "dotenv",
+ "ffb_auth",
  "ffb_structs",
  "futures",
- "hmac",
  "jwt",
  "lazy_static",
  "log",
  "log4rs",
- "magic-crypt",
  "regex",
  "serde",
- "sha2 0.10.2",
  "time 0.2.27",
  "validator",
 ]
@@ -1680,9 +1696,9 @@ dependencies = [
 
 [[package]]
 name = "ipnet"
-version = "2.4.0"
+version = "2.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "35e70ee094dc02fd9c13fdad4940090f22dbd6ac7c9e7094a46cf0232a50bc7c"
+checksum = "879d54834c8c76457ef4293a689b2a8c59b076067ad77b15efafbb05f92a592b"
 
 [[package]]
 name = "itertools"

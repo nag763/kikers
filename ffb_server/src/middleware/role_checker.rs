@@ -1,7 +1,7 @@
 use std::pin::Pin;
 use std::task::{Context, Poll};
 
-use crate::auth::JwtUser;
+use ffb_auth::JwtUser;
 
 use actix_service::{Service, Transform};
 use actix_web::HttpMessage;

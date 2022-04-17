@@ -1,4 +1,4 @@
-use crate::auth::JwtUser;
+use ffb_auth::JwtUser;
 
 use crate::error::ApplicationError;
 use actix_web::http::Cookie;

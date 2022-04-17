@@ -1,11 +1,8 @@
 #[macro_use]
-extern crate magic_crypt;
-#[macro_use]
 extern crate log;
 #[macro_use]
 extern crate lazy_static;
 
-mod auth;
 mod controllers;
 mod error;
 mod middleware;

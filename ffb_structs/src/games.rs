@@ -2,7 +2,7 @@ use crate::common_api_structs::Game;
 use crate::database::Database;
 use crate::error::ApplicationError;
 
-#[derive(serde::Deserialize, Clone)]
+#[derive(serde::Deserialize, Clone, Default)]
 pub struct Model {
     pub games: Vec<Game>,
     pub fetched_on: Option<String>,

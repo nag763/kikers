@@ -7,8 +7,7 @@ use ffb_structs::user::Model as User;
 
 #[derive(serde::Deserialize, validator::Validate)]
 pub struct UserActivation {
-    #[validate(range(min = 0))]
-    id: u32,
+    uuid: String,
     value: bool,
     #[validate(range(min = 0))]
     page: i32,
@@ -24,15 +23,15 @@ pub async fn user_activation(
     user_activation_form: actix_web_validator::Form<UserActivation>,
 ) -> Result<impl Responder, ApplicationError> {
     let jwt_user: JwtUser = JwtUser::from_request(req)?;
-    user::Entity::change_activation_status(user_activation_form.id, user_activation_form.value)
+    user::Entity::change_activation_status(&user_activation_form.uuid, user_activation_form.value)
         .await?;
 
     if !user_activation_form.value {
         JwtUser::revoke_all_session(&user_activation_form.login)?;
     }
     info!(
-        "User {} updated activation status (to {}) of user (#{})",
-        jwt_user.login, user_activation_form.value, user_activation_form.id
+        "User {} updated activation status (to {}) of user {}",
+        jwt_user.login, user_activation_form.value, &user_activation_form.login
     );
     Ok(HttpResponse::Found()
         .append_header((
@@ -49,8 +48,7 @@ pub async fn user_activation(
 
 #[derive(serde::Deserialize, validator::Validate)]
 pub struct UserDeletion {
-    #[validate(range(min = 0))]
-    id: u32,
+    uuid: String,
     #[validate(length(min = 2))]
     login: String,
     #[validate(range(min = 0))]
@@ -63,7 +61,7 @@ pub struct UserDeletion {
 pub async fn user_deletion(
     user_deletion_form: actix_web_validator::Form<UserDeletion>,
 ) -> Result<impl Responder, ApplicationError> {
-    user::Entity::delete_user_id(user_deletion_form.id).await?;
+    user::Entity::delete_user_uuid(&user_deletion_form.uuid).await?;
     JwtUser::revoke_all_session(&user_deletion_form.login)?;
     Ok(HttpResponse::Found()
         .append_header((
@@ -78,8 +76,8 @@ pub async fn user_deletion(
 
 #[derive(serde::Deserialize, validator::Validate)]
 pub struct UserModification {
-    #[validate(range(min = 0))]
     id: u32,
+    uuid: String,
     #[validate(length(min = 2))]
     login: String,
     #[validate(length(min = 2))]
@@ -95,7 +93,7 @@ pub struct UserModification {
 pub async fn user_modification(
     user_modification_form: actix_web_validator::Form<UserModification>,
 ) -> Result<impl Responder, ApplicationError> {
-    let mut user: User = user::Entity::find_by_id(user_modification_form.id)
+    let mut user: User = user::Entity::find_by_uuid(&user_modification_form.uuid)
         .await?
         .ok_or(ApplicationError::NotFound)?;
     user.name = user_modification_form.name.clone();

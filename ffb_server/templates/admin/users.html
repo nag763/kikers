@@ -50,7 +50,7 @@
 	    </td>
 	    <td class="border px-4 py-2" style="text-align:center">
 	    <form method="post" action="/user/activation">
-	    <input hidden name="id" value="{{app_user.id}}"/>
+	    <input hidden name="uuid" value="{{app_user.uuid}}"/>
 	    <input hidden name="login" value="{{app_user.login}}"/>
 	    <input hidden name="page" value="{{page}}"/>
 	    <input hidden name="per_page" value="{{per_page}}"/>
@@ -84,6 +84,7 @@
 {% when Some with (chosen_user) %}
   <div class="flex flex-wrap -mx-3 border px-2 py-3 mr-2 ml-2 mt-3">
 	<form class="w-full" method="post" action="/user/modification">
+	    <input hidden name="uuid" value="{{chosen_user.uuid}}"/>
 	    <input hidden name="id" value="{{chosen_user.id}}"/>
 	    <input hidden name="page" value="{{page}}"/>
 	    <input hidden name="per_page" value="{{per_page}}"/>
@@ -116,7 +117,7 @@
 	    </button>
 </form>
 	    <form method="post" action="/user/deletion">
-	    <input hidden name="id" value="{{chosen_user.id}}"/>
+	    <input hidden name="uuid" value="{{chosen_user.uuid}}"/>
 	    <input hidden name="login" value="{{chosen_user.login}}"/>
 	    <input hidden name="page" value="{{page}}"/>
 	    <input hidden name="per_page" value="{{per_page}}"/>

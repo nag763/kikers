@@ -1,9 +1,11 @@
 use crate::database::Database;
 use crate::error::ApplicationError;
+use uuid::Uuid;
 
-#[derive(Clone, Debug, PartialEq, sqlx::FromRow)]
+#[derive(Clone, Debug, PartialEq, Default, sqlx::FromRow)]
 pub struct Model {
     pub id: u32,
+    pub uuid: String,
     pub name: String,
     pub login: String,
     pub password: String,
@@ -69,6 +71,15 @@ impl Entity {
         Ok(model)
     }
 
+    pub async fn find_by_uuid(uuid: &str) -> Result<Option<Model>, ApplicationError> {
+        let mut conn = Database::acquire_sql_connection().await?;
+        let model = sqlx::query_as::<_, Model>("SELECT * FROM USER WHERE uuid=? LIMIT 1")
+            .bind(uuid)
+            .fetch_optional(&mut conn)
+            .await?;
+        Ok(model)
+    }
+
     pub async fn get_user_by_login(login: &str) -> Result<Option<Model>, ApplicationError> {
         let mut conn = Database::acquire_sql_connection().await?;
         let model = sqlx::query_as("SELECT * FROM USER WHERE login=? LIMIT 1")
@@ -92,10 +103,10 @@ impl Entity {
         Ok(model)
     }
 
-    pub async fn delete_user_id(id: u32) -> Result<(), ApplicationError> {
+    pub async fn delete_user_uuid(uuid: &str) -> Result<(), ApplicationError> {
         let mut conn = Database::acquire_sql_connection().await?;
-        sqlx::query("DELETE FROM USER WHERE id =?")
-            .bind(&id)
+        sqlx::query("DELETE FROM USER WHERE uuid =?")
+            .bind(&uuid)
             .execute(&mut conn)
             .await?;
         Ok(())
@@ -106,8 +117,10 @@ impl Entity {
         name: &str,
         password: &str,
     ) -> Result<(), ApplicationError> {
+        let uuid = Uuid::new_v4();
         let mut conn = Database::acquire_sql_connection().await?;
-        sqlx::query("INSERT INTO USER(login, name, password) VALUES(?,?,?)")
+        sqlx::query("INSERT INTO USER(uuid, login, name, password) VALUES(?, ?,?,?)")
+            .bind(uuid.to_string())
             .bind(login)
             .bind(name)
             .bind(password)
@@ -151,13 +164,13 @@ impl Entity {
     }
 
     pub async fn change_activation_status(
-        id: u32,
+        uuid: &str,
         is_authorized: bool,
     ) -> Result<(), ApplicationError> {
         let mut conn = Database::acquire_sql_connection().await?;
-        sqlx::query("UPDATE USER SET is_authorized=? WHERE id =?")
+        sqlx::query("UPDATE USER SET is_authorized=? WHERE uuid =?")
             .bind(&is_authorized)
-            .bind(&id)
+            .bind(uuid)
             .execute(&mut conn)
             .await?;
         Ok(())

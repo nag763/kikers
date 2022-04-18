@@ -75,6 +75,7 @@ DROP TABLE IF EXISTS `USER`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `USER` (
   `id` int unsigned NOT NULL AUTO_INCREMENT COMMENT 'ID of user',
+  `uuid` varchar(36) NOT NULL,
   `name` varchar(32) NOT NULL COMMENT 'User name',
   `login` varchar(32) NOT NULL,
   `password` varchar(64) NOT NULL,
@@ -83,9 +84,10 @@ CREATE TABLE `USER` (
   `joined_on` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `login` (`login`),
+  UNIQUE KEY `uuid` (`uuid`),
   KEY `role` (`role_id`),
   CONSTRAINT `USER_ibfk_1` FOREIGN KEY (`role_id`) REFERENCES `ROLE` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT
-) ENGINE=InnoDB AUTO_INCREMENT=35 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=48 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -102,7 +104,7 @@ CREATE TABLE `USER_LEAGUE` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `user_id` (`user_id`,`league_id`),
   CONSTRAINT `USER_LEAGUE_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `USER` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=28 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=44 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
@@ -114,4 +116,4 @@ CREATE TABLE `USER_LEAGUE` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2022-04-16 17:54:24
+-- Dump completed on 2022-04-18 19:57:36

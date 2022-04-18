@@ -9,7 +9,7 @@ use actix_web::{get, HttpRequest, HttpResponse};
 
 use ffb_structs::{user, user::Model as User};
 
-#[derive(Template, Debug)]
+#[derive(Template, Debug, Default)]
 #[template(path = "admin.html")]
 struct Admin {
     title: String,

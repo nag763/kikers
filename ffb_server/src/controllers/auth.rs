@@ -25,13 +25,17 @@ pub async fn login(
     login_form: actix_web_validator::Form<LoginForm>,
 ) -> Result<HttpResponse, ApplicationError> {
     match JwtUser::emit(login_form.login.as_str(), login_form.password.as_str()).await? {
-        Some(token) => Ok(HttpResponse::Found()
-            .header("Location", "/")
-            .cookie(Cookie::new(
-                std::env::var("JWT_TOKEN_PATH")?.as_str(),
-                token,
-            ))
-            .finish()),
+        Some(token) => {
+            let cookie_path: String = std::env::var("JWT_TOKEN_PATH")?;
+            let cookie: Cookie = Cookie::build(cookie_path.as_str(), &token)
+                .path("/")
+                .http_only(true)
+                .finish();
+            Ok(HttpResponse::Found()
+                .header("Location", "/")
+                .cookie(cookie)
+                .finish())
+        }
         None => {
             warn!(
                 "{:?} tried to connect with login {} without success",

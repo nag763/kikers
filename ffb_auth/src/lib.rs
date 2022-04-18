@@ -116,7 +116,6 @@ impl JwtUser {
     }
 
     pub fn from_request(req: HttpRequest) -> Result<JwtUser, ApplicationError> {
-        info!("Passed here");
         match req.cookie(std::env::var("JWT_TOKEN_PATH")?.as_str()) {
             Some(token) => Ok(JwtUser::from_token(token.value())?),
             None => Err(ApplicationError::InternalError),

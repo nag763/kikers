@@ -109,6 +109,7 @@ impl Entity {
             .bind(&uuid)
             .execute(&mut conn)
             .await?;
+        info!("User {} has been deleted", uuid);
         Ok(())
     }
 
@@ -126,6 +127,7 @@ impl Entity {
             .bind(password)
             .execute(&mut conn)
             .await?;
+        info!("User {} has been created", login);
         Ok(())
     }
 
@@ -173,6 +175,7 @@ impl Entity {
             .bind(uuid)
             .execute(&mut conn)
             .await?;
+        info!("User#{} activation status have been updated to {}", uuid, is_authorized);
         Ok(())
     }
 
@@ -184,6 +187,7 @@ impl Entity {
             .bind(&model.id)
             .execute(&mut conn)
             .await?;
+        info!("User {} has been updated", &model.login);
         Ok(())
     }
 

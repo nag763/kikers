@@ -55,7 +55,7 @@ impl JwtUser {
                 emited_on: time::OffsetDateTime::now_utc().unix_timestamp(),
             },
         );
-        info!("Token for {} has been emitted", user.login);
+        info!("Token for {} has been generated", user.login);
         let signed_token = unsigned_token.sign_with_key(&key)?;
         Ok(signed_token.into())
     }
@@ -70,9 +70,12 @@ impl JwtUser {
                 true => {
                     let token = Self::gen_token(user).await?;
                     token::Entity::register(login, &token)?;
+                    info!("Token for {} has been registered and emitted", &login);
                     Ok(Some(token))
                 }
-                false => Err(ApplicationError::UserNotAuthorized(login.to_string())),
+                false => {
+                    warn!("Token for {} was ready but user isn't authorized", &user.login);
+                    Err(ApplicationError::UserNotAuthorized(login.to_string()))},
             },
             None => Ok(None),
         }
@@ -81,8 +84,10 @@ impl JwtUser {
     pub fn check_token(token: &str) -> Result<(), ApplicationError> {
         let jwt_user: Self = Self::from_token(token)?;
         if !token::Entity::verify(&jwt_user.login, token)? {
+            warn!("Token for {} has been considered as invalid", &jwt_user.login);
             Err(ApplicationError::IllegalToken)
         } else {
+            debug!("Token for {} has been checked", &jwt_user.login);
             Ok(())
         }
     }
@@ -101,17 +106,23 @@ impl JwtUser {
             .await?
             .ok_or(ApplicationError::NotFound)?;
         let new_token = Self::gen_token(user).await?;
+        token::Entity::revoke_token(&jwt_user.login, &token)?;
+        debug!("Token for {} has been refreshed", &jwt_user.login);
         token::Entity::register(&jwt_user.login, &new_token)?;
+        debug!("Token for {} has been registered", &jwt_user.login);
+        info!("Token for {} has been refreshed", &jwt_user.login);
         Ok(new_token)
     }
 
     pub fn revoke_session(login: &str, token: &str) -> Result<(), ApplicationError> {
         token::Entity::revoke_token(login, token)?;
+        info!("Token for {} has been revoked", login);
         Ok(())
     }
 
     pub fn revoke_all_session(login: &str) -> Result<(), ApplicationError> {
         token::Entity::revoke_all(login)?;
+        info!("Sessions of {} have been discarded", login);
         Ok(())
     }
 

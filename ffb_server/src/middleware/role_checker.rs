@@ -72,7 +72,7 @@ where
             None => {
                 return Box::pin(async move {
                     Ok(req.into_response(
-                        ApplicationError::InternalError.error_response(),
+                        ApplicationError::BadRequest.error_response(),
                     ))
                 });
             }

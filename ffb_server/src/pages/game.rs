@@ -7,7 +7,7 @@ use crate::error::ApplicationError;
 use actix_web::{get, HttpRequest, HttpResponse};
 
 use chrono::{DateTime, Utc};
-use ffb_structs::{games::Entity as GamesEntity, games::Model as Games};
+use ffb_structs::{games::Entity as GamesEntity, games::Model as Games, user};
 
 #[derive(Template)]
 #[template(path = "games/game_row.html")]
@@ -51,7 +51,10 @@ pub async fn games(
     let now: DateTime<Utc> = Utc::now();
     let fav_leagues: Option<Vec<u32>> = match context_query.all {
         Some(v) if v => None,
-        _ => Some(jwt_user.fav_leagues.clone()),
+        _ => {
+            let fav_leagues : Vec<u32> = user::Entity::get_favorite_leagues_id(jwt_user.id).await?;
+            Some(fav_leagues)
+        },
     };
     if let Some(query_date) = &context_query.date {
         let games: Option<Games> =

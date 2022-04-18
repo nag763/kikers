@@ -24,7 +24,6 @@ pub struct JwtUser {
     pub login: String,
     pub name: String,
     pub nav: Vec<NavAccess>,
-    pub fav_leagues: Vec<u32>,
     pub is_authorized: bool,
     pub role: u32,
     pub emited_on: i64,
@@ -39,7 +38,6 @@ impl JwtUser {
     async fn gen_token(user: User) -> Result<String, ApplicationError> {
         let nav: Vec<NavAccess> =
             navaccess::Entity::get_navaccess_for_role_id(user.role_id).await?;
-        let fav_leagues: Vec<u32> = user::Entity::get_favorite_leagues_id(user.id).await?;
 
         let jwt_key: String = std::env::var("JWT_KEY")?;
         let key: Hmac<Sha256> = Hmac::new_from_slice(jwt_key.as_bytes())?;
@@ -54,7 +52,6 @@ impl JwtUser {
                 nav,
                 is_authorized: user.is_authorized,
                 role: user.role_id,
-                fav_leagues,
                 emited_on: time::OffsetDateTime::now_utc().unix_timestamp(),
             },
         );

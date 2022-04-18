@@ -15,13 +15,32 @@ pub struct Entity;
 
 impl Entity {
     pub async fn get_favorite_leagues_id(id: u32) -> Result<Vec<u32>, ApplicationError> {
-        let mut conn = Database::acquire_sql_connection().await?;
-        let rows: Vec<(u32,)> = sqlx::query_as("SELECT league_id FROM USER_LEAGUE WHERE user_id=?")
-            .bind(&id)
-            .fetch_all(&mut conn)
-            .await?;
-        let result: Vec<u32> = rows.iter().map(|row| row.0).collect();
-        Ok(result)
+        let mut redis_conn = Database::acquire_redis_connection()?;
+        let fav_leagues_as_string: Option<String> = redis::cmd("GET")
+            .arg(format!("fav_leagues:{}", id))
+            .query(&mut redis_conn)?;
+        let fav_leagues = match fav_leagues_as_string {
+            Some(v) => {
+                let fav_leagues : Vec<u32> = serde_json::from_str(v.as_str())?;
+                fav_leagues
+            },
+            None => {
+                let mut conn = Database::acquire_sql_connection().await?;
+                let rows: Vec<(u32,)> = sqlx::query_as("SELECT league_id FROM USER_LEAGUE WHERE user_id=?")
+                    .bind(&id)
+                    .fetch_all(&mut conn)
+                    .await?;
+                let result: Vec<u32> = rows.iter().map(|row| row.0).collect();
+                redis::cmd("SET")
+                    .arg(format!("fav_leagues:{}", id))
+                    .arg(&serde_json::to_string(&result)?)
+                    .arg("EX")
+                    .arg(3600)
+                    .query(&mut redis_conn)?;
+                result
+            }
+        };
+        Ok(fav_leagues)
     }
 
     pub async fn get_users_with_pagination(
@@ -101,11 +120,15 @@ impl Entity {
         league_id: u32,
     ) -> Result<(), ApplicationError> {
         let mut conn = Database::acquire_sql_connection().await?;
+        let mut redis_conn = Database::acquire_redis_connection()?;
         sqlx::query("INSERT INTO USER_LEAGUE(user_id, league_id) VALUES(?,?)")
             .bind(&user_id)
             .bind(&league_id)
             .execute(&mut conn)
             .await?;
+        redis::cmd("DEL")
+            .arg(format!("fav_leagues:{}", user_id))
+            .query(&mut redis_conn)?;
         Ok(())
     }
 
@@ -114,11 +137,15 @@ impl Entity {
         league_id: u32,
     ) -> Result<(), ApplicationError> {
         let mut conn = Database::acquire_sql_connection().await?;
+        let mut redis_conn = Database::acquire_redis_connection()?;
         sqlx::query("DELETE FROM USER_LEAGUE WHERE user_id=? AND league_id=?")
             .bind(&user_id)
             .bind(&league_id)
             .execute(&mut conn)
             .await?;
+        redis::cmd("DEL")
+            .arg(format!("fav_leagues:{}", user_id))
+            .query(&mut redis_conn)?;
         Ok(())
     }
 

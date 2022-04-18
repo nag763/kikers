@@ -7,9 +7,9 @@
 <p>Click on the star to add a league to your favorites, or remove it if it is already in your list</p>
 <hr/>
 	<div class="overflow-auto  h-64">
+		{% if let Some(user) = user %}
 		{% for league in leagues %}
-	      {% if let Some(user) = user %}
-	      {% let is_league_in_favorite = user.fav_leagues.contains(league.league.id) %}
+	      {% let is_league_in_favorite = fav_leagues_id.contains(league.league.id) %}
 	<div class="flex items-center gap-4 p-4">
         <img class="w-12 h-12" src="{{league.league.logo}}" alt="logo">
       <div class="flex flex-col">
@@ -40,8 +40,8 @@
 	     </form>
       </div>
 </div>
-	      {% endif %}
 		{%endfor%}
+		{%endif%}
 	</div>
 	<a href="/profile/leagues"><button type="button" class="text-white bg-gradient-to-br from-green-400 to-blue-600 hover:bg-gradient-to-bl focus:ring-4 focus:ring-green-200 dark:focus:ring-green-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-2 mb-2">Go back</button></a>
 		{% else if let Some(fav_leagues) = fav_leagues %}

@@ -1,8 +1,6 @@
 use ffb_auth::JwtUser;
 
 use crate::error::ApplicationError;
-use actix_web::http::Cookie;
-use actix_web::HttpMessage;
 use actix_web::{post, HttpRequest, HttpResponse, Responder};
 use ffb_structs::user;
 use ffb_structs::user::Model as User;
@@ -129,7 +127,6 @@ pub struct UserChangeLeague {
 
 #[post("/profile/leagues")]
 pub async fn user_change_leagues(
-    req: HttpRequest,
     user_change_league_form: actix_web_validator::Form<UserChangeLeague>,
 ) -> Result<impl Responder, ApplicationError> {
     let res_msg: String = match user_change_league_form.action.as_str() {
@@ -158,22 +155,11 @@ pub async fn user_change_leagues(
         _ => return Err(ApplicationError::BadRequest),
     };
 
-    let jwt_path: String = std::env::var("JWT_TOKEN_PATH")?;
-    let current_token: Cookie = req
-        .cookie(jwt_path.as_str())
-        .ok_or(ApplicationError::IllegalToken)?;
-    let mut refreshed_token: Cookie = Cookie::new(
-        jwt_path.as_str(),
-        JwtUser::refresh_token(current_token.value()).await?,
-    );
-    refreshed_token.set_path("/");
     let code_redirect: String = match &user_change_league_form.code {
         Some(v) => format!("&code={}", v),
         None => String::new(),
     };
     Ok(HttpResponse::Found()
-        .del_cookie(&current_token)
-        .cookie(refreshed_token)
         .header(
             "Location",
             format!("/profile/leagues?info={}{}", res_msg, code_redirect),

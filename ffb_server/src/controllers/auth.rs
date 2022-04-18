@@ -1,8 +1,8 @@
 use ffb_auth::JwtUser;
 
 use crate::error::ApplicationError;
-use actix_web::http::Cookie;
-use actix_web::{get, post, HttpMessage, HttpRequest, HttpResponse, Responder};
+use actix_web::cookie::Cookie;
+use actix_web::{get, post, HttpRequest, HttpResponse, Responder};
 use ffb_structs::user;
 use std::thread;
 
@@ -32,7 +32,7 @@ pub async fn login(
                 .http_only(true)
                 .finish();
             Ok(HttpResponse::Found()
-                .header("Location", "/")
+                .append_header(("Location", "/"))
                 .cookie(cookie)
                 .finish())
         }
@@ -44,10 +44,10 @@ pub async fn login(
             );
             thread::sleep(std::time::Duration::from_secs(3));
             Ok(HttpResponse::Found()
-                .header(
+                .append_header((
                     "Location",
                     "/?error=We couldn't connect you, please verify your credentials",
-                )
+                ))
                 .finish())
         }
     }
@@ -55,16 +55,17 @@ pub async fn login(
 
 #[get("/logout")]
 pub async fn logout(req: HttpRequest) -> Result<impl Responder, ApplicationError> {
-    if let Some(jwt_cookie) = req.cookie(std::env::var("JWT_TOKEN_PATH")?.as_str()) {
+    if let Some(mut jwt_cookie) = req.cookie(std::env::var("JWT_TOKEN_PATH")?.as_str()) {
         if let Ok(jwt_user) = JwtUser::from_request(req) {
             JwtUser::revoke_session(&jwt_user.login, jwt_cookie.value())?;
         }
+        jwt_cookie.make_removal();
         Ok(HttpResponse::Found()
-            .header("Location", "/?info=You have been logged out successfully")
-            .del_cookie(&jwt_cookie)
+            .append_header(("Location", "/?info=You have been logged out successfully"))
+            .cookie(jwt_cookie)
             .finish())
     } else {
-        Ok(HttpResponse::Found().header("Location", "/").finish())
+        Ok(HttpResponse::Found().append_header(("Location", "/")).finish())
     }
 }
 
@@ -90,7 +91,7 @@ pub async fn register_user(
             req.peer_addr(),
             sign_up_form.login
         );
-        return Ok(HttpResponse::Found().header("Location", "?error=Someone with the same login already exists, please contact the administrator if you believe you are the owner of the account").finish());
+        return Ok(HttpResponse::Found().append_header(("Location", "?error=Someone with the same login already exists, please contact the administrator if you believe you are the owner of the account")).finish());
     }
 
     user::Entity::insert_user(
@@ -105,6 +106,6 @@ pub async fn register_user(
     );
     let info_msg : String = format!("User {} has been created, you will need to wait for approval before being able to use this site's functionnalities.", sign_up_form.login);
     Ok(HttpResponse::Found()
-        .header("Location", format!("/?info={}", info_msg))
+        .append_header(("Location", format!("/?info={}", info_msg)))
         .finish())
 }

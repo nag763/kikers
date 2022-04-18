@@ -3,7 +3,6 @@ use askama::Template;
 use crate::error::ApplicationError;
 use crate::pages::ContextQuery;
 use actix_web::web;
-use actix_web::HttpMessage;
 use actix_web::{get, HttpRequest, HttpResponse};
 use ffb_auth::JwtUser;
 
@@ -70,7 +69,7 @@ pub async fn signup(
         };
         Ok(HttpResponse::Ok().body(sign_up.render()?))
     } else {
-        Ok(HttpResponse::Found().header("Location", "/").finish())
+        Ok(HttpResponse::Found().append_header(("Location", "/")).finish())
     }
 }
 

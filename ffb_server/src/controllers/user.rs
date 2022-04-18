@@ -35,7 +35,7 @@ pub async fn user_activation(
         jwt_user.login, user_activation_form.value, user_activation_form.id
     );
     Ok(HttpResponse::Found()
-        .header(
+        .append_header((
             "Location",
             format!(
                 "/admin?info=User {}'s access has been modified&page={}&per_page={}",
@@ -43,7 +43,7 @@ pub async fn user_activation(
                 user_activation_form.page,
                 user_activation_form.per_page
             ),
-        )
+        ))
         .finish())
 }
 
@@ -66,13 +66,13 @@ pub async fn user_deletion(
     user::Entity::delete_user_id(user_deletion_form.id).await?;
     JwtUser::revoke_all_session(&user_deletion_form.login)?;
     Ok(HttpResponse::Found()
-        .header(
+        .append_header((
             "Location",
             format!(
                 "/admin?info=User {} has been deleted&page={}&per_page={}",
                 user_deletion_form.login, user_deletion_form.page, user_deletion_form.per_page
             ),
-        )
+        ))
         .finish())
 }
 
@@ -103,7 +103,7 @@ pub async fn user_modification(
     user::Entity::update(user).await?;
     JwtUser::revoke_all_session(&user_modification_form.login)?;
     Ok(HttpResponse::Found()
-        .header(
+        .append_header((
             "Location",
             format!(
                 "/admin?info=User {} has been modified&page={}&per_page={}&id={}",
@@ -112,7 +112,7 @@ pub async fn user_modification(
                 user_modification_form.per_page,
                 user_modification_form.id
             ),
-        )
+        ))
         .finish())
 }
 
@@ -160,10 +160,10 @@ pub async fn user_change_leagues(
         None => String::new(),
     };
     Ok(HttpResponse::Found()
-        .header(
+        .append_header((
             "Location",
             format!("/profile/leagues?info={}{}", res_msg, code_redirect),
-        )
+        ))
         .finish())
 }
 
@@ -194,5 +194,5 @@ pub async fn user_search(
             )
         }
     };
-    Ok(HttpResponse::Found().header("Location", result).finish())
+    Ok(HttpResponse::Found().append_header(("Location", result)).finish())
 }

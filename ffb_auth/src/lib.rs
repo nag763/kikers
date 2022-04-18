@@ -1,6 +1,6 @@
 use crate::error::ApplicationError;
 use crate::magic_crypt::MagicCryptTrait;
-use actix_web::{HttpMessage, HttpRequest};
+use actix_web::HttpRequest;
 use ffb_structs::navaccess;
 use ffb_structs::navaccess::Model as NavAccess;
 use ffb_structs::token;

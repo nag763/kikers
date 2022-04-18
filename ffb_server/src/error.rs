@@ -1,4 +1,4 @@
-use actix_web::{dev::HttpResponseBuilder, http::header, http::StatusCode, HttpResponse};
+use actix_web::{HttpResponseBuilder, http::header, http::StatusCode, HttpResponse};
 use askama::Template;
 
 use ffb_auth::error::ApplicationError as AuthApplicationError;
@@ -59,7 +59,7 @@ impl actix_web::error::ResponseError for ApplicationError {
             redirect_url: self.redirect_url(),
         };
         let builder = HttpResponseBuilder::new(self.status_code())
-            .set_header(header::CONTENT_TYPE, "text/html; charset=utf-8")
+            .insert_header((header::CONTENT_TYPE, "text/html; charset=utf-8"))
             .body(error_page.render().unwrap());
         builder
     }
@@ -75,13 +75,6 @@ impl actix_web::error::ResponseError for ApplicationError {
             | ApplicationError::BadRequest => StatusCode::BAD_REQUEST,
             ApplicationError::NotFound => StatusCode::NOT_FOUND,
         }
-    }
-}
-
-impl From<jwt::Error> for ApplicationError {
-    fn from(jwt_err: jwt::Error) -> Self {
-        error!("A jwt error happened : {}", jwt_err.to_string());
-        ApplicationError::IllegalToken
     }
 }
 

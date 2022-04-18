@@ -57,7 +57,7 @@ impl Entity {
             .arg("fixtures")
             .arg(date)
             .arg(value)
-            .query(&mut conn)?; 
+            .query(&mut conn)?;
         Ok(())
     }
 }

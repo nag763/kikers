@@ -51,14 +51,14 @@ pub async fn user_leagues(
     context_query: web::Query<ContextQuery>,
 ) -> Result<HttpResponse, ApplicationError> {
     let jwt_user: JwtUser = JwtUser::from_request(req)?;
-    let fav_leagues_id : Vec<u32> = user::Entity::get_favorite_leagues_id(jwt_user.id).await?;
+    let fav_leagues_id: Vec<u32> = user::Entity::get_favorite_leagues_id(jwt_user.id).await?;
     let (leagues, fav_leagues): (Option<Vec<APILeague>>, Option<Vec<APILeague>>) =
         match &context_query.code {
             Some(v) => (Some(league::Entity::get_leagues_for_country_code(v)?), None),
             None => (
                 None,
                 Some(league::Entity::get_fav_leagues_of_user(
-                        fav_leagues_id.clone()
+                    fav_leagues_id.clone(),
                 )?),
             ),
         };

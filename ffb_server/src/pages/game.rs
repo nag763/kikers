@@ -52,9 +52,9 @@ pub async fn games(
     let fav_leagues: Option<Vec<u32>> = match context_query.all {
         Some(v) if v => None,
         _ => {
-            let fav_leagues : Vec<u32> = user::Entity::get_favorite_leagues_id(jwt_user.id).await?;
+            let fav_leagues: Vec<u32> = user::Entity::get_favorite_leagues_id(jwt_user.id).await?;
             Some(fav_leagues)
-        },
+        }
     };
     if let Some(query_date) = &context_query.date {
         let games: Option<Games> =

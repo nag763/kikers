@@ -21,15 +21,16 @@ impl Entity {
             .query(&mut redis_conn)?;
         let fav_leagues = match fav_leagues_as_string {
             Some(v) => {
-                let fav_leagues : Vec<u32> = serde_json::from_str(v.as_str())?;
+                let fav_leagues: Vec<u32> = serde_json::from_str(v.as_str())?;
                 fav_leagues
-            },
+            }
             None => {
                 let mut conn = Database::acquire_sql_connection().await?;
-                let rows: Vec<(u32,)> = sqlx::query_as("SELECT league_id FROM USER_LEAGUE WHERE user_id=?")
-                    .bind(&id)
-                    .fetch_all(&mut conn)
-                    .await?;
+                let rows: Vec<(u32,)> =
+                    sqlx::query_as("SELECT league_id FROM USER_LEAGUE WHERE user_id=?")
+                        .bind(&id)
+                        .fetch_all(&mut conn)
+                        .await?;
                 let result: Vec<u32> = rows.iter().map(|row| row.0).collect();
                 redis::cmd("SET")
                     .arg(format!("fav_leagues:{}", id))

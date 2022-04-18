@@ -3,8 +3,8 @@ pub(crate) mod error;
 use clap::{Parser, Subcommand};
 use dotenv::dotenv;
 use error::CliError;
+use ffb_structs::{country, games, league};
 use serde_json::json;
-use ffb_structs::{league, country, games};
 
 #[derive(Parser)]
 struct Args {
@@ -52,14 +52,14 @@ async fn run_main() -> Result<(), CliError> {
 
 async fn fetch_leagues() -> Result<(), CliError> {
     let res = call_api_endpoint("leagues".into()).await?;
-    let response : String = res["response"].to_string();
+    let response: String = res["response"].to_string();
     league::Entity::store(&response)?;
     Ok(())
 }
 
 async fn fetch_countries() -> Result<(), CliError> {
     let res = call_api_endpoint("countries".into()).await?;
-    let response : String = res["response"].to_string();
+    let response: String = res["response"].to_string();
     country::Entity::store(&response)?;
     Ok(())
 }

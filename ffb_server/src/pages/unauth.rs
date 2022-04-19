@@ -69,7 +69,9 @@ pub async fn signup(
         };
         Ok(HttpResponse::Ok().body(sign_up.render()?))
     } else {
-        Ok(HttpResponse::Found().append_header(("Location", "/")).finish())
+        Ok(HttpResponse::Found()
+            .append_header(("Location", "/"))
+            .finish())
     }
 }
 

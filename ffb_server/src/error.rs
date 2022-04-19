@@ -1,4 +1,4 @@
-use actix_web::{HttpResponseBuilder, http::header, http::StatusCode, HttpResponse};
+use actix_web::{http::header, http::StatusCode, HttpResponse, HttpResponseBuilder};
 use askama::Template;
 
 use ffb_auth::error::ApplicationError as AuthApplicationError;
@@ -28,7 +28,7 @@ struct Error {
 impl ApplicationError {
     fn redirect_url(&self) -> Option<String> {
         match &*self {
-            Self::AuthError(_) => Some("/logout".into()),
+            Self::AuthError(_) | Self::IllegalToken => Some("/logout".into()),
             Self::CookiesUnapproved => Some("/cookies".into()),
             _ => None,
         }

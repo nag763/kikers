@@ -23,24 +23,35 @@ pub async fn user_activation(
     user_activation_form: actix_web_validator::Form<UserActivation>,
 ) -> Result<impl Responder, ApplicationError> {
     let jwt_user: JwtUser = JwtUser::from_request(req)?;
-    user::Entity::change_activation_status(&user_activation_form.uuid, user_activation_form.value)
-        .await?;
+    let result: bool = user::Entity::change_activation_status_with_role_check(
+        &user_activation_form.uuid,
+        user_activation_form.value,
+        jwt_user.role,
+    )
+    .await?
+    .into();
 
-    if !user_activation_form.value {
-        JwtUser::revoke_all_session(&user_activation_form.login)?;
-    }
-    info!(
-        "User {} updated activation status (to {}) of user {}",
-        jwt_user.login, user_activation_form.value, &user_activation_form.login
-    );
+    let result: String = match result {
+        true => {
+            if !user_activation_form.value {
+                JwtUser::revoke_all_session(&user_activation_form.login)?;
+            }
+            format!(
+                "info=User {}'s access has been modified",
+                &user_activation_form.login
+            )
+        }
+        false => format!(
+            "error=An error happened while modifying user {}'s acces",
+            &user_activation_form.login
+        ),
+    };
     Ok(HttpResponse::Found()
         .append_header((
             "Location",
             format!(
-                "/admin?info=User {}'s access has been modified&page={}&per_page={}",
-                user_activation_form.login,
-                user_activation_form.page,
-                user_activation_form.per_page
+                "/admin?{}&page={}&per_page={}",
+                result, user_activation_form.page, user_activation_form.per_page
             ),
         ))
         .finish())
@@ -59,16 +70,31 @@ pub struct UserDeletion {
 
 #[post("/user/deletion")]
 pub async fn user_deletion(
+    req: HttpRequest,
     user_deletion_form: actix_web_validator::Form<UserDeletion>,
 ) -> Result<impl Responder, ApplicationError> {
-    user::Entity::delete_user_uuid(&user_deletion_form.uuid).await?;
-    JwtUser::revoke_all_session(&user_deletion_form.login)?;
+    let jwt_user: JwtUser = JwtUser::from_request(req)?;
+    let result: bool =
+        user::Entity::delete_user_uuid_with_role_check(&user_deletion_form.uuid, jwt_user.role)
+            .await?
+            .into();
+
+    let result: String = match result {
+        true => {
+            JwtUser::revoke_all_session(&user_deletion_form.login)?;
+            format!("info=User {} has been deleted", &user_deletion_form.login)
+        }
+        false => format!(
+            "error=User {} hasn't been deleted",
+            &user_deletion_form.login
+        ),
+    };
     Ok(HttpResponse::Found()
         .append_header((
             "Location",
             format!(
-                "/admin?info=User {} has been deleted&page={}&per_page={}",
-                user_deletion_form.login, user_deletion_form.page, user_deletion_form.per_page
+                "/admin?{}&page={}&per_page={}",
+                &result, user_deletion_form.page, user_deletion_form.per_page
             ),
         ))
         .finish())
@@ -92,20 +118,36 @@ pub struct UserModification {
 #[post("/user/modification")]
 pub async fn user_modification(
     user_modification_form: actix_web_validator::Form<UserModification>,
+    req: HttpRequest,
 ) -> Result<impl Responder, ApplicationError> {
+    let jwt_user: JwtUser = JwtUser::from_request(req)?;
     let mut user: User = user::Entity::find_by_uuid(&user_modification_form.uuid)
         .await?
         .ok_or(ApplicationError::NotFound)?;
     user.name = user_modification_form.name.clone();
     user.is_authorized = user_modification_form.is_authorized.is_some();
-    user::Entity::update(user).await?;
-    JwtUser::revoke_all_session(&user_modification_form.login)?;
+    let result: bool = user::Entity::update_with_role_check(user, jwt_user.role)
+        .await?
+        .into();
+    let result: String = match result {
+        true => {
+            JwtUser::revoke_all_session(&user_modification_form.login)?;
+            format!(
+                "info=User {} has been modified",
+                &user_modification_form.login
+            )
+        }
+        false => format!(
+            "error=User {} hasn't been modified, an error happened",
+            &user_modification_form.login
+        ),
+    };
     Ok(HttpResponse::Found()
         .append_header((
             "Location",
             format!(
-                "/admin?info=User {} has been modified&page={}&per_page={}&id={}",
-                user_modification_form.login,
+                "/admin?{}&page={}&per_page={}&id={}",
+                &result,
                 user_modification_form.page,
                 user_modification_form.per_page,
                 user_modification_form.id
@@ -126,7 +168,12 @@ pub struct UserChangeLeague {
 #[post("/profile/leagues")]
 pub async fn user_change_leagues(
     user_change_league_form: actix_web_validator::Form<UserChangeLeague>,
+    req: HttpRequest,
 ) -> Result<impl Responder, ApplicationError> {
+    let jwt_user: JwtUser = JwtUser::from_request(req)?;
+    if jwt_user.id != user_change_league_form.user_id {
+        return Err(ApplicationError::BadRequest);
+    }
     let res_msg: String = match user_change_league_form.action.as_str() {
         "add" => {
             user::Entity::add_leagues_as_favorite(
@@ -178,8 +225,12 @@ pub struct UserSearch {
 #[post("/user/search")]
 pub async fn user_search(
     user_search_form: actix_web_validator::Form<UserSearch>,
+    req: HttpRequest,
 ) -> Result<impl Responder, ApplicationError> {
-    let user: Option<User> = user::Entity::get_user_by_login(&user_search_form.login).await?;
+    let jwt_user: JwtUser = JwtUser::from_request(req)?;
+    let user: Option<User> =
+        user::Entity::get_user_by_login_with_role_check(&user_search_form.login, jwt_user.role)
+            .await?;
     let result: String = match user {
         Some(v) => format!(
             "/admin?page={}&per_page={}&id={}",
@@ -187,10 +238,12 @@ pub async fn user_search(
         ),
         None => {
             format!(
-                "/admin?error=User {} hasn't been found&page={}&per_page={}",
+                "/admin?error=User {} has either not been found or you don't have rights on him&page={}&per_page={}",
                 user_search_form.login, user_search_form.page, user_search_form.per_page,
             )
         }
     };
-    Ok(HttpResponse::Found().append_header(("Location", result)).finish())
+    Ok(HttpResponse::Found()
+        .append_header(("Location", result))
+        .finish())
 }

@@ -65,7 +65,9 @@ pub async fn logout(req: HttpRequest) -> Result<impl Responder, ApplicationError
             .cookie(jwt_cookie)
             .finish())
     } else {
-        Ok(HttpResponse::Found().append_header(("Location", "/")).finish())
+        Ok(HttpResponse::Found()
+            .append_header(("Location", "/"))
+            .finish())
     }
 }
 
@@ -94,18 +96,24 @@ pub async fn register_user(
         return Ok(HttpResponse::Found().append_header(("Location", "?error=Someone with the same login already exists, please contact the administrator if you believe you are the owner of the account")).finish());
     }
 
-    user::Entity::insert_user(
+    let result: bool = user::Entity::insert_user(
         &sign_up_form.login,
         &sign_up_form.name,
         &JwtUser::encrypt_key(&sign_up_form.password)?,
     )
-    .await?;
-    info!(
-        "User {} has been created, access hasn't been granted yet",
-        sign_up_form.login
-    );
-    let info_msg : String = format!("User {} has been created, you will need to wait for approval before being able to use this site's functionnalities.", sign_up_form.login);
+    .await?
+    .into();
+    let response: String = match result {
+        true => {
+            info!(
+                "User {} has been created, access hasn't been granted yet",
+                sign_up_form.login
+            );
+            format!("/?info=User {} has been created, you will need to wait for approval before being able to use this site's functionnalities.", sign_up_form.login)
+        }
+        false => format!("/signup/?error=An error happened while trying to create your user"),
+    };
     Ok(HttpResponse::Found()
-        .append_header(("Location", format!("/?info={}", info_msg)))
+        .append_header(("Location", response))
         .finish())
 }

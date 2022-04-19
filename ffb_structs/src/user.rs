@@ -1,5 +1,6 @@
 use crate::database::Database;
 use crate::error::ApplicationError;
+use crate::transaction_result::TransactionResult;
 use uuid::Uuid;
 
 #[derive(Clone, Debug, PartialEq, Default, sqlx::FromRow)]
@@ -62,6 +63,20 @@ impl Entity {
         Ok(models)
     }
 
+    pub async fn find_by_id_with_role_check(
+        id: u32,
+        role_id: u32,
+    ) -> Result<Option<Model>, ApplicationError> {
+        let mut conn = Database::acquire_sql_connection().await?;
+        let model =
+            sqlx::query_as::<_, Model>("SELECT * FROM USER WHERE id=? AND role_id < ? LIMIT 1")
+                .bind(&id)
+                .bind(&role_id)
+                .fetch_optional(&mut conn)
+                .await?;
+        Ok(model)
+    }
+
     pub async fn find_by_id(id: u32) -> Result<Option<Model>, ApplicationError> {
         let mut conn = Database::acquire_sql_connection().await?;
         let model = sqlx::query_as::<_, Model>("SELECT * FROM USER WHERE id=? LIMIT 1")
@@ -80,10 +95,14 @@ impl Entity {
         Ok(model)
     }
 
-    pub async fn get_user_by_login(login: &str) -> Result<Option<Model>, ApplicationError> {
+    pub async fn get_user_by_login_with_role_check(
+        login: &str,
+        role_id: u32,
+    ) -> Result<Option<Model>, ApplicationError> {
         let mut conn = Database::acquire_sql_connection().await?;
-        let model = sqlx::query_as("SELECT * FROM USER WHERE login=? LIMIT 1")
+        let model = sqlx::query_as("SELECT * FROM USER WHERE login=? AND role_id < ? LIMIT 1")
             .bind(login)
+            .bind(role_id)
             .fetch_optional(&mut conn)
             .await?;
         Ok(model)
@@ -103,24 +122,28 @@ impl Entity {
         Ok(model)
     }
 
-    pub async fn delete_user_uuid(uuid: &str) -> Result<(), ApplicationError> {
+    pub async fn delete_user_uuid_with_role_check(
+        uuid: &str,
+        role_id: u32,
+    ) -> Result<TransactionResult, ApplicationError> {
         let mut conn = Database::acquire_sql_connection().await?;
-        sqlx::query("DELETE FROM USER WHERE uuid =?")
+        let result = sqlx::query("DELETE FROM USER WHERE uuid =? AND role_id < ?")
             .bind(&uuid)
+            .bind(&role_id)
             .execute(&mut conn)
             .await?;
         info!("User {} has been deleted", uuid);
-        Ok(())
+        Ok(TransactionResult::from_expected_affected_rows(result, 1))
     }
 
     pub async fn insert_user(
         login: &str,
         name: &str,
         password: &str,
-    ) -> Result<(), ApplicationError> {
+    ) -> Result<TransactionResult, ApplicationError> {
         let uuid = Uuid::new_v4();
         let mut conn = Database::acquire_sql_connection().await?;
-        sqlx::query("INSERT INTO USER(uuid, login, name, password) VALUES(?, ?,?,?)")
+        let result = sqlx::query("INSERT INTO USER(uuid, login, name, password) VALUES(?, ?,?,?)")
             .bind(uuid.to_string())
             .bind(login)
             .bind(name)
@@ -128,16 +151,16 @@ impl Entity {
             .execute(&mut conn)
             .await?;
         info!("User {} has been created", login);
-        Ok(())
+        Ok(TransactionResult::from_expected_affected_rows(result, 1))
     }
 
     pub async fn add_leagues_as_favorite(
         user_id: u32,
         league_id: u32,
-    ) -> Result<(), ApplicationError> {
+    ) -> Result<TransactionResult, ApplicationError> {
         let mut conn = Database::acquire_sql_connection().await?;
         let mut redis_conn = Database::acquire_redis_connection()?;
-        sqlx::query("INSERT INTO USER_LEAGUE(user_id, league_id) VALUES(?,?)")
+        let result = sqlx::query("INSERT INTO USER_LEAGUE(user_id, league_id) VALUES(?,?)")
             .bind(&user_id)
             .bind(&league_id)
             .execute(&mut conn)
@@ -145,16 +168,16 @@ impl Entity {
         redis::cmd("DEL")
             .arg(format!("fav_leagues:{}", user_id))
             .query(&mut redis_conn)?;
-        Ok(())
+        Ok(TransactionResult::from_expected_affected_rows(result, 1))
     }
 
     pub async fn remove_leagues_as_favorite(
         user_id: u32,
         league_id: u32,
-    ) -> Result<(), ApplicationError> {
+    ) -> Result<TransactionResult, ApplicationError> {
         let mut conn = Database::acquire_sql_connection().await?;
         let mut redis_conn = Database::acquire_redis_connection()?;
-        sqlx::query("DELETE FROM USER_LEAGUE WHERE user_id=? AND league_id=?")
+        let result = sqlx::query("DELETE FROM USER_LEAGUE WHERE user_id=? AND league_id=?")
             .bind(&user_id)
             .bind(&league_id)
             .execute(&mut conn)
@@ -162,33 +185,43 @@ impl Entity {
         redis::cmd("DEL")
             .arg(format!("fav_leagues:{}", user_id))
             .query(&mut redis_conn)?;
-        Ok(())
+        Ok(TransactionResult::from_expected_affected_rows(result, 1))
     }
 
-    pub async fn change_activation_status(
+    pub async fn change_activation_status_with_role_check(
         uuid: &str,
         is_authorized: bool,
-    ) -> Result<(), ApplicationError> {
+        role_id: u32,
+    ) -> Result<TransactionResult, ApplicationError> {
         let mut conn = Database::acquire_sql_connection().await?;
-        sqlx::query("UPDATE USER SET is_authorized=? WHERE uuid =?")
+        let result = sqlx::query("UPDATE USER SET is_authorized=? WHERE uuid =? AND role_id < ?")
             .bind(&is_authorized)
             .bind(uuid)
+            .bind(role_id)
             .execute(&mut conn)
             .await?;
-        info!("User#{} activation status have been updated to {}", uuid, is_authorized);
-        Ok(())
+        info!(
+            "User#{} activation status have been updated to {}",
+            uuid, is_authorized
+        );
+        Ok(TransactionResult::from_expected_affected_rows(result, 1))
     }
 
-    pub async fn update(model: Model) -> Result<(), ApplicationError> {
+    pub async fn update_with_role_check(
+        model: Model,
+        role_id: u32,
+    ) -> Result<TransactionResult, ApplicationError> {
         let mut conn = Database::acquire_sql_connection().await?;
-        sqlx::query("UPDATE USER SET name=?,is_authorized=? WHERE id =?")
-            .bind(&model.name)
-            .bind(&model.is_authorized)
-            .bind(&model.id)
-            .execute(&mut conn)
-            .await?;
+        let result =
+            sqlx::query("UPDATE USER SET name=?,is_authorized=? WHERE id =? and role_id < ?")
+                .bind(&model.name)
+                .bind(&model.is_authorized)
+                .bind(&model.id)
+                .bind(&role_id)
+                .execute(&mut conn)
+                .await?;
         info!("User {} has been updated", &model.login);
-        Ok(())
+        Ok(TransactionResult::from_expected_affected_rows(result, 1))
     }
 
     pub async fn login_exists(login: &str) -> Result<bool, ApplicationError> {

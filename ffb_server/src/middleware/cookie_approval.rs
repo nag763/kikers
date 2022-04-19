@@ -1,8 +1,8 @@
 use std::pin::Pin;
 
 use actix_service::{Service, Transform};
-use actix_web::HttpResponse;
 use actix_web::body::BoxBody;
+use actix_web::HttpResponse;
 use actix_web::ResponseError;
 use actix_web::{dev::ServiceRequest, dev::ServiceResponse, Error};
 use futures::future::{ok, Ready};
@@ -52,25 +52,17 @@ where
             match req.path() {
                 "/" => {
                     return Box::pin(async move {
-                        Ok(
-                            req.into_response(
+                        Ok(req.into_response(
                             HttpResponse::Found()
                                 .append_header(("Location", "/cookies"))
-                                .finish()
-                                )
-
-                        )
+                                .finish(),
+                        ))
                     })
                 }
                 "/cookies" => {}
                 _ => {
                     return Box::pin(async move {
-                        Ok(
-                            req.into_response(
-                            ApplicationError::CookiesUnapproved
-                                .error_response()
-                                )
-                        )
+                        Ok(req.into_response(ApplicationError::CookiesUnapproved.error_response()))
                     })
                 }
             }

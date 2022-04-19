@@ -54,26 +54,20 @@ where
                 Ok(jwt_user) => {
                     if JwtUser::check_token(token.value()).is_err() {
                         return Box::pin(async move {
-                            Ok(req.into_response(
-                                ApplicationError::IllegalToken.error_response(),
-                            ))
+                            Ok(req.into_response(ApplicationError::IllegalToken.error_response()))
                         });
                     }
                     jwt_user.nav
                 }
                 _ => {
                     return Box::pin(async move {
-                        Ok(req.into_response(
-                            ApplicationError::IllegalToken.error_response(),
-                        ))
+                        Ok(req.into_response(ApplicationError::IllegalToken.error_response()))
                     });
                 }
             },
             None => {
                 return Box::pin(async move {
-                    Ok(req.into_response(
-                        ApplicationError::BadRequest.error_response(),
-                    ))
+                    Ok(req.into_response(ApplicationError::BadRequest.error_response()))
                 });
             }
         };

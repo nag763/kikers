@@ -33,7 +33,7 @@ pub async fn admin_dashboard(
     let data: Vec<User> =
         user::Entity::get_users_with_pagination(jwt_user.role, per_page, page).await?;
     let chosen_user: Option<User> = match context_query.id {
-        Some(v) => user::Entity::find_by_id(v).await?,
+        Some(v) => user::Entity::find_by_id_with_role_check(v, jwt_user.role).await?,
         None => None,
     };
     let index = Admin {

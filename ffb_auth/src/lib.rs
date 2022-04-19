@@ -74,8 +74,12 @@ impl JwtUser {
                     Ok(Some(token))
                 }
                 false => {
-                    warn!("Token for {} was ready but user isn't authorized", &user.login);
-                    Err(ApplicationError::UserNotAuthorized(login.to_string()))},
+                    warn!(
+                        "Token for {} was ready but user isn't authorized",
+                        &user.login
+                    );
+                    Err(ApplicationError::UserNotAuthorized(login.to_string()))
+                }
             },
             None => Ok(None),
         }
@@ -84,7 +88,10 @@ impl JwtUser {
     pub fn check_token(token: &str) -> Result<(), ApplicationError> {
         let jwt_user: Self = Self::from_token(token)?;
         if !token::Entity::verify(&jwt_user.login, token)? {
-            warn!("Token for {} has been considered as invalid", &jwt_user.login);
+            warn!(
+                "Token for {} has been considered as invalid",
+                &jwt_user.login
+            );
             Err(ApplicationError::IllegalToken)
         } else {
             debug!("Token for {} has been checked", &jwt_user.login);

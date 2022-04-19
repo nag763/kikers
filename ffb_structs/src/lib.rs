@@ -11,4 +11,5 @@ pub mod games;
 pub mod league;
 pub mod navaccess;
 pub mod token;
+pub mod transaction_result;
 pub mod user;

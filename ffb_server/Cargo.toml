@@ -23,3 +23,4 @@ regex = "1.5.5"
 ffb_structs = { path = "../ffb_structs" }
 ffb_auth = { path = "../ffb_auth" }
 lazy_static = "1.4.0"
+tokio = "1.17.0"

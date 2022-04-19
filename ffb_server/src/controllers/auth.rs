@@ -42,7 +42,7 @@ pub async fn login(
                 req.peer_addr(),
                 login_form.login
             );
-            thread::sleep(std::time::Duration::from_secs(3));
+            tokio::time::sleep(tokio::time::Duration::from_secs(3)).await;
             Ok(HttpResponse::Found()
                 .append_header((
                     "Location",

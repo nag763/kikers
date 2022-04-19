@@ -1,10 +1,16 @@
 use sqlx::mysql::MySqlQueryResult;
 
+#[derive(Clone, Debug, PartialEq, Display)]
 pub enum TransactionResult {
+    #[display(fmt = "The transaction executed with success")]
     Success,
+    #[display(fmt = "No rows have been affected by the transaction")]
     NoRowsAffected,
+    #[display(fmt = "Too many rows affected : {}", _0)]
     TooManyRowsAffected(u64),
+    #[display(fmt = "Not enough rows affected : {}", _0)]
     NotEnoughRowsAffected(u64),
+    #[display(fmt = "An unexpected result happened")]
     UnknownResult,
 }
 

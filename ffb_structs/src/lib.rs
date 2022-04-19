@@ -2,6 +2,8 @@
 extern crate lazy_static;
 #[macro_use]
 extern crate log;
+#[macro_use]
+extern crate derive_more;
 
 pub(crate) mod common_api_structs;
 pub mod country;

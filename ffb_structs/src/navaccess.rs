@@ -2,7 +2,8 @@ use crate::database::Database;
 use crate::error::ApplicationError;
 use serde::{Deserialize, Serialize};
 
-#[derive(Clone, Debug, PartialEq, Serialize, Deserialize, sqlx::FromRow)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize, Display, sqlx::FromRow)]
+#[display(fmt = "{}=>{}(positioned at {:?}", label, href, position)]
 pub struct Model {
     pub id: u32,
     pub label: String,

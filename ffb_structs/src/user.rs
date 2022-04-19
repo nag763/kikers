@@ -3,7 +3,8 @@ use crate::error::ApplicationError;
 use crate::transaction_result::TransactionResult;
 use uuid::Uuid;
 
-#[derive(Clone, Debug, PartialEq, Default, sqlx::FromRow)]
+#[derive(Clone, Debug, PartialEq, Default, Display, sqlx::FromRow)]
+#[display(fmt = "#{} named {} with login {}", id, name, login)]
 pub struct Model {
     pub id: u32,
     pub uuid: String,

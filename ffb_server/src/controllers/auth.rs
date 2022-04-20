@@ -4,7 +4,6 @@ use crate::error::ApplicationError;
 use actix_web::cookie::Cookie;
 use actix_web::{get, post, HttpRequest, HttpResponse, Responder};
 use ffb_structs::user;
-use std::thread;
 
 lazy_static! {
     static ref RE_VALID_LOGIN: regex::Regex =

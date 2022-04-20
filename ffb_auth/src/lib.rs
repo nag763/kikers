@@ -14,6 +14,8 @@ use sha2::Sha256;
 pub mod error;
 
 #[macro_use]
+extern crate derive_more;
+#[macro_use]
 extern crate magic_crypt;
 #[macro_use]
 extern crate log;

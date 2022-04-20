@@ -10,6 +10,7 @@ pub enum ApplicationError {
 impl fmt::Display for ApplicationError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let reason : String = match &*self {
+//TODO:            impl format derive more here
             Self::DatabaseError(db_err) => format!("A database error happened, it has been reported and will be resolved as soon as possible : {} ", db_err) ,
             Self::RedisError(redis_err) => format!("A redis error happened, it has been reported and will be resolved as soon as possible : {} ", redis_err) ,
             Self::SerialError => "A serial error happened".into(),

@@ -1,26 +1,17 @@
 use ffb_structs::error::ApplicationError as StructError;
-use std::fmt;
 
-#[derive(Debug)]
+#[derive(Debug, Display)]
 pub enum ApplicationError {
+    #[display(fmt = "Your authentication token is not correct, please reconnect in order to regenarate it")]
     IllegalToken,
+    #[display(fmt = "{}", _0)]
     StructError(String),
+    #[display(fmt = "The user hasn't been found")]
     NotFound,
+    #[display(fmt = "The user : {}'s access has either been revoked or not granted", _0)]
     UserNotAuthorized(String),
+    #[display(fmt = "An internal error happened")]
     InternalError,
-}
-
-impl fmt::Display for ApplicationError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        let reason : String = match &*self {
-            Self::IllegalToken => "Your authentication token is not correct, please reconnect in order to regenarate it".into(),
-            Self::NotFound => "The user hasn't been found".into(),
-            Self::StructError(err) => err.into(),
-            Self::UserNotAuthorized(login) => format!("The user : {}'s access has either been revoked or not granted", login),
-            Self::InternalError => "An internal error happened".into(),
-        };
-        write!(f, "{}", reason)
-    }
 }
 
 impl From<jwt::Error> for ApplicationError {

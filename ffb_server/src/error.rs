@@ -3,17 +3,24 @@ use askama::Template;
 
 use ffb_auth::error::ApplicationError as AuthApplicationError;
 use ffb_structs::error::ApplicationError as StructApplicationError;
-use std::fmt;
 
-#[derive(Debug)]
+#[derive(Debug, Display)]
 pub enum ApplicationError {
+    #[display(fmt = "An internal error happened, it has been reported and will be resolved as soon as possible")]
     InternalError,
+    #[display(fmt = "One of the requested item hasn't been found, please ensure your request is correct")]
     NotFound,
+    #[display(fmt = "You don't have access to this ressource, or the way you are trying to access it is wrong")]
     IllegalToken,
+    #[display(fmt = "Your authentication token is not correct, please reconnect in order to regenarate it")]
     BadRequest,
+    #[display(fmt = "An error happened when trying to display, this error has been reported")]
     TemplateError,
+    #[display(fmt = "You haven't approved cookies yet, approve them prior any usage of the application")]
     CookiesUnapproved,
+    #[display(fmt = "{}", _0)]
     StructError(String),
+    #[display(fmt = "{}", _0)]
     AuthError(String),
 }
 
@@ -32,22 +39,6 @@ impl ApplicationError {
             Self::CookiesUnapproved => Some("/cookies".into()),
             _ => None,
         }
-    }
-}
-
-impl fmt::Display for ApplicationError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        let reason : String = match &*self {
-            Self::InternalError => "An internal error happened, it has been reported and will be resolved as soon as possible".into(),
-            Self::NotFound => "One of the requested item hasn't been found, please ensure your request is correct".into(),
-            Self::BadRequest => "You don't have access to this ressource, or the way you are trying to access it is wrong.".into(),
-            Self::IllegalToken => "Your authentication token is not correct, please reconnect in order to regenarate it".into(),
-            Self::CookiesUnapproved => "You haven't approved cookies yet, approve them prior any usage of the application".into(),
-            Self::TemplateError => "An error happened regarding the display, this error has been reported".into(),
-            Self::StructError(err) => err.into(),
-            Self::AuthError(err) => err.into(),
-        };
-        write!(f, "{}", reason)
     }
 }
 

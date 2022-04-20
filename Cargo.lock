@@ -1021,6 +1021,7 @@ name = "ffb_auth"
 version = "0.1.0"
 dependencies = [
  "actix-web",
+ "derive_more",
  "ffb_structs",
  "hmac",
  "jwt",
@@ -1055,6 +1056,7 @@ dependencies = [
  "actix-web-validator",
  "askama",
  "chrono",
+ "derive_more",
  "dotenv",
  "ffb_auth",
  "ffb_structs",
@@ -1064,7 +1066,8 @@ dependencies = [
  "log4rs",
  "regex",
  "serde",
- "time 0.2.27",
+ "time 0.3.9",
+ "tokio",
  "validator",
 ]
 

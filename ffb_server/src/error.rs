@@ -6,17 +6,27 @@ use ffb_structs::error::ApplicationError as StructApplicationError;
 
 #[derive(Debug, Display)]
 pub enum ApplicationError {
-    #[display(fmt = "An internal error happened, it has been reported and will be resolved as soon as possible")]
+    #[display(
+        fmt = "An internal error happened, it has been reported and will be resolved as soon as possible"
+    )]
     InternalError,
-    #[display(fmt = "One of the requested item hasn't been found, please ensure your request is correct")]
+    #[display(
+        fmt = "One of the requested item hasn't been found, please ensure your request is correct"
+    )]
     NotFound,
-    #[display(fmt = "You don't have access to this ressource, or the way you are trying to access it is wrong")]
+    #[display(
+        fmt = "You don't have access to this ressource, or the way you are trying to access it is wrong"
+    )]
     IllegalToken,
-    #[display(fmt = "Your authentication token is not correct, please reconnect in order to regenarate it")]
+    #[display(
+        fmt = "Your authentication token is not correct, please reconnect in order to regenarate it"
+    )]
     BadRequest,
     #[display(fmt = "An error happened when trying to display, this error has been reported")]
     TemplateError,
-    #[display(fmt = "You haven't approved cookies yet, approve them prior any usage of the application")]
+    #[display(
+        fmt = "You haven't approved cookies yet, approve them prior any usage of the application"
+    )]
     CookiesUnapproved,
     #[display(fmt = "{}", _0)]
     StructError(String),

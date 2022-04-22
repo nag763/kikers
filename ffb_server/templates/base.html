@@ -5,8 +5,16 @@
 		<title>FFB - {{title}}</title>
 		<link rel="stylesheet" href="/styles/tailwind.css"/>
 		<link rel="shortcut icon" type="image/jpg" href="/assets/favicon.ico"/>
+		
+		<style nonce="7a616b6f6b">
+			body {
+  				background-image: url('/assets/img/stadium.jpg');
+			}
+		{% block style %}
+		{% endblock %}
+		</style>
 	</head>
-	<body style="background-image: url('/assets/img/stadium.jpg');">
+	<body>
 		{% include "nav.html" %}
 			<div class="flex justify-center">
           <div class="w-4/5 py-4 px-8 bg-white shadow-xl rounded-xl my-10">

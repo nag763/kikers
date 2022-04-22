@@ -1,4 +1,10 @@
 {% extends "base.html" %}
+
+{% block style %}
+td {
+	text-align:center
+}
+{% endblock %}
 {% block title %}Administration{% endblock %}
 {% block body %}
 {% include "admin/users.html" %}

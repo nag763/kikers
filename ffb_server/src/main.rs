@@ -27,6 +27,7 @@ use actix_web::middleware::Logger;
 use actix_web::web;
 use actix_web::ResponseError;
 use actix_web::{App, HttpServer};
+use actix_web_validator::{FormConfig, QueryConfig};
 use dotenv::dotenv;
 
 #[actix_web::main]
@@ -36,10 +37,28 @@ async fn main() -> std::io::Result<()> {
         .expect("Log4rs file misconfigured or not found");
     HttpServer::new(|| {
         App::new()
+            // Logging config
             .wrap(Logger::new("[%a]->'%U'(%s)"))
+            // Default service config
             .default_service(web::to(|| async {
                 ApplicationError::NotFound.error_response()
             }))
+            // Validators config
+            .app_data(FormConfig::default().error_handler(|err, _| {
+                actix_web::error::InternalError::from_response(
+                    err,
+                    ApplicationError::BadRequest.error_response(),
+                )
+                .into()
+            }))
+            .app_data(QueryConfig::default().error_handler(|err, _| {
+                actix_web::error::InternalError::from_response(
+                    err,
+                    ApplicationError::BadRequest.error_response(),
+                )
+                .into()
+            }))
+            // File services
             .service(fs::Files::new("/styles", "./styles").use_last_modified(true))
             .service(fs::Files::new("/assets", "./assets").use_last_modified(true))
             .service(cookies_approved)

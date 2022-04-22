@@ -52,7 +52,7 @@ where
         let navaccess: Vec<Navaccess> = match req.cookie(jwt_path.as_str()) {
             Some(token) => match JwtUser::from_token(token.value()) {
                 Ok(jwt_user) => {
-                    if JwtUser::check_token(token.value()).is_err() {
+                    if JwtUser::check_token_of_login(token.value(), &jwt_user.login).is_err() {
                         return Box::pin(async move {
                             Ok(req.into_response(ApplicationError::IllegalToken.error_response()))
                         });

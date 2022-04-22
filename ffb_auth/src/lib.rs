@@ -87,16 +87,15 @@ impl JwtUser {
         }
     }
 
-    pub fn check_token(token: &str) -> Result<(), ApplicationError> {
-        let jwt_user: Self = Self::from_token(token)?;
-        if !token::Entity::verify(&jwt_user.login, token)? {
+    pub fn check_token_of_login(token: &str, login: &str) -> Result<(), ApplicationError> {
+        if !token::Entity::verify(login, token)? {
             warn!(
                 "Token for {} has been considered as invalid",
-                &jwt_user.login
+                &login
             );
             Err(ApplicationError::IllegalToken)
         } else {
-            debug!("Token for {} has been checked", &jwt_user.login);
+            debug!("Token for {} has been checked", &login);
             Ok(())
         }
     }

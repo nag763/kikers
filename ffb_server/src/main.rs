@@ -5,11 +5,13 @@ extern crate derive_more;
 #[macro_use]
 extern crate lazy_static;
 
+mod application_data;
 mod controllers;
 mod error;
 mod middleware;
 mod pages;
 
+use crate::application_data::ApplicationData;
 use crate::controllers::auth::{login, logout, register_user};
 use crate::controllers::cookies::cookies_approved;
 use crate::controllers::user::{
@@ -35,7 +37,8 @@ async fn main() -> std::io::Result<()> {
     dotenv().ok();
     log4rs::init_file("log4rs.yaml", Default::default())
         .expect("Log4rs file misconfigured or not found");
-    HttpServer::new(|| {
+    let mydata = web::Data::new(ApplicationData::init().await.unwrap());
+    HttpServer::new(move || {
         App::new()
             // Logging config
             .wrap(Logger::new("[%a]->'%U'(%s)"))
@@ -58,6 +61,7 @@ async fn main() -> std::io::Result<()> {
                 )
                 .into()
             }))
+            .app_data(web::Data::clone(&mydata))
             // File services
             .service(fs::Files::new("/styles", "./styles").use_last_modified(true))
             .service(fs::Files::new("/assets", "./assets").use_last_modified(true))

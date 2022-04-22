@@ -23,9 +23,9 @@ function hamburgerInteraction() {
   </div>
   <div id="nav-list" class="hidden w-full block flex-grow lg:flex lg:items-center lg:w-auto">
   {% match user %}
-  		{% when Some with (val) %}
+  		{% when Some with(user)  %}
     <div class="text-sm lg:flex-grow">
-	    {% for ref in val.nav %}
+	    {% for ref in app_data.get_navaccess_for_role(user.role) %}
 		{% if ref.position.is_some() %}
 	    <a href="{{ref.href}}" class="block mt-4 lg:inline-block lg:mt-0 text-indigo-200 hover:text-white mr-4">
 		    {{ref.label}}

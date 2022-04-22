@@ -1,4 +1,5 @@
 use crate::pages::ContextQuery;
+use crate::ApplicationData;
 use askama::Template;
 use ffb_auth::JwtUser;
 
@@ -15,12 +16,14 @@ struct UserTemplate {
     user: Option<JwtUser>,
     error: Option<String>,
     info: Option<String>,
+    app_data: web::Data<ApplicationData>,
 }
 
 #[get("/profile/edit")]
 pub async fn user_profile(
     req: HttpRequest,
     context_query: web::Query<ContextQuery>,
+    app_data: web::Data<ApplicationData>,
 ) -> Result<HttpResponse, ApplicationError> {
     let jwt_user: JwtUser = JwtUser::from_request(req)?;
     let index = UserTemplate {
@@ -28,6 +31,7 @@ pub async fn user_profile(
         user: Some(jwt_user),
         error: context_query.error.clone(),
         info: context_query.info.clone(),
+        app_data,
     };
     Ok(HttpResponse::Ok().body(index.render()?))
 }
@@ -43,12 +47,14 @@ struct UserLeagueTemplate {
     fav_leagues_id: Vec<u32>,
     leagues: Option<Vec<APILeague>>,
     fav_leagues: Option<Vec<APILeague>>,
+    app_data: web::Data<ApplicationData>,
 }
 
 #[get("/profile/leagues")]
 pub async fn user_leagues(
     req: HttpRequest,
     context_query: web::Query<ContextQuery>,
+    app_data: web::Data<ApplicationData>,
 ) -> Result<HttpResponse, ApplicationError> {
     let jwt_user: JwtUser = JwtUser::from_request(req)?;
     let fav_leagues_id: Vec<u32> = user::Entity::get_favorite_leagues_id(jwt_user.id).await?;
@@ -72,6 +78,7 @@ pub async fn user_leagues(
         fav_leagues,
         fav_leagues_id,
         countries,
+        app_data,
     };
     Ok(HttpResponse::Ok().body(index.render()?))
 }
@@ -83,12 +90,14 @@ struct UserClubsTemplate {
     user: Option<JwtUser>,
     error: Option<String>,
     info: Option<String>,
+    app_data: web::Data<ApplicationData>,
 }
 
 #[get("/profile/clubs")]
 pub async fn user_club(
     req: HttpRequest,
     context_query: web::Query<ContextQuery>,
+    app_data: web::Data<ApplicationData>,
 ) -> Result<HttpResponse, ApplicationError> {
     let jwt_user: JwtUser = JwtUser::from_request(req)?;
     let index = UserClubsTemplate {
@@ -96,6 +105,7 @@ pub async fn user_club(
         user: Some(jwt_user),
         error: context_query.error.clone(),
         info: context_query.info.clone(),
+        app_data,
     };
     Ok(HttpResponse::Ok().body(index.render()?))
 }

@@ -15,11 +15,11 @@ pub enum ApplicationError {
     )]
     NotFound,
     #[display(
-        fmt = "You don't have access to this ressource, or the way you are trying to access it is wrong"
+        fmt = "Your authentication token is not correct, please reconnect in order to regenarate it"
     )]
     IllegalToken,
     #[display(
-        fmt = "Your authentication token is not correct, please reconnect in order to regenarate it"
+        fmt = "You don't have access to this ressource, or the way you are trying to access it is wrong"
     )]
     BadRequest,
     #[display(fmt = "An error happened when trying to display, this error has been reported")]

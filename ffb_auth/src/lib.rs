@@ -1,8 +1,6 @@
 use crate::error::ApplicationError;
 use crate::magic_crypt::MagicCryptTrait;
 use actix_web::HttpRequest;
-use ffb_structs::navaccess;
-use ffb_structs::navaccess::Model as NavAccess;
 use ffb_structs::token;
 use ffb_structs::user;
 use ffb_structs::user::Model as User;
@@ -25,7 +23,6 @@ pub struct JwtUser {
     pub id: u32,
     pub login: String,
     pub name: String,
-    pub nav: Vec<NavAccess>,
     pub is_authorized: bool,
     pub role: u32,
     pub emited_on: i64,
@@ -38,9 +35,6 @@ impl JwtUser {
     }
 
     async fn gen_token(user: User) -> Result<String, ApplicationError> {
-        let nav: Vec<NavAccess> =
-            navaccess::Entity::get_navaccess_for_role_id(user.role_id).await?;
-
         let jwt_key: String = std::env::var("JWT_KEY")?;
         let key: Hmac<Sha256> = Hmac::new_from_slice(jwt_key.as_bytes())?;
 
@@ -51,7 +45,6 @@ impl JwtUser {
                 id: user.id,
                 login: user.login.clone(),
                 name: user.name,
-                nav,
                 is_authorized: user.is_authorized,
                 role: user.role_id,
                 emited_on: time::OffsetDateTime::now_utc().unix_timestamp(),
@@ -89,10 +82,7 @@ impl JwtUser {
 
     pub fn check_token_of_login(token: &str, login: &str) -> Result<(), ApplicationError> {
         if !token::Entity::verify(login, token)? {
-            warn!(
-                "Token for {} has been considered as invalid",
-                &login
-            );
+            warn!("Token for {} has been considered as invalid", &login);
             Err(ApplicationError::IllegalToken)
         } else {
             debug!("Token for {} has been checked", &login);

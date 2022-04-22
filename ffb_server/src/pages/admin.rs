@@ -4,12 +4,13 @@ use crate::pages::ContextQuery;
 use askama::Template;
 
 use crate::error::ApplicationError;
+use crate::ApplicationData;
 use actix_web::web;
 use actix_web::{get, HttpRequest, HttpResponse};
 
 use ffb_structs::{user, user::Model as User};
 
-#[derive(Template, Debug, Default)]
+#[derive(Template)]
 #[template(path = "admin.html")]
 struct Admin {
     title: String,
@@ -20,12 +21,14 @@ struct Admin {
     data: Vec<User>,
     page: u32,
     per_page: u32,
+    app_data: web::Data<ApplicationData>,
 }
 
 #[get("/admin")]
 pub async fn admin_dashboard(
     req: HttpRequest,
     context_query: web::Query<ContextQuery>,
+    app_data: web::Data<ApplicationData>,
 ) -> Result<HttpResponse, ApplicationError> {
     let jwt_user: JwtUser = JwtUser::from_request(req)?;
     let page: u32 = context_query.page.unwrap_or(0);
@@ -45,6 +48,7 @@ pub async fn admin_dashboard(
         chosen_user,
         page,
         per_page,
+        app_data,
     };
     Ok(HttpResponse::Ok().body(index.render()?))
 }

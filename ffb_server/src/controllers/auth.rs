@@ -1,8 +1,9 @@
 use ffb_auth::JwtUser;
 
 use crate::error::ApplicationError;
+use crate::ApplicationData;
 use actix_web::cookie::Cookie;
-use actix_web::{get, post, HttpRequest, HttpResponse, Responder};
+use actix_web::{get, post, web, HttpRequest, HttpResponse, Responder};
 use ffb_structs::user;
 
 lazy_static! {
@@ -22,11 +23,12 @@ pub struct LoginForm {
 pub async fn login(
     req: HttpRequest,
     login_form: actix_web_validator::Form<LoginForm>,
+    app_data: web::Data<ApplicationData>,
 ) -> Result<HttpResponse, ApplicationError> {
     match JwtUser::emit(login_form.login.as_str(), login_form.password.as_str()).await? {
         Some(token) => {
-            let cookie_path: String = std::env::var("JWT_TOKEN_PATH")?;
-            let cookie: Cookie = Cookie::build(cookie_path.as_str(), &token)
+            let cookie_path: &str = app_data.get_jwt_path();
+            let cookie: Cookie = Cookie::build(cookie_path, &token)
                 .path("/")
                 .http_only(true)
                 .finish();
@@ -53,8 +55,11 @@ pub async fn login(
 }
 
 #[get("/logout")]
-pub async fn logout(req: HttpRequest) -> Result<impl Responder, ApplicationError> {
-    if let Some(mut jwt_cookie) = req.cookie(std::env::var("JWT_TOKEN_PATH")?.as_str()) {
+pub async fn logout(
+    req: HttpRequest,
+    app_data: web::Data<ApplicationData>,
+) -> Result<impl Responder, ApplicationError> {
+    if let Some(mut jwt_cookie) = req.cookie(app_data.get_jwt_path()) {
         if let Ok(jwt_user) = JwtUser::from_request(req) {
             JwtUser::revoke_session(&jwt_user.login, jwt_cookie.value())?;
         }

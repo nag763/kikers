@@ -2,14 +2,14 @@ use std::pin::Pin;
 
 use ffb_auth::JwtUser;
 
+use crate::error::ApplicationError;
+use crate::ApplicationData;
 use actix_service::{Service, Transform};
 use actix_web::ResponseError;
 use actix_web::{dev::ServiceRequest, dev::ServiceResponse, Error};
 use ffb_structs::navaccess::Model as Navaccess;
 use futures::future::{ok, Ready};
 use futures::Future;
-
-use crate::error::ApplicationError;
 
 #[derive(Default)]
 pub struct RoleChecker;
@@ -47,9 +47,10 @@ where
     actix_web::dev::forward_ready!(service);
 
     fn call(&self, req: ServiceRequest) -> Self::Future {
-        let jwt_path: String =
-            std::env::var("JWT_TOKEN_PATH").unwrap_or_else(|_| "jwt-token".to_string());
-        let navaccess: Vec<Navaccess> = match req.cookie(jwt_path.as_str()) {
+        let app_data = req
+            .app_data::<actix_web::web::Data<ApplicationData>>()
+            .unwrap();
+        let role_id: u32 = match req.cookie(app_data.get_jwt_path()) {
             Some(token) => match JwtUser::from_token(token.value()) {
                 Ok(jwt_user) => {
                     if JwtUser::check_token_of_login(token.value(), &jwt_user.login).is_err() {
@@ -57,7 +58,7 @@ where
                             Ok(req.into_response(ApplicationError::IllegalToken.error_response()))
                         });
                     }
-                    jwt_user.nav
+                    jwt_user.role
                 }
                 _ => {
                     return Box::pin(async move {
@@ -72,6 +73,7 @@ where
             }
         };
 
+        let navaccess: Vec<Navaccess> = app_data.get_navaccess_for_role(&role_id);
         let req_path: &str = req.path();
         if !navaccess.iter().any(|nav| nav.href == req_path) {
             return Box::pin(async move {

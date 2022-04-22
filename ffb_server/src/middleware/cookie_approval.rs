@@ -1,5 +1,6 @@
 use std::pin::Pin;
 
+use crate::ApplicationData;
 use actix_service::{Service, Transform};
 use actix_web::body::BoxBody;
 use actix_web::HttpResponse;
@@ -46,9 +47,10 @@ where
     actix_web::dev::forward_ready!(service);
 
     fn call(&self, req: ServiceRequest) -> Self::Future {
-        let cookie_approval_path: String =
-            std::env::var("COOKIE_APPROVAL_PATH").expect("No COOKIE_APPROVAL_PATH in .env");
-        if req.cookie(cookie_approval_path.as_str()).is_none() {
+        let app_data = req
+            .app_data::<actix_web::web::Data<ApplicationData>>()
+            .unwrap();
+        if req.cookie(app_data.get_cookie_approval_path()).is_none() {
             match req.path() {
                 "/" => {
                     return Box::pin(async move {

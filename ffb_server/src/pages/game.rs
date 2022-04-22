@@ -4,7 +4,8 @@ use crate::pages::ContextQuery;
 use askama::Template;
 
 use crate::error::ApplicationError;
-use actix_web::{get, HttpRequest, HttpResponse};
+use crate::ApplicationData;
+use actix_web::{get, web, HttpRequest, HttpResponse};
 
 use chrono::{DateTime, Utc};
 use ffb_structs::{games::Entity as GamesEntity, games::Model as Games, user};
@@ -29,6 +30,7 @@ struct GamesTemplate {
     yesterday_three_games: Option<GamesRowTemplate>,
     tomorow_three_games: Option<GamesRowTemplate>,
     fetched_date: Option<String>,
+    app_data: web::Data<ApplicationData>,
 }
 
 #[derive(Template)]
@@ -40,12 +42,14 @@ struct GamesOfDayTemplate {
     info: Option<String>,
     fetched_date: Option<String>,
     day_games: Option<GamesRowTemplate>,
+    app_data: web::Data<ApplicationData>,
 }
 
 #[get("/games")]
 pub async fn games(
     req: HttpRequest,
     context_query: actix_web_validator::Query<ContextQuery>,
+    app_data: web::Data<ApplicationData>,
 ) -> Result<HttpResponse, ApplicationError> {
     let jwt_user: JwtUser = JwtUser::from_request(req)?;
     let now: DateTime<Utc> = Utc::now();
@@ -77,6 +81,7 @@ pub async fn games(
                 fetched_date: Some(query_date.clone()),
                 info: context_query.info.clone(),
                 day_games: subtemplate,
+                app_data,
             }
             .render()?,
         ));
@@ -145,6 +150,7 @@ pub async fn games(
         yesterday_three_games,
         tomorow_three_games,
         fetched_date: None,
+        app_data,
     };
     Ok(HttpResponse::Ok().body(index.render()?))
 }

@@ -2,26 +2,29 @@ use askama::Template;
 
 use crate::error::ApplicationError;
 use crate::pages::ContextQuery;
+use crate::ApplicationData;
 use actix_web::web;
 use actix_web::{get, HttpRequest, HttpResponse};
 use ffb_auth::JwtUser;
 
-#[derive(Template, Debug)]
+#[derive(Template)]
 #[template(path = "index.html")]
 struct Index {
     title: String,
     user: Option<JwtUser>,
     error: Option<String>,
     info: Option<String>,
+    app_data: web::Data<ApplicationData>,
 }
 
 #[get("/")]
 pub async fn index(
     req: HttpRequest,
     context_query: web::Query<ContextQuery>,
+    app_data: web::Data<ApplicationData>,
 ) -> Result<HttpResponse, ApplicationError> {
     let index: Index;
-    match req.cookie(std::env::var("JWT_TOKEN_PATH")?.as_str()) {
+    match req.cookie(app_data.get_jwt_path()) {
         Some(token) => {
             let jwt_user = JwtUser::from_token(token.value())?;
             index = Index {
@@ -29,6 +32,7 @@ pub async fn index(
                 user: Some(jwt_user),
                 error: context_query.error.clone(),
                 info: context_query.info.clone(),
+                app_data,
             };
         }
         None => {
@@ -37,35 +41,36 @@ pub async fn index(
                 user: None,
                 error: context_query.error.clone(),
                 info: context_query.info.clone(),
+                app_data,
             }
         }
     };
     Ok(HttpResponse::Ok().body(index.render()?))
 }
 
-#[derive(Template, Debug)]
+#[derive(Template)]
 #[template(path = "signup.html")]
 struct SignUp {
     title: String,
     user: Option<JwtUser>,
     error: Option<String>,
     info: Option<String>,
+    app_data: web::Data<ApplicationData>,
 }
 
 #[get("/signup")]
 pub async fn signup(
     req: HttpRequest,
     context_query: web::Query<ContextQuery>,
+    app_data: web::Data<ApplicationData>,
 ) -> Result<HttpResponse, ApplicationError> {
-    if req
-        .cookie(std::env::var("JWT_TOKEN_PATH")?.as_str())
-        .is_none()
-    {
+    if req.cookie(app_data.get_jwt_path()).is_none() {
         let sign_up: SignUp = SignUp {
             title: "Sign up".to_string(),
             user: None,
             error: context_query.error.clone(),
             info: context_query.info.clone(),
+            app_data,
         };
         Ok(HttpResponse::Ok().body(sign_up.render()?))
     } else {
@@ -75,22 +80,26 @@ pub async fn signup(
     }
 }
 
-#[derive(Template, Debug)]
+#[derive(Template)]
 #[template(path = "cookies.html")]
 struct Cookies {
     title: String,
     user: Option<JwtUser>,
     error: Option<String>,
     info: Option<String>,
+    app_data: web::Data<ApplicationData>,
 }
 
 #[get("/cookies")]
-pub async fn cookies() -> Result<HttpResponse, ApplicationError> {
+pub async fn cookies(
+    app_data: web::Data<ApplicationData>,
+) -> Result<HttpResponse, ApplicationError> {
     let cookies: Cookies = Cookies {
         title: "Cookie approval".to_string(),
         user: None,
         error: None,
         info: None,
+        app_data,
     };
     Ok(HttpResponse::Ok().body(cookies.render()?))
 }

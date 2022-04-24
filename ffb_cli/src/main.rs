@@ -60,7 +60,7 @@ async fn fetch_leagues() -> Result<(), CliError> {
 async fn fetch_countries() -> Result<(), CliError> {
     let res = call_api_endpoint("countries".into()).await?;
     let response: String = res["response"].to_string();
-    country::Entity::store(&response)?;
+    country::Entity::store(&response).await?;
     Ok(())
 }
 

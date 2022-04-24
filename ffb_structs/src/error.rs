@@ -48,3 +48,11 @@ impl From<mongodb::error::Error> for ApplicationError {
         ApplicationError::MongoError(mongo_error.to_string())
     }
 }
+
+
+impl From<bson::ser::Error> for ApplicationError {
+    fn from(mongo_error: bson::ser::Error) -> Self {
+        error!("A bson serialization error happened : {}", mongo_error);
+        ApplicationError::MongoError(mongo_error.to_string())
+    }
+}

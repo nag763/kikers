@@ -12,7 +12,7 @@ pub struct ApplicationData {
 impl ApplicationData {
     pub async fn init() -> Result<ApplicationData, ApplicationError> {
         info!("Begin of init of application data");
-        let application_data : ApplicationData = ApplicationData {
+        let application_data: ApplicationData = ApplicationData {
             role_navaccess: navaccess::Entity::get_role_navaccess_mapping().await?,
             jwt_path: std::env::var("JWT_TOKEN_PATH")?,
             cookie_approval_path: std::env::var("COOKIE_APPROVAL_PATH")?,

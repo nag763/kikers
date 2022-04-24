@@ -60,15 +60,16 @@ pub async fn user_leagues(
     let fav_leagues_id: Vec<u32> = user::Entity::get_favorite_leagues_id(jwt_user.id).await?;
     let (leagues, fav_leagues): (Option<Vec<APILeague>>, Option<Vec<APILeague>>) =
         match &context_query.code {
-            Some(v) => (Some(league::Entity::get_leagues_for_country_code(v).await?), None),
+            Some(v) => (
+                Some(league::Entity::get_leagues_for_country_code(v).await?),
+                None,
+            ),
             None => (
                 None,
-                Some(league::Entity::get_fav_leagues_of_user(
-                    fav_leagues_id.clone(),
-                ).await?),
+                Some(league::Entity::get_fav_leagues_of_user(fav_leagues_id.clone()).await?),
             ),
         };
-    let countries: Vec<Country> = country::Entity::find_all()?;
+    let countries: Vec<Country> = country::Entity::find_all().await?;
     let index = UserLeagueTemplate {
         title: "Your informations".into(),
         user: Some(jwt_user),

@@ -1,5 +1,5 @@
+use mongodb::{options::ClientOptions, Client};
 use sqlx::Connection;
-use mongodb::{Client, options::ClientOptions};
 
 lazy_static! {
     static ref DB_URL: String = std::env::var("DATABASE_URL").unwrap();

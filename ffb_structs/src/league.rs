@@ -2,8 +2,11 @@ use crate::common_api_structs::League;
 use crate::country::Model as Country;
 use crate::database::Database;
 use crate::error::ApplicationError;
+use mongodb::bson::doc;
+use bson::Bson;
+use futures::TryStreamExt;
 
-#[derive(Debug, Clone, serde::Deserialize)]
+#[derive(Debug, Clone, serde::Deserialize, serde::Serialize)]
 pub struct Model {
     pub league: League,
     pub country: Country,
@@ -12,53 +15,31 @@ pub struct Model {
 pub struct Entity;
 
 impl Entity {
-    fn get_all() -> Result<Vec<Model>, ApplicationError> {
-        let mut conn = Database::acquire_redis_connection()?;
-        let model_as_string: String = redis::cmd("GET").arg("leagues").query(&mut conn)?;
-        let model = serde_json::from_str(model_as_string.as_str())?;
-        Ok(model)
-    }
 
-    pub fn get_fav_leagues_of_user(
+    pub async fn get_fav_leagues_of_user(
         fav_leagues_id: Vec<u32>,
     ) -> Result<Vec<Model>, ApplicationError> {
-        let models: Vec<Model> = Self::get_all()?;
-        let fav_leagues: Vec<Model> = models
-            .into_iter()
-            .filter(|model| fav_leagues_id.contains(&model.league.id))
-            .collect();
-        Ok(fav_leagues)
+        let database = Database::acquire_mongo_connection().await?;
+        let models : Vec<Model> = database.collection::<Model>("league").find(doc! { "league.id" : { "$in" : fav_leagues_id }}, None).await?.try_collect().await?;
+        Ok(models)
     }
 
-    pub fn get_leagues_for_country_code(
+    pub async fn get_leagues_for_country_code(
         country_code: &str,
     ) -> Result<Vec<Model>, ApplicationError> {
-        let models: Vec<Model> = Self::get_all()?;
-        let leagues: Vec<Model> = match country_code.is_empty() {
-            true => models
-                .into_iter()
-                .filter(|league| league.country.code.is_none())
-                .collect(),
-            false => models
-                .into_iter()
-                .filter(|league| {
-                    if let Some(code) = &league.country.code {
-                        code == country_code
-                    } else {
-                        false
-                    }
-                })
-                .collect(),
+        let database = Database::acquire_mongo_connection().await?;
+        let search_key : Bson = match country_code {
+            v if !v.is_empty() => Bson::String(v.into()),
+            _ => Bson::Null
         };
-        Ok(leagues)
+        let models : Vec<Model> = database.collection::<Model>("league").find(doc! { "country.code" : search_key}, None).await?.try_collect().await?;
+        Ok(models)
     }
 
-    pub fn store(value: &str) -> Result<(), ApplicationError> {
-        let mut conn = Database::acquire_redis_connection()?;
-        redis::cmd("SET")
-            .arg("leagues")
-            .arg(value)
-            .query(&mut conn)?;
+    pub async fn store(value: &str) -> Result<(), ApplicationError> {
+        let database = Database::acquire_mongo_connection().await.unwrap();
+        let models : Vec<Model> = serde_json::from_str(value)?;
+        database.collection::<Model>("league").insert_many(models, None).await.unwrap();
         Ok(())
     }
 }

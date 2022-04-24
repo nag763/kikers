@@ -53,7 +53,7 @@ async fn run_main() -> Result<(), CliError> {
 async fn fetch_leagues() -> Result<(), CliError> {
     let res = call_api_endpoint("leagues".into()).await?;
     let response: String = res["response"].to_string();
-    league::Entity::store(&response)?;
+    league::Entity::store(&response).await?;
     Ok(())
 }
 

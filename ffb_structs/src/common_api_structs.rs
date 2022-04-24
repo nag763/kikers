@@ -24,7 +24,7 @@ pub struct Fixture {
     pub status: Status,
 }
 
-#[derive(Debug, Clone, serde::Deserialize)]
+#[derive(Debug, Clone, serde::Deserialize, serde::Serialize)]
 pub struct League {
     pub id: u32,
     pub name: String,

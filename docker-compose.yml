@@ -17,6 +17,10 @@ services:
     volumes:
       - ./sql_init:/docker-entrypoint-initdb.d
       - db:/var/lib/mysql
+  mongodb:
+    image: mongo:3.6.8
+    volumes: 
+      - mongo:/data/db
   app:
     build:
         context: .
@@ -24,8 +28,11 @@ services:
     links:
         - redis:redishost
         - mysqldb:dbhost
+        - mongodb:mongohost
     depends_on:
         - mysqldb
+        - mongodb
+        - redis
     restart: unless-stopped
     env_file: .env
     ports:
@@ -35,3 +42,4 @@ services:
 volumes:
   db:
   cache:
+  mongo:

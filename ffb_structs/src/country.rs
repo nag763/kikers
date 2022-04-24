@@ -1,7 +1,7 @@
 use crate::database::Database;
 use crate::error::ApplicationError;
 
-#[derive(Debug, Clone, serde::Deserialize)]
+#[derive(Debug, Clone, serde::Deserialize, serde::Serialize)]
 pub struct Model {
     pub name: String,
     pub code: Option<String>,
@@ -19,7 +19,7 @@ impl Entity {
     }
     pub fn store(value: &str) -> Result<(), ApplicationError> {
         let mut conn = Database::acquire_redis_connection()?;
-        redis::cmd("GET")
+        redis::cmd("SET")
             .arg("countries")
             .arg(value)
             .query(&mut conn)?;

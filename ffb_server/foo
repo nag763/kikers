@@ -1,9 +1,0 @@
-function hamburgerInteraction() {
-	let navList = document.getElementById("nav-list").classList;
-	if(navList.contains('hidden')){
-		navList.remove('hidden');
-	} else {
-		navList.add('hidden');
-	}
-}
-document.getElementById("hamburgerButton").addEventListener('click', hamburgerInteraction);

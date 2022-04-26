@@ -3,7 +3,7 @@ pub(crate) mod error;
 use clap::{Parser, Subcommand};
 use dotenv::dotenv;
 use error::CliError;
-use ffb_structs::{country, games, league};
+use ffb_structs::{country, game, league};
 
 #[macro_use]
 extern crate log;
@@ -78,7 +78,7 @@ async fn fetch_fixtures(day_diff: i64) -> Result<(), CliError> {
     debug!("Date fetched : {}", date_to_fetch);
     let res = call_api_endpoint(format!("fixtures?date={}", &date_to_fetch)).await?;
     let response: String = res["response"].to_string();
-    games::Entity::store(&date_to_fetch, &response).await?;
+    game::Entity::store(&date_to_fetch, &response).await?;
     debug!("Games stored");
     Ok(())
 }

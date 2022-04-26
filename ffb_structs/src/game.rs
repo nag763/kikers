@@ -21,6 +21,8 @@ impl Entity {
         limit: Option<i64>,
     ) -> Result<Vec<Model>, ApplicationError> {
         let database = Database::acquire_mongo_connection().await?;
+        println!("Fav Leagues: {:?}", fav_leagues);
+        println!("Limits : {:?}", limit);
         let options: Option<mongodb::options::FindOptions> = match limit {
             Some(v) => Some(
                 mongodb::options::FindOptions::builder()
@@ -34,8 +36,8 @@ impl Entity {
         if let Some(fav_leagues) = fav_leagues {
             key.insert("league.id", doc! {"$in": fav_leagues});
         }
-        error!("Search key : {:#?}", key);
-        error!("Options : {:#?}", options);
+        println!("Search key : {:#?}", key);
+        println!("Options : {:#?}", options);
         let model: Vec<Model> = database
             .collection::<Model>("fixture")
             .find(key, options)

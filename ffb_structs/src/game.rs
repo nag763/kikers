@@ -20,27 +20,53 @@ impl Entity {
         fav_leagues: Option<Vec<u32>>,
         limit: Option<i64>,
     ) -> Result<Vec<Model>, ApplicationError> {
-        let database = Database::acquire_mongo_connection().await?;
-        let options: Option<mongodb::options::FindOptions> = match limit {
-            Some(v) => Some(
-                mongodb::options::FindOptions::builder()
-                    .limit(Some(v))
-                    .build(),
-            ),
-            None => None,
-        };
-        let mut key: bson::Document = bson::Document::new();
-        key.insert("fixture.date", doc! {"$regex" : date});
-        if let Some(fav_leagues) = fav_leagues {
-            key.insert("league.id", doc! {"$in": fav_leagues});
+        let redis_key : String = format!("fixtures:{}", date);
+        let redis_hset_key : String = format!("{:?}::{:?}", fav_leagues, limit);
+        let mut conn = Database::acquire_redis_connection()?;
+        let cached_struct: Option<String> = redis::cmd("HGET")
+            .arg(redis_key.as_str())
+            .arg(redis_hset_key.as_str())
+            .query(&mut conn)?;
+        if let Some(cached_struct) = cached_struct {
+
+            let deserialized_struct: Vec<Model> = serde_json::from_str(cached_struct.as_str())?;
+            redis::cmd("EXPIRE")
+                .arg(redis_key.as_str())
+                .arg(500)
+                .query(&mut conn)?;
+            return Ok(deserialized_struct);
+        } else {
+            let database = Database::acquire_mongo_connection().await?;
+            let options: Option<mongodb::options::FindOptions> = match limit {
+                Some(v) => Some(
+                    mongodb::options::FindOptions::builder()
+                        .limit(Some(v))
+                        .build(),
+                ),
+                None => None,
+            };
+            let mut key: bson::Document = bson::Document::new();
+            key.insert("fixture.date", doc! {"$regex" : date});
+            if let Some(fav_leagues) = fav_leagues.clone() {
+                key.insert("league.id", doc! {"$in": fav_leagues});
+            }
+            let model: Vec<Model> = database
+                .collection::<Model>("fixture")
+                .find(key, options)
+                .await?
+                .try_collect()
+                .await?;
+            redis::cmd("HSET")
+                .arg(redis_key.as_str())
+                .arg(redis_hset_key.as_str())
+                .arg(serde_json::to_string(&model)?)
+                .query(&mut conn)?;
+            redis::cmd("EXPIRE")
+                .arg(redis_key.as_str())
+                .arg(300)
+                .query(&mut conn)?;
+            Ok(model)
         }
-        let model: Vec<Model> = database
-            .collection::<Model>("fixture")
-            .find(key, options)
-            .await?
-            .try_collect()
-            .await?;
-        Ok(model)
     }
 
     pub async fn store(date: &str, value: &str) -> Result<(), ApplicationError> {
@@ -59,6 +85,9 @@ impl Entity {
             .arg("fixtures_fetch_date")
             .arg(date)
             .arg(chrono::Utc::now().to_rfc3339())
+            .query(&mut conn)?;
+        redis::cmd("DEL")
+            .arg(format!("fixtures:{}", date))
             .query(&mut conn)?;
         Ok(())
     }

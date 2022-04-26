@@ -8,12 +8,12 @@ use crate::ApplicationData;
 use actix_web::{get, web, HttpRequest, HttpResponse};
 
 use chrono::{DateTime, Utc};
-use ffb_structs::{games::Entity as GamesEntity, games::Model as Games, user};
+use ffb_structs::{game::Entity as GameEntity, game::Model as Game, user};
 
 #[derive(Template)]
 #[template(path = "games/game_row.html")]
 struct GamesRowTemplate {
-    games: Vec<Games>,
+    games: Vec<Game>,
     now: DateTime<Utc>,
     fetched_date: String,
     title: String,
@@ -62,14 +62,14 @@ pub async fn games(
         }
     };
     if let Some(query_date) = &context_query.date {
-        let games: Vec<Games> =
-            GamesEntity::find_all_for_date(query_date.as_str(), fav_leagues, None).await?;
+        let games: Vec<Game> =
+            GameEntity::find_all_for_date(query_date.as_str(), fav_leagues, None).await?;
         let subtemplate: Option<GamesRowTemplate> = match games.is_empty() {
             false => Some(GamesRowTemplate {
                 games,
                 now,
                 fetched_date: query_date.clone(),
-                fetched_on: GamesEntity::get_last_fetched_timestamp_for_date(query_date)?,
+                fetched_on: GameEntity::get_last_fetched_timestamp_for_date(query_date)?,
                 title: format!("Games for the {0}", query_date.as_str()),
             }),
             true => None,
@@ -96,14 +96,14 @@ pub async fn games(
     tomorow_as_simple_date.truncate(10);
     let now_as_simple_date: String = now_as_simple_date;
 
-    let next_three_games: Vec<Games> =
-        GamesEntity::find_all_for_date(now_as_simple_date.as_str(), fav_leagues.clone(), Some(3))
+    let next_three_games: Vec<Game> =
+        GameEntity::find_all_for_date(now_as_simple_date.as_str(), fav_leagues.clone(), Some(3))
             .await?;
 
     let next_three_games: Option<GamesRowTemplate> = match next_three_games.is_empty() {
         false => Some(GamesRowTemplate {
             games: next_three_games,
-            fetched_on: GamesEntity::get_last_fetched_timestamp_for_date(
+            fetched_on: GameEntity::get_last_fetched_timestamp_for_date(
                 now_as_simple_date.as_str(),
             )?,
             now,
@@ -113,7 +113,7 @@ pub async fn games(
         true => None,
     };
 
-    let yesterday_three_games: Vec<Games> = GamesEntity::find_all_for_date(
+    let yesterday_three_games: Vec<Game> = GameEntity::find_all_for_date(
         yesterday_as_simple_date.as_str(),
         fav_leagues.clone(),
         Some(3),
@@ -126,14 +126,14 @@ pub async fn games(
             now,
             fetched_date: yesterday_as_simple_date.clone(),
             title: "Yesterday games".to_string(),
-            fetched_on: GamesEntity::get_last_fetched_timestamp_for_date(
+            fetched_on: GameEntity::get_last_fetched_timestamp_for_date(
                 yesterday_as_simple_date.as_str(),
             )?,
         }),
         _ => None,
     };
-    let tomorow_three_games: Vec<Games> =
-        GamesEntity::find_all_for_date(tomorow_as_simple_date.as_str(), fav_leagues, Some(3))
+    let tomorow_three_games: Vec<Game> =
+        GameEntity::find_all_for_date(tomorow_as_simple_date.as_str(), fav_leagues, Some(3))
             .await?;
 
     let tomorow_three_games: Option<GamesRowTemplate> = match tomorow_three_games.is_empty() {
@@ -142,7 +142,7 @@ pub async fn games(
             now,
             fetched_date: tomorow_as_simple_date.clone(),
             title: "Tomorow games".to_string(),
-            fetched_on: GamesEntity::get_last_fetched_timestamp_for_date(
+            fetched_on: GameEntity::get_last_fetched_timestamp_for_date(
                 tomorow_as_simple_date.as_str(),
             )?,
         }),

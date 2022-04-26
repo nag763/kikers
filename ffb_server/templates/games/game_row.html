@@ -1,5 +1,5 @@
 <h2 class="text-xl">{{title}}<a class="text-indigo-600" href="/games?date={{fetched_date}}"> (see more)</a></h2>
-{% for game in games.games %}
+{% for game in games %}
 <div class="max-w-sm bg-white rounded-lg border border-gray-700 shadow-md">
     <div class="flex justify-end px-4 pt-4">
     </div>
@@ -66,6 +66,6 @@
     </div>
 </div>
 {% endfor %}
-{% if let Some(fetched_on) = games.fetched_on %}
+{% if let Some(fetched_on) = fetched_on %}
 <small>Last updated on {{fetched_on}}</small>
 {% endif %}

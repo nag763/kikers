@@ -50,7 +50,7 @@ impl Entity {
         let models: Vec<Model> = serde_json::from_str(value)?;
         database
             .collection::<Model>("league")
-            .delete_many(doc!{}, None)
+            .delete_many(doc! {}, None)
             .await?;
         database
             .collection::<Model>("league")

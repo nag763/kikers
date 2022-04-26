@@ -14,3 +14,4 @@ serde_json = { version = "1.0.79" }
 clap = { version = "3.1.6" , features = ["derive"] }
 chrono = "0.4.0"
 ffb_structs = { path = "../ffb_structs" }
+log = "~0.4"

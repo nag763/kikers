@@ -13,10 +13,11 @@ use ffb_structs::{games::Entity as GamesEntity, games::Model as Games, user};
 #[derive(Template)]
 #[template(path = "games/game_row.html")]
 struct GamesRowTemplate {
-    games: Games,
+    games: Vec<Games>,
     now: DateTime<Utc>,
     fetched_date: String,
     title: String,
+    fetched_on: Option<String>,
 }
 
 #[derive(Template)]
@@ -61,16 +62,17 @@ pub async fn games(
         }
     };
     if let Some(query_date) = &context_query.date {
-        let games: Option<Games> =
-            GamesEntity::find_all_for_date(query_date.as_str(), fav_leagues)?;
-        let subtemplate: Option<GamesRowTemplate> = match games {
-            Some(games) if !games.games.is_empty() => Some(GamesRowTemplate {
+        let games: Vec<Games> =
+            GamesEntity::find_all_for_date(query_date.as_str(), fav_leagues, None).await?;
+        let subtemplate: Option<GamesRowTemplate> = match games.is_empty() {
+            false => Some(GamesRowTemplate {
                 games,
                 now,
                 fetched_date: query_date.clone(),
+                fetched_on: GamesEntity::get_last_fetched_timestamp_for_date(query_date)?,
                 title: format!("Games for the {0}", query_date.as_str()),
             }),
-            _ => None,
+            true => None,
         };
 
         return Ok(HttpResponse::Ok().body(
@@ -94,51 +96,57 @@ pub async fn games(
     tomorow_as_simple_date.truncate(10);
     let now_as_simple_date: String = now_as_simple_date;
 
-    let next_three_games: Option<Games> = GamesEntity::find_all_for_date_truncate_games(
-        now_as_simple_date.as_str(),
-        fav_leagues.clone(),
-        3,
-    )?;
+    let next_three_games: Vec<Games> =
+        GamesEntity::find_all_for_date(now_as_simple_date.as_str(), fav_leagues.clone(), Some(3))
+            .await?;
 
-    let next_three_games: Option<GamesRowTemplate> = match next_three_games {
-        Some(games) if !games.games.is_empty() => Some(GamesRowTemplate {
-            games,
+    let next_three_games: Option<GamesRowTemplate> = match next_three_games.is_empty() {
+        false => Some(GamesRowTemplate {
+            games: next_three_games,
+            fetched_on: GamesEntity::get_last_fetched_timestamp_for_date(
+                now_as_simple_date.as_str(),
+            )?,
             now,
             fetched_date: now_as_simple_date,
             title: "Next three games".to_string(),
         }),
-        _ => None,
+        true => None,
     };
 
-    let yesterday_three_games: Option<Games> = GamesEntity::find_all_for_date_truncate_games(
+    let yesterday_three_games: Vec<Games> = GamesEntity::find_all_for_date(
         yesterday_as_simple_date.as_str(),
         fav_leagues.clone(),
-        3,
-    )?;
+        Some(3),
+    )
+    .await?;
 
-    let yesterday_three_games: Option<GamesRowTemplate> = match yesterday_three_games {
-        Some(games) if !games.games.is_empty() => Some(GamesRowTemplate {
-            games,
+    let yesterday_three_games: Option<GamesRowTemplate> = match yesterday_three_games.is_empty() {
+        false => Some(GamesRowTemplate {
+            games: yesterday_three_games,
             now,
             fetched_date: yesterday_as_simple_date.clone(),
             title: "Yesterday games".to_string(),
+            fetched_on: GamesEntity::get_last_fetched_timestamp_for_date(
+                yesterday_as_simple_date.as_str(),
+            )?,
         }),
         _ => None,
     };
-    let tomorow_three_games: Option<Games> = GamesEntity::find_all_for_date_truncate_games(
-        tomorow_as_simple_date.as_str(),
-        fav_leagues,
-        3,
-    )?;
+    let tomorow_three_games: Vec<Games> =
+        GamesEntity::find_all_for_date(tomorow_as_simple_date.as_str(), fav_leagues, Some(3))
+            .await?;
 
-    let tomorow_three_games: Option<GamesRowTemplate> = match tomorow_three_games {
-        Some(games) if !games.games.is_empty() => Some(GamesRowTemplate {
-            games,
+    let tomorow_three_games: Option<GamesRowTemplate> = match tomorow_three_games.is_empty() {
+        false => Some(GamesRowTemplate {
+            games: tomorow_three_games,
             now,
             fetched_date: tomorow_as_simple_date.clone(),
             title: "Tomorow games".to_string(),
+            fetched_on: GamesEntity::get_last_fetched_timestamp_for_date(
+                tomorow_as_simple_date.as_str(),
+            )?,
         }),
-        _ => None,
+        true => None,
     };
 
     let index = GamesTemplate {

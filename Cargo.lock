@@ -1113,6 +1113,7 @@ dependencies = [
  "dotenv",
  "env_logger",
  "ffb_structs",
+ "log",
  "reqwest",
  "serde_json",
  "tokio",

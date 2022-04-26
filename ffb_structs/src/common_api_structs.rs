@@ -1,20 +1,20 @@
 use chrono::{DateTime, Utc};
 
-#[derive(Debug, Clone, serde::Deserialize)]
+#[derive(Debug, Clone, serde::Deserialize, serde::Serialize)]
 pub struct Venue {
     pub id: Option<u32>,
     pub name: Option<String>,
     pub city: Option<String>,
 }
 
-#[derive(Debug, Clone, serde::Deserialize)]
+#[derive(Debug, Clone, serde::Deserialize, serde::Serialize)]
 pub struct Status {
     pub long: String,
     pub short: String,
     pub elapsed: Option<u32>,
 }
 
-#[derive(Debug, Clone, serde::Deserialize)]
+#[derive(Debug, Clone, serde::Deserialize, serde::Serialize)]
 pub struct Fixture {
     pub id: u32,
     pub referee: Option<String>,
@@ -34,7 +34,7 @@ pub struct League {
     pub round: Option<String>,
 }
 
-#[derive(Debug, Clone, serde::Deserialize)]
+#[derive(Debug, Clone, serde::Deserialize, serde::Serialize)]
 pub struct Team {
     pub id: u32,
     pub name: String,
@@ -42,22 +42,14 @@ pub struct Team {
     pub winner: Option<bool>,
 }
 
-#[derive(Debug, Clone, serde::Deserialize)]
+#[derive(Debug, Clone, serde::Deserialize, serde::Serialize)]
 pub struct Teams {
     pub home: Team,
     pub away: Team,
 }
 
-#[derive(Debug, Clone, serde::Deserialize)]
+#[derive(Debug, Clone, serde::Deserialize, serde::Serialize)]
 pub struct Goals {
     pub home: Option<u8>,
     pub away: Option<u8>,
-}
-
-#[derive(serde::Deserialize, Clone)]
-pub struct Game {
-    pub fixture: Fixture,
-    pub league: League,
-    pub teams: Teams,
-    pub goals: Goals,
 }

@@ -20,19 +20,16 @@ impl Entity {
         fav_leagues: Option<Vec<u32>>,
         limit: Option<i64>,
     ) -> Result<Vec<Model>, ApplicationError> {
-        let redis_key : String = format!("fixtures:{}", date);
-        let redis_hset_key : String = format!("{:?}::{:?}", fav_leagues, limit);
+        let redis_key: String = format!("games:{}::{:?}::{:?}", date, fav_leagues, limit);
         let mut conn = Database::acquire_redis_connection()?;
-        let cached_struct: Option<String> = redis::cmd("HGET")
+        let cached_struct: Option<String> = redis::cmd("GET")
             .arg(redis_key.as_str())
-            .arg(redis_hset_key.as_str())
             .query(&mut conn)?;
         if let Some(cached_struct) = cached_struct {
-
             let deserialized_struct: Vec<Model> = serde_json::from_str(cached_struct.as_str())?;
             redis::cmd("EXPIRE")
                 .arg(redis_key.as_str())
-                .arg(500)
+                .arg(200)
                 .query(&mut conn)?;
             return Ok(deserialized_struct);
         } else {
@@ -56,14 +53,13 @@ impl Entity {
                 .await?
                 .try_collect()
                 .await?;
-            redis::cmd("HSET")
+            redis::cmd("SET")
                 .arg(redis_key.as_str())
-                .arg(redis_hset_key.as_str())
                 .arg(serde_json::to_string(&model)?)
                 .query(&mut conn)?;
             redis::cmd("EXPIRE")
                 .arg(redis_key.as_str())
-                .arg(300)
+                .arg(100)
                 .query(&mut conn)?;
             Ok(model)
         }
@@ -86,9 +82,15 @@ impl Entity {
             .arg(date)
             .arg(chrono::Utc::now().to_rfc3339())
             .query(&mut conn)?;
-        redis::cmd("DEL")
-            .arg(format!("fixtures:{}", date))
+        let keys_to_del : Vec<String> = redis::cmd("KEYS")
+            .arg(format!("games:\"{}\"::*", date))
             .query(&mut conn)?;
+        if !keys_to_del.is_empty() {
+            redis::cmd("DEL")
+                .arg(keys_to_del)
+                .query(&mut conn)?;
+        }
+
         Ok(())
     }
 

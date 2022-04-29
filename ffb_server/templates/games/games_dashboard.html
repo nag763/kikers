@@ -27,5 +27,9 @@
 	</div>
 	<div>
 	</div>
+	
+	{% if next_three_games.is_none()  && yesterday_three_games.is_none() && tomorow_three_games.is_none() %}
+	<p class="mt-5">You don't see any game ? Ensure you added games to your <a href="/profile/leagues" class="font-light text-md text-indigo-600 text-right">favorites</a>, otherwise, you can still have a look at all the games of the day by clicking on the all button.</p>
+	{% endif %}
 </div>
 {% endblock %}

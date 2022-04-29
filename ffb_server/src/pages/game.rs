@@ -56,7 +56,7 @@ pub async fn games(
     let now: DateTime<Utc> = Utc::now();
     let fav_leagues: Option<Vec<u32>> = match context_query.all {
         Some(v) if v => None,
-        _ => Some(user::Entity::get_favorite_leagues_id(jwt_user.id).await?)
+        _ => Some(user::Entity::get_favorite_leagues_id(jwt_user.id).await?),
     };
     if let Some(query_date) = &context_query.date {
         let games: Vec<Game> =

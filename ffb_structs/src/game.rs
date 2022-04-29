@@ -22,9 +22,8 @@ impl Entity {
     ) -> Result<Vec<Model>, ApplicationError> {
         let redis_key: String = format!("games:{}::{:?}::{:?}", date, fav_leagues, limit);
         let mut conn = Database::acquire_redis_connection()?;
-        let cached_struct: Option<String> = redis::cmd("GET")
-            .arg(redis_key.as_str())
-            .query(&mut conn)?;
+        let cached_struct: Option<String> =
+            redis::cmd("GET").arg(redis_key.as_str()).query(&mut conn)?;
         if let Some(cached_struct) = cached_struct {
             let deserialized_struct: Vec<Model> = serde_json::from_str(cached_struct.as_str())?;
             redis::cmd("EXPIRE")
@@ -82,13 +81,11 @@ impl Entity {
             .arg(date)
             .arg(chrono::Utc::now().to_rfc3339())
             .query(&mut conn)?;
-        let keys_to_del : Vec<String> = redis::cmd("KEYS")
+        let keys_to_del: Vec<String> = redis::cmd("KEYS")
             .arg(format!("games:\"{}\"::*", date))
             .query(&mut conn)?;
         if !keys_to_del.is_empty() {
-            redis::cmd("DEL")
-                .arg(keys_to_del)
-                .query(&mut conn)?;
+            redis::cmd("DEL").arg(keys_to_del).query(&mut conn)?;
         }
 
         Ok(())

@@ -3,7 +3,9 @@ use crate::error::ApplicationError;
 use crate::transaction_result::TransactionResult;
 use uuid::Uuid;
 
-#[derive(Clone, Debug, PartialEq, Default, Display, sqlx::FromRow)]
+#[derive(
+    Clone, Debug, PartialEq, Default, Display, sqlx::FromRow, serde::Serialize, serde::Deserialize,
+)]
 #[display(fmt = "#{} named {} with login {}", id, name, login)]
 pub struct Model {
     pub id: u32,
@@ -53,15 +55,35 @@ impl Entity {
         per_page: u32,
         page: u32,
     ) -> Result<Vec<Model>, ApplicationError> {
-        let mut conn = Database::acquire_sql_connection().await?;
-        let offset = per_page * page;
-        let models = sqlx::query_as::<_, Model>("SELECT * FROM USER WHERE role_id < ? LIMIT ?,?")
-            .bind(&role)
-            .bind(&offset)
-            .bind(&per_page)
-            .fetch_all(&mut conn)
-            .await?;
-        Ok(models)
+        let mut redis_conn = Database::acquire_redis_connection()?;
+        let redis_key: String = format!("fav_leagues:{}::{}::{}", role, per_page, page);
+        let paginated_users_as_string: Option<String> =
+            redis::cmd("GET").arg(&redis_key).query(&mut redis_conn)?;
+        if let Some(paginated_users_as_string) = paginated_users_as_string {
+            let models: Vec<Model> = serde_json::from_str(paginated_users_as_string.as_str())?;
+            redis::cmd("EXPIRE")
+                .arg(&redis_key)
+                .arg(250)
+                .query(&mut redis_conn)?;
+            Ok(models)
+        } else {
+            let mut conn = Database::acquire_sql_connection().await?;
+            let offset = per_page * page;
+            let models =
+                sqlx::query_as::<_, Model>("SELECT * FROM USER WHERE role_id < ? LIMIT ?,?")
+                    .bind(&role)
+                    .bind(&offset)
+                    .bind(&per_page)
+                    .fetch_all(&mut conn)
+                    .await?;
+            redis::cmd("SET")
+                .arg(&redis_key)
+                .arg(&serde_json::to_string(&models)?)
+                .arg("EX")
+                .arg(200)
+                .query(&mut redis_conn)?;
+            Ok(models)
+        }
     }
 
     pub async fn find_by_id_with_role_check(
@@ -124,16 +146,23 @@ impl Entity {
     }
 
     pub async fn delete_user_uuid_with_role_check(
-        uuid: &str,
+        user_uuid: &str,
         role_id: u32,
     ) -> Result<TransactionResult, ApplicationError> {
         let mut conn = Database::acquire_sql_connection().await?;
+        let mut redis_conn = Database::acquire_redis_connection()?;
         let result = sqlx::query("DELETE FROM USER WHERE uuid =? AND role_id < ?")
-            .bind(&uuid)
+            .bind(&user_uuid)
             .bind(&role_id)
             .execute(&mut conn)
             .await?;
-        info!("User {} has been deleted", uuid);
+        let keys_to_del: Vec<String> = redis::cmd("KEYS")
+            .arg("fav_leagues:*")
+            .query(&mut redis_conn)?;
+        if !keys_to_del.is_empty() {
+            redis::cmd("DEL").arg(keys_to_del).query(&mut redis_conn)?;
+        }
+        info!("User {} has been deleted", user_uuid);
         Ok(TransactionResult::from_expected_affected_rows(result, 1))
     }
 
@@ -142,16 +171,24 @@ impl Entity {
         name: &str,
         password: &str,
     ) -> Result<TransactionResult, ApplicationError> {
-        let uuid = Uuid::new_v4();
+        let gen_uuid = Uuid::new_v4();
         let mut conn = Database::acquire_sql_connection().await?;
+        let mut redis_conn = Database::acquire_redis_connection()?;
         let result = sqlx::query("INSERT INTO USER(uuid, login, name, password) VALUES(?, ?,?,?)")
-            .bind(uuid.to_string())
+            .bind(gen_uuid.to_string())
             .bind(login)
             .bind(name)
             .bind(password)
             .execute(&mut conn)
             .await?;
         info!("User {} has been created", login);
+        let keys_to_del: Vec<String> = redis::cmd("KEYS")
+            .arg("fav_leagues:*")
+            .query(&mut redis_conn)?;
+        if !keys_to_del.is_empty() {
+            redis::cmd("DEL").arg(keys_to_del).query(&mut redis_conn)?;
+        }
+        info!("User {} has been inserted", gen_uuid);
         Ok(TransactionResult::from_expected_affected_rows(result, 1))
     }
 
@@ -167,7 +204,7 @@ impl Entity {
             .execute(&mut conn)
             .await?;
         redis::cmd("DEL")
-            .arg(format!("fav_leagues:{}", user_id))
+            .arg("fav_leagues:*")
             .query(&mut redis_conn)?;
         Ok(TransactionResult::from_expected_affected_rows(result, 1))
     }
@@ -184,7 +221,7 @@ impl Entity {
             .execute(&mut conn)
             .await?;
         redis::cmd("DEL")
-            .arg(format!("fav_leagues:{}", user_id))
+            .arg("fav_leagues:*")
             .query(&mut redis_conn)?;
         Ok(TransactionResult::from_expected_affected_rows(result, 1))
     }
@@ -195,6 +232,7 @@ impl Entity {
         role_id: u32,
     ) -> Result<TransactionResult, ApplicationError> {
         let mut conn = Database::acquire_sql_connection().await?;
+        let mut redis_conn = Database::acquire_redis_connection()?;
         let result = sqlx::query("UPDATE USER SET is_authorized=? WHERE uuid =? AND role_id < ?")
             .bind(&is_authorized)
             .bind(uuid)
@@ -205,6 +243,13 @@ impl Entity {
             "User#{} activation status have been updated to {}",
             uuid, is_authorized
         );
+        let keys_to_del: Vec<String> = redis::cmd("KEYS")
+            .arg("fav_leagues:*")
+            .query(&mut redis_conn)?;
+        if !keys_to_del.is_empty() {
+            redis::cmd("DEL").arg(keys_to_del).query(&mut redis_conn)?;
+        }
+        info!("User {} has been deleted", uuid);
         Ok(TransactionResult::from_expected_affected_rows(result, 1))
     }
 
@@ -212,6 +257,7 @@ impl Entity {
         model: Model,
         role_id: u32,
     ) -> Result<TransactionResult, ApplicationError> {
+        let mut redis_conn = Database::acquire_redis_connection()?;
         let mut conn = Database::acquire_sql_connection().await?;
         let result =
             sqlx::query("UPDATE USER SET name=?,is_authorized=? WHERE id =? and role_id < ?")
@@ -222,6 +268,12 @@ impl Entity {
                 .execute(&mut conn)
                 .await?;
         info!("User {} has been updated", &model.login);
+        let keys_to_del: Vec<String> = redis::cmd("KEYS")
+            .arg("fav_leagues:*")
+            .query(&mut redis_conn)?;
+        if !keys_to_del.is_empty() {
+            redis::cmd("DEL").arg(keys_to_del).query(&mut redis_conn)?;
+        }
         Ok(TransactionResult::from_expected_affected_rows(result, 1))
     }
 

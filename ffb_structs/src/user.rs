@@ -277,6 +277,27 @@ impl Entity {
         Ok(TransactionResult::from_expected_affected_rows(result, 1))
     }
 
+    pub async fn update_self(
+        model: Model,
+    ) -> Result<TransactionResult, ApplicationError> {
+        let mut redis_conn = Database::acquire_redis_connection()?;
+        let mut conn = Database::acquire_sql_connection().await?;
+        let result =
+            sqlx::query("UPDATE USER SET name=? WHERE id =?")
+                .bind(&model.name)
+                .bind(&model.id)
+                .execute(&mut conn)
+                .await?;
+        info!("User {} has been updated", &model.login);
+        let keys_to_del: Vec<String> = redis::cmd("KEYS")
+            .arg("fav_leagues:*")
+            .query(&mut redis_conn)?;
+        if !keys_to_del.is_empty() {
+            redis::cmd("DEL").arg(keys_to_del).query(&mut redis_conn)?;
+        }
+        Ok(TransactionResult::from_expected_affected_rows(result, 1))
+    }
+
     pub async fn login_exists(login: &str) -> Result<bool, ApplicationError> {
         let mut conn = Database::acquire_sql_connection().await?;
         let row: (bool,) =

@@ -21,6 +21,7 @@ extern crate log;
 #[derive(Debug, Default, Deserialize, Serialize, Clone)]
 pub struct JwtUser {
     pub id: u32,
+    pub uuid: String,
     pub login: String,
     pub name: String,
     pub is_authorized: bool,
@@ -43,6 +44,7 @@ impl JwtUser {
             header,
             JwtUser {
                 id: user.id,
+                uuid: user.uuid,
                 login: user.login.clone(),
                 name: user.name,
                 is_authorized: user.is_authorized,

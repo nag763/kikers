@@ -157,6 +157,37 @@ pub async fn user_modification(
 }
 
 #[derive(serde::Deserialize, validator::Validate)]
+pub struct UserSelfModification {
+    uuid: String,
+    #[validate(length(min = 2))]
+    login: String,
+    #[validate(length(min = 2))]
+    name: String,
+}
+
+#[post("/profile/edit")]
+pub async fn user_self_modification(
+    user_modification_form: actix_web_validator::Form<UserSelfModification>,
+    req: HttpRequest,
+) -> Result<impl Responder, ApplicationError> {
+    let jwt_user: JwtUser = JwtUser::from_request(req)?;
+    let mut user: User = user::Entity::find_by_uuid(&user_modification_form.uuid)
+        .await?
+        .ok_or(ApplicationError::NotFound)?;
+    if user.id != jwt_user.id {
+        return Err(ApplicationError::BadRequest);
+    }
+    user.name = user_modification_form.name.clone();
+    let result: bool = user::Entity::update_self(user).await?.into();
+    if result {
+            JwtUser::revoke_all_session(&user_modification_form.login)?;
+    }
+    Ok(HttpResponse::Found()
+        .append_header(("Location", "/logout"))
+        .finish())
+}
+
+#[derive(serde::Deserialize, validator::Validate)]
 pub struct UserChangeLeague {
     league_id: u32,
     user_id: u32,

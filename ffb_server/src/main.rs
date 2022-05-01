@@ -15,7 +15,7 @@ use crate::application_data::ApplicationData;
 use crate::controllers::auth::{login, logout, register_user};
 use crate::controllers::cookies::cookies_approved;
 use crate::controllers::user::{
-    user_activation, user_change_leagues, user_deletion, user_modification, user_search,
+    user_activation, user_change_leagues, user_deletion, user_modification, user_search, user_self_modification
 };
 use crate::error::ApplicationError;
 use crate::middleware::cookie_approval::CookieChecker;
@@ -94,6 +94,7 @@ async fn main() -> std::io::Result<()> {
                             .service(user_leagues)
                             .service(user_change_leagues)
                             .service(user_club)
+                            .service(user_self_modification)
                             .service(admin_dashboard)
                             .service(user_search)
                             .service(user_activation)

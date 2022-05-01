@@ -163,6 +163,7 @@ pub struct UserSelfModification {
     login: String,
     #[validate(length(min = 2))]
     name: String,
+    password: Option<String>,
 }
 
 #[post("/profile/edit")]
@@ -178,6 +179,9 @@ pub async fn user_self_modification(
         return Err(ApplicationError::BadRequest);
     }
     user.name = user_modification_form.name.clone();
+    if let Some(password) = &user_modification_form.password {
+        user.password = JwtUser::encrypt_key(&password)?
+    }
     let result: bool = user::Entity::update_self(user).await?.into();
     if result {
             JwtUser::revoke_all_session(&user_modification_form.login)?;

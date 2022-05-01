@@ -1,9 +1,10 @@
 use crate::database::Database;
 use crate::error::ApplicationError;
 use serde::{Deserialize, Serialize};
+use crate::{role, role::Model as Role};
 use std::collections::HashMap;
 
-#[derive(Clone, Debug, PartialEq, Serialize, Deserialize, Display, sqlx::FromRow)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize, Display, sqlx::FromRow, Hash)]
 #[display(fmt = "{}=>{}(positioned at {:?}", label, href, position)]
 pub struct Model {
     pub id: u32,
@@ -24,19 +25,18 @@ impl Entity {
         Ok(models)
     }
 
-    pub async fn get_role_navaccess_mapping() -> Result<HashMap<u32, Vec<Model>>, ApplicationError>
+    pub async fn get_role_navaccess_mapping() -> Result<HashMap<Role, Vec<Model>>, ApplicationError>
     {
+        let roles : Vec<Role> = role::Entity::get_roles().await?;
         let mut conn = Database::acquire_sql_connection().await?;
-        let roles: Vec<(u32,)> = sqlx::query_as("SELECT id FROM ROLE")
-            .fetch_all(&mut conn)
-            .await?;
         let mut role_navaccess = HashMap::new();
+
         for role in roles {
             let models : Vec<Model> = sqlx::query_as("SELECT * FROM NAVACCESS na INNER JOIN ROLE_NAVACCESS rna ON na.id = rna.navaccess_id WHERE rna.role_id=? ORDER BY na.position")
-                .bind(&role.0)
+                .bind(&role.id)
                 .fetch_all(&mut conn)
                 .await?;
-            role_navaccess.insert(role.0, models);
+            role_navaccess.insert(role, models);
         }
         Ok(role_navaccess)
     }

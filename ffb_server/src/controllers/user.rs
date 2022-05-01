@@ -113,6 +113,7 @@ pub struct UserModification {
     page: i32,
     #[validate(range(min = 0))]
     per_page: i32,
+    role: u32,
 }
 
 #[post("/user/modification")]
@@ -125,6 +126,7 @@ pub async fn user_modification(
         .await?
         .ok_or(ApplicationError::NotFound)?;
     user.name = user_modification_form.name.clone();
+    user.role_id = user_modification_form.role;
     user.is_authorized = user_modification_form.is_authorized.is_some();
     let result: bool = user::Entity::update_with_role_check(user, jwt_user.role)
         .await?

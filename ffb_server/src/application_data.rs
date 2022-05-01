@@ -1,10 +1,10 @@
 use crate::ApplicationError;
-use ffb_structs::{navaccess, navaccess::Model as NavAccess};
+use ffb_structs::{navaccess, navaccess::Model as NavAccess, role::Model as Role};
 use std::collections::HashMap;
 
 #[derive(Clone)]
 pub struct ApplicationData {
-    pub role_navaccess: HashMap<u32, Vec<NavAccess>>,
+    pub role_navaccess: HashMap<Role, Vec<NavAccess>>,
     pub jwt_path: String,
     pub cookie_approval_path: String,
 }
@@ -22,7 +22,12 @@ impl ApplicationData {
     }
 
     pub fn get_navaccess_for_role(&self, role_id: &u32) -> Vec<NavAccess> {
-        self.role_navaccess.get(role_id).unwrap_or(&vec![]).to_vec()
+        for (role, navaccess) in &self.role_navaccess {
+            if &role.id == role_id {
+                return navaccess.to_vec();
+            }
+        }
+        vec![]
     }
 
     pub fn get_jwt_path(&self) -> &str {

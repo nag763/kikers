@@ -10,6 +10,7 @@ pub mod country;
 pub(crate) mod database;
 pub mod error;
 pub mod game;
+pub mod role;
 pub mod league;
 pub mod navaccess;
 pub mod token;

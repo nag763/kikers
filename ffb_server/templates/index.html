@@ -1,12 +1,10 @@
-
 {% extends "base.html" %}
 {% block title %}Welcome on FFB{% endblock %}
 {% block body %}
 	{% match user %}
   		{% when Some with (val) %}
-		<p class="hidden">{% block pagetitle %}Welcome back{% endblock %}</p>
+		 {% include "home.html" %}
   		{% when None %}
-		<p class="hidden">{% block pagetitle %}Login page{% endblock %}</p>
 		 {% include "login.html" %}
 	{% endmatch %}
 {% endblock %}

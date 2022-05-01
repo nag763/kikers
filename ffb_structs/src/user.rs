@@ -260,9 +260,10 @@ impl Entity {
         let mut redis_conn = Database::acquire_redis_connection()?;
         let mut conn = Database::acquire_sql_connection().await?;
         let result =
-            sqlx::query("UPDATE USER SET name=?,is_authorized=? WHERE id =? and role_id < ?")
+            sqlx::query("UPDATE USER SET name=?,is_authorized=?,role_id=? WHERE id =? and role_id < ?")
                 .bind(&model.name)
                 .bind(&model.is_authorized)
+                .bind(&model.role_id)
                 .bind(&model.id)
                 .bind(&role_id)
                 .execute(&mut conn)

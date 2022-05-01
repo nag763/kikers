@@ -56,7 +56,7 @@ impl Entity {
         page: u32,
     ) -> Result<Vec<Model>, ApplicationError> {
         let mut redis_conn = Database::acquire_redis_connection()?;
-        let redis_key: String = format!("fav_leagues:{}::{}::{}", role, per_page, page);
+        let redis_key: String = format!("users:{}::{}::{}", role, per_page, page);
         let paginated_users_as_string: Option<String> =
             redis::cmd("GET").arg(&redis_key).query(&mut redis_conn)?;
         if let Some(paginated_users_as_string) = paginated_users_as_string {
@@ -157,7 +157,7 @@ impl Entity {
             .execute(&mut conn)
             .await?;
         let keys_to_del: Vec<String> = redis::cmd("KEYS")
-            .arg("fav_leagues:*")
+            .arg("users:*")
             .query(&mut redis_conn)?;
         if !keys_to_del.is_empty() {
             redis::cmd("DEL").arg(keys_to_del).query(&mut redis_conn)?;
@@ -183,7 +183,7 @@ impl Entity {
             .await?;
         info!("User {} has been created", login);
         let keys_to_del: Vec<String> = redis::cmd("KEYS")
-            .arg("fav_leagues:*")
+            .arg("users:*")
             .query(&mut redis_conn)?;
         if !keys_to_del.is_empty() {
             redis::cmd("DEL").arg(keys_to_del).query(&mut redis_conn)?;
@@ -204,7 +204,7 @@ impl Entity {
             .execute(&mut conn)
             .await?;
         redis::cmd("DEL")
-            .arg("fav_leagues:*")
+            .arg(format!("fav_leagues:{}", user_id))
             .query(&mut redis_conn)?;
         Ok(TransactionResult::from_expected_affected_rows(result, 1))
     }
@@ -221,7 +221,7 @@ impl Entity {
             .execute(&mut conn)
             .await?;
         redis::cmd("DEL")
-            .arg("fav_leagues:*")
+            .arg(format!("fav_leagues:{}", user_id))
             .query(&mut redis_conn)?;
         Ok(TransactionResult::from_expected_affected_rows(result, 1))
     }
@@ -244,7 +244,7 @@ impl Entity {
             uuid, is_authorized
         );
         let keys_to_del: Vec<String> = redis::cmd("KEYS")
-            .arg("fav_leagues:*")
+            .arg("users:*")
             .query(&mut redis_conn)?;
         if !keys_to_del.is_empty() {
             redis::cmd("DEL").arg(keys_to_del).query(&mut redis_conn)?;
@@ -269,7 +269,7 @@ impl Entity {
                 .await?;
         info!("User {} has been updated", &model.login);
         let keys_to_del: Vec<String> = redis::cmd("KEYS")
-            .arg("fav_leagues:*")
+            .arg("users:*")
             .query(&mut redis_conn)?;
         if !keys_to_del.is_empty() {
             redis::cmd("DEL").arg(keys_to_del).query(&mut redis_conn)?;
@@ -291,7 +291,7 @@ impl Entity {
                 .await?;
         info!("User {} has been updated", &model.login);
         let keys_to_del: Vec<String> = redis::cmd("KEYS")
-            .arg("fav_leagues:*")
+            .arg("users:*")
             .query(&mut redis_conn)?;
         if !keys_to_del.is_empty() {
             redis::cmd("DEL").arg(keys_to_del).query(&mut redis_conn)?;

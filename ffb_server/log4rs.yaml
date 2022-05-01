@@ -52,11 +52,27 @@ root:
   appenders:
     - stdout
 loggers:
-   ffb:
+   ffb_server:
     level: info
     appenders:
       - app_out
-   ffb:
+   ffb_auth:
+    level: info
+    appenders:
+      - app_out
+   ffb_structs:
+    level: info
+    appenders:
+      - app_out
+   ffb_server:
+    level: error
+    appenders:
+      - app_err
+   ffb_auth:
+    level: error
+    appenders:
+      - app_err
+   ffb_structs:
     level: error
     appenders:
       - app_err

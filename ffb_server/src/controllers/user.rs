@@ -186,7 +186,7 @@ pub async fn user_self_modification(
     }
     let result: bool = user::Entity::update_self(user).await?.into();
     if result {
-            JwtUser::revoke_all_session(&user_modification_form.login)?;
+        JwtUser::revoke_all_session(&user_modification_form.login)?;
     }
     Ok(HttpResponse::Found()
         .append_header(("Location", "/logout"))

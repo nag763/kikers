@@ -13,7 +13,7 @@ pub struct Entity;
 impl Entity {
     pub async fn get_roles() -> Result<Vec<Model>, ApplicationError> {
         let mut conn = Database::acquire_sql_connection().await?;
-        let models : Vec<Model> = sqlx::query_as("SELECT * FROM ROLE")
+        let models: Vec<Model> = sqlx::query_as("SELECT * FROM ROLE")
             .fetch_all(&mut conn)
             .await?;
         Ok(models)

@@ -15,10 +15,12 @@ use crate::application_data::ApplicationData;
 use crate::controllers::auth::{login, logout, register_user};
 use crate::controllers::cookies::cookies_approved;
 use crate::controllers::user::{
-    user_activation, user_change_leagues, user_deletion, user_modification, user_search, user_self_modification
+    user_activation, user_change_leagues, user_deletion, user_modification, user_search,
+    user_self_modification,
 };
 use crate::error::ApplicationError;
 use crate::middleware::cookie_approval::CookieChecker;
+use crate::middleware::ddos_limiter::DDosLimiter;
 use crate::middleware::role_checker::RoleChecker;
 use crate::pages::admin::admin_dashboard;
 use crate::pages::game::games;
@@ -80,6 +82,7 @@ async fn main() -> std::io::Result<()> {
             .service(
                 web::scope("")
                     .service(cookies)
+                    .wrap(DDosLimiter::default())
                     .wrap(CookieChecker::default())
                     .service(index)
                     .service(login)

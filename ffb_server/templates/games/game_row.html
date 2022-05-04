@@ -3,7 +3,24 @@
 <div class="max-w-sm bg-white rounded-lg border border-gray-700 shadow-md">
     <div class="flex justify-end px-4 pt-4">
     </div>
-        <img class="ml-1 mb-2 w-8 h-8 rounded-full shadow-lg" src="{{game.league.logo}}"/>
+    <div class="flex flex-row justify-between">
+        <img class="ml-2 mb-2 w-8 h-8 rounded-full shadow-lg" src="{{game.league.logo}}"/>
+	<div class="mr-3">
+	{% match game.fixture.status.short.as_str() %}
+		{% when "NS" %}
+		{% let diff = (now - game.fixture.date) %}
+		{% if diff.num_hours() < 2 %}
+<button class="rounded-full w-8 h-8 bg-gradient-to-r from-cyan-500 to-blue-500 shadow-lg focus:ring focus:ring-violet-300" title="Add game to bets">+</button>
+
+		{% endif %}
+		{% when _ %}
+
+
+	{% endmatch %}
+	<button class="rounded-full w-8 h-8 bg-gradient-to-r from-orange-500 to-red-500 shadow-lg focus:ring focus:ring-orange-700" title="Drop games from bets">-</button>
+	<button class="rounded-full w-8 h-8 bg-gradient-to-r from-green-400 to-green-600 shadow-lg focus:ring focus:ring-violet-100" title="Check out game">&#128065;</button>
+	</div>
+    </div>
     <div class="flex flex-col items-center pb-5">
 	    <h5 class="mb-1 text-xl font-medium text-gray-500 py-4 px-2 text-center">{{game.league.name}} {% if let Some(country) = game.league.country %} ({{country}}) {% endif %}</h5>
 	    {% if let Some(round) = game.league.round %}

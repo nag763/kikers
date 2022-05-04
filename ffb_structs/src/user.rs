@@ -156,9 +156,7 @@ impl Entity {
             .bind(&role_id)
             .execute(&mut conn)
             .await?;
-        let keys_to_del: Vec<String> = redis::cmd("KEYS")
-            .arg("users:*")
-            .query(&mut redis_conn)?;
+        let keys_to_del: Vec<String> = redis::cmd("KEYS").arg("users:*").query(&mut redis_conn)?;
         if !keys_to_del.is_empty() {
             redis::cmd("DEL").arg(keys_to_del).query(&mut redis_conn)?;
         }
@@ -182,9 +180,7 @@ impl Entity {
             .execute(&mut conn)
             .await?;
         info!("User {} has been created", login);
-        let keys_to_del: Vec<String> = redis::cmd("KEYS")
-            .arg("users:*")
-            .query(&mut redis_conn)?;
+        let keys_to_del: Vec<String> = redis::cmd("KEYS").arg("users:*").query(&mut redis_conn)?;
         if !keys_to_del.is_empty() {
             redis::cmd("DEL").arg(keys_to_del).query(&mut redis_conn)?;
         }
@@ -243,9 +239,7 @@ impl Entity {
             "User#{} activation status have been updated to {}",
             uuid, is_authorized
         );
-        let keys_to_del: Vec<String> = redis::cmd("KEYS")
-            .arg("users:*")
-            .query(&mut redis_conn)?;
+        let keys_to_del: Vec<String> = redis::cmd("KEYS").arg("users:*").query(&mut redis_conn)?;
         if !keys_to_del.is_empty() {
             redis::cmd("DEL").arg(keys_to_del).query(&mut redis_conn)?;
         }
@@ -259,41 +253,35 @@ impl Entity {
     ) -> Result<TransactionResult, ApplicationError> {
         let mut redis_conn = Database::acquire_redis_connection()?;
         let mut conn = Database::acquire_sql_connection().await?;
-        let result =
-            sqlx::query("UPDATE USER SET name=?,is_authorized=?,role_id=? WHERE id =? and role_id < ?")
-                .bind(&model.name)
-                .bind(&model.is_authorized)
-                .bind(&model.role_id)
-                .bind(&model.id)
-                .bind(&role_id)
-                .execute(&mut conn)
-                .await?;
+        let result = sqlx::query(
+            "UPDATE USER SET name=?,is_authorized=?,role_id=? WHERE id =? and role_id < ?",
+        )
+        .bind(&model.name)
+        .bind(&model.is_authorized)
+        .bind(&model.role_id)
+        .bind(&model.id)
+        .bind(&role_id)
+        .execute(&mut conn)
+        .await?;
         info!("User {} has been updated", &model.login);
-        let keys_to_del: Vec<String> = redis::cmd("KEYS")
-            .arg("users:*")
-            .query(&mut redis_conn)?;
+        let keys_to_del: Vec<String> = redis::cmd("KEYS").arg("users:*").query(&mut redis_conn)?;
         if !keys_to_del.is_empty() {
             redis::cmd("DEL").arg(keys_to_del).query(&mut redis_conn)?;
         }
         Ok(TransactionResult::from_expected_affected_rows(result, 1))
     }
 
-    pub async fn update_self(
-        model: Model,
-    ) -> Result<TransactionResult, ApplicationError> {
+    pub async fn update_self(model: Model) -> Result<TransactionResult, ApplicationError> {
         let mut redis_conn = Database::acquire_redis_connection()?;
         let mut conn = Database::acquire_sql_connection().await?;
-        let result =
-            sqlx::query("UPDATE USER SET name=?,password=? WHERE id =?")
-                .bind(&model.name)
-                .bind(&model.password)
-                .bind(&model.id)
-                .execute(&mut conn)
-                .await?;
+        let result = sqlx::query("UPDATE USER SET name=?,password=? WHERE id =?")
+            .bind(&model.name)
+            .bind(&model.password)
+            .bind(&model.id)
+            .execute(&mut conn)
+            .await?;
         info!("User {} has been updated", &model.login);
-        let keys_to_del: Vec<String> = redis::cmd("KEYS")
-            .arg("users:*")
-            .query(&mut redis_conn)?;
+        let keys_to_del: Vec<String> = redis::cmd("KEYS").arg("users:*").query(&mut redis_conn)?;
         if !keys_to_del.is_empty() {
             redis::cmd("DEL").arg(keys_to_del).query(&mut redis_conn)?;
         }

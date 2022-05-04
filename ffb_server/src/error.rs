@@ -28,6 +28,10 @@ pub enum ApplicationError {
         fmt = "You haven't approved cookies yet, approve them prior any usage of the application"
     )]
     CookiesUnapproved,
+    #[display(
+        fmt = "Following too many bad requests on your side, your IP has been banned. If you believe it is an error, please contact the administrator of the site."
+    )]
+    PeerBanned,
     #[display(fmt = "{}", _0)]
     StructError(String),
     #[display(fmt = "{}", _0)]
@@ -47,6 +51,7 @@ impl ApplicationError {
         match &*self {
             Self::AuthError(_) | Self::IllegalToken => Some("/logout".into()),
             Self::CookiesUnapproved => Some("/cookies".into()),
+            Self::PeerBanned => Some("https://google.com/".into()),
             _ => None,
         }
     }
@@ -75,6 +80,7 @@ impl actix_web::error::ResponseError for ApplicationError {
             | ApplicationError::CookiesUnapproved
             | ApplicationError::BadRequest => StatusCode::BAD_REQUEST,
             ApplicationError::NotFound => StatusCode::NOT_FOUND,
+            ApplicationError::PeerBanned => StatusCode::FORBIDDEN,
         }
     }
 }

@@ -1,7 +1,7 @@
 use crate::database::Database;
 use crate::error::ApplicationError;
-use serde::{Deserialize, Serialize};
 use crate::{role, role::Model as Role};
+use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize, Display, sqlx::FromRow, Hash)]
@@ -27,7 +27,7 @@ impl Entity {
 
     pub async fn get_role_navaccess_mapping() -> Result<HashMap<Role, Vec<Model>>, ApplicationError>
     {
-        let roles : Vec<Role> = role::Entity::get_roles().await?;
+        let roles: Vec<Role> = role::Entity::get_roles().await?;
         let mut conn = Database::acquire_sql_connection().await?;
         let mut role_navaccess = HashMap::new();
 

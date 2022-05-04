@@ -47,7 +47,7 @@ where
 
     fn call(&self, req: ServiceRequest) -> Self::Future {
         if let Some(peer_addr) = req.peer_addr() {
-            let is_banned: bool = DDosEntity::is_ip_banned(&peer_addr.to_string()).unwrap();
+            let is_banned: bool = DDosEntity::is_ip_banned(&peer_addr.ip().to_string()).unwrap();
             if is_banned {
                 return Box::pin(async move {
                     Ok(req.into_response(ApplicationError::PeerBanned.error_response()))
@@ -60,7 +60,7 @@ where
             let res = fut.await?;
             if res.status().is_client_error() {
                 if let Some(peer_addr) = res.request().peer_addr() {
-                    DDosEntity::register_client_error(&peer_addr.to_string()).unwrap();
+                    DDosEntity::register_client_error(&peer_addr.ip().to_string()).unwrap();
                 }
             }
             Ok(res)

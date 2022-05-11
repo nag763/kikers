@@ -6,6 +6,7 @@ use mongodb::bson::doc;
 
 #[derive(serde::Deserialize, serde::Serialize, Clone)]
 pub struct Model {
+    pub is_bet: Option<bool>,
     pub fixture: Fixture,
     pub league: League,
     pub teams: Teams,

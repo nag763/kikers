@@ -70,7 +70,7 @@ impl Entity {
             let mut conn = Database::acquire_sql_connection().await?;
             let offset = per_page * page;
             let models =
-                sqlx::query_as::<_, Model>("SELECT * FROM USER WHERE role_id < ? LIMIT ?,?")
+                sqlx::query_as::<_, Model>("SELECT * FROM USER WHERE role_id < ? ORDER BY id LIMIT ?,?")
                     .bind(&role)
                     .bind(&offset)
                     .bind(&per_page)

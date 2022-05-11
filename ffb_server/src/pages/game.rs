@@ -14,6 +14,7 @@ use ffb_structs::{game::Entity as GameEntity, game::Model as Game, user};
 #[template(path = "games/game_row.html")]
 struct GamesRowTemplate {
     games: Vec<Game>,
+    user_role: u32,
     now: DateTime<Utc>,
     fetched_date: String,
     title: String,
@@ -67,6 +68,7 @@ pub async fn games(
                 now,
                 fetched_date: query_date.clone(),
                 fetched_on: GameEntity::get_last_fetched_timestamp_for_date(query_date)?,
+                user_role: jwt_user.role,
                 title: format!("Games for the {0}", query_date.as_str()),
             }),
             true => None,
@@ -106,6 +108,7 @@ pub async fn games(
             now,
             fetched_date: now_as_simple_date,
             title: "Next three games".to_string(),
+                user_role: jwt_user.role,
         }),
         true => None,
     };
@@ -126,6 +129,7 @@ pub async fn games(
             fetched_on: GameEntity::get_last_fetched_timestamp_for_date(
                 yesterday_as_simple_date.as_str(),
             )?,
+                user_role: jwt_user.role,
         }),
         _ => None,
     };
@@ -142,6 +146,7 @@ pub async fn games(
             fetched_on: GameEntity::get_last_fetched_timestamp_for_date(
                 tomorow_as_simple_date.as_str(),
             )?,
+                user_role: jwt_user.role,
         }),
         true => None,
     };

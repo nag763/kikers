@@ -1,6 +1,7 @@
-use crate::common_api_structs::{Fixture, Goals, League, Teams, Score};
+use crate::common_api_structs::{Fixture, Goals, League, Score, Teams};
 use crate::database::Database;
 use crate::error::ApplicationError;
+use crate::transaction_result::TransactionResult;
 use futures::TryStreamExt;
 use mongodb::bson::doc;
 
@@ -84,13 +85,39 @@ impl Entity {
             .arg(chrono::Utc::now().to_rfc3339())
             .query(&mut conn)?;
         let keys_to_del: Vec<String> = redis::cmd("KEYS")
-            .arg(format!("games:\"{}\"::*", date))
+            .arg(format!(r#"games:{}::*"#, date))
             .query(&mut conn)?;
         if !keys_to_del.is_empty() {
             redis::cmd("DEL").arg(keys_to_del).query(&mut conn)?;
         }
 
         Ok(())
+    }
+
+    pub async fn change_is_bet_status(
+        id: u32,
+        value: bool,
+        date: &str,
+    ) -> Result<TransactionResult, ApplicationError> {
+        let database = Database::acquire_mongo_connection().await.unwrap();
+        let result = database
+            .collection::<Model>("fixture")
+            .update_one(
+                doc! {"fixture.id": id},
+                doc! {"$set":{"is_bet":value}},
+                None,
+            )
+            .await?;
+        let mut conn = Database::acquire_redis_connection()?;
+        let keys_to_del: Vec<String> = redis::cmd("KEYS")
+            .arg(format!(r#"games:{}::*"#, date))
+            .query(&mut conn)?;
+        if !keys_to_del.is_empty() {
+            redis::cmd("DEL").arg(keys_to_del).query(&mut conn)?;
+        }
+        Ok(TransactionResult::expect_single_result(
+            result.modified_count,
+        ))
     }
 
     pub fn get_last_fetched_timestamp_for_date(

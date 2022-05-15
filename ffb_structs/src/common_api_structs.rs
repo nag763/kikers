@@ -62,5 +62,5 @@ pub struct Penalty {
 
 #[derive(Debug, Clone, serde::Deserialize, serde::Serialize)]
 pub struct Score {
-    pub penalty: Option<Penalty>
+    pub penalty: Option<Penalty>,
 }

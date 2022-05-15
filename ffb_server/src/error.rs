@@ -29,7 +29,8 @@ pub enum ApplicationError {
     )]
     CookiesUnapproved,
     #[display(
-        fmt = "Following too many bad requests on your side, your IP {} has been banned. If you believe it is an error, please contact the administrator of the site.", _0
+        fmt = "Following too many bad requests on your side, your IP {} has been banned. If you believe it is an error, please contact the administrator of the site.",
+        _0
     )]
     PeerBanned(String),
     #[display(fmt = "{}", _0)]
@@ -108,5 +109,15 @@ impl From<StructApplicationError> for ApplicationError {
 impl From<AuthApplicationError> for ApplicationError {
     fn from(auth_error: AuthApplicationError) -> Self {
         Self::AuthError(auth_error.to_string())
+    }
+}
+
+impl From<actix_web::http::header::ToStrError> for ApplicationError {
+    fn from(to_str_err: actix_web::http::header::ToStrError) -> Self {
+        error!(
+            "A header deserialization error happened : {}",
+            to_str_err.to_string()
+        );
+        Self::InternalError
     }
 }

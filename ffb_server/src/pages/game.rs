@@ -108,7 +108,7 @@ pub async fn games(
             now,
             fetched_date: now_as_simple_date,
             title: "Next three games".to_string(),
-                user_role: jwt_user.role,
+            user_role: jwt_user.role,
         }),
         true => None,
     };
@@ -129,7 +129,7 @@ pub async fn games(
             fetched_on: GameEntity::get_last_fetched_timestamp_for_date(
                 yesterday_as_simple_date.as_str(),
             )?,
-                user_role: jwt_user.role,
+            user_role: jwt_user.role,
         }),
         _ => None,
     };
@@ -146,7 +146,7 @@ pub async fn games(
             fetched_on: GameEntity::get_last_fetched_timestamp_for_date(
                 tomorow_as_simple_date.as_str(),
             )?,
-                user_role: jwt_user.role,
+            user_role: jwt_user.role,
         }),
         true => None,
     };

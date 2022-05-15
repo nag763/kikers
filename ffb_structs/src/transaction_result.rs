@@ -1,5 +1,3 @@
-use sqlx::mysql::MySqlQueryResult;
-
 #[derive(Clone, Debug, PartialEq, Display)]
 pub enum TransactionResult {
     #[display(fmt = "The transaction executed with success")]
@@ -15,17 +13,18 @@ pub enum TransactionResult {
 }
 
 impl TransactionResult {
-    pub(crate) fn from_expected_affected_rows(
-        mysql_result: MySqlQueryResult,
-        expected_affected_rows: u64,
-    ) -> Self {
-        match mysql_result.rows_affected() {
+    pub(crate) fn from_expected_affected_rows(result: u64, expected_affected_rows: u64) -> Self {
+        match result {
             v if v == expected_affected_rows => Self::Success,
             0 => Self::NoRowsAffected,
             v if v < expected_affected_rows => Self::NotEnoughRowsAffected(v),
             v if expected_affected_rows < v => Self::TooManyRowsAffected(v),
             _ => Self::UnknownResult,
         }
+    }
+
+    pub(crate) fn expect_single_result(result: u64) -> Self {
+        Self::from_expected_affected_rows(result, 1)
     }
 }
 

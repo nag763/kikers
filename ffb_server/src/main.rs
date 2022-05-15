@@ -14,6 +14,7 @@ mod pages;
 use crate::application_data::ApplicationData;
 use crate::controllers::auth::{login, logout, register_user};
 use crate::controllers::cookies::cookies_approved;
+use crate::controllers::game::update_game_status;
 use crate::controllers::user::{
     user_activation, user_change_leagues, user_deletion, user_modification, user_search,
     user_self_modification,
@@ -50,7 +51,7 @@ async fn main() -> std::io::Result<()> {
                   .add(("Content-Security-Policy", "default-src 'self'; script-src 'nonce-2726c7f26c'; style-src 'self' 'nonce-7a616b6f6b'; img-src 'self' https://media.api-sports.io"))
                   .add(("Content-Type", "text/html; charset=utf-8"))
                   .add(("X-Frame-Options", "DENY"))
-                  .add(("Referrer-Policy", "no-referrer"))
+                  .add(("Referrer-Policy", "origin-when-cross-origin"))
                   .add(("X-Content-Type-Options", "nosniff"))
                   .add(("Access-Control-Allow-Origin", "null"))
                   .add(("Permissions-Policy", "accelerometer=(), ambient-light-sensor=(), autoplay=(), battery=(), camera=(), cross-origin-isolated=(), display-capture=(), document-domain=(), encrypted-media=(), execution-while-not-rendered=(), execution-while-out-of-viewport=(), fullscreen=(), geolocation=(), gyroscope=(), keyboard-map=(), magnetometer=(), microphone=(), midi=(), navigation-override=(), payment=(), picture-in-picture=(), publickey-credentials-get=(), screen-wake-lock=(), sync-xhr=(), usb=(), web-share=(), xr-spatial-tracking=()"))
@@ -93,6 +94,7 @@ async fn main() -> std::io::Result<()> {
                         web::scope("")
                             .wrap(RoleChecker::default())
                             .service(games)
+                            .service(update_game_status)
                             .service(user_profile)
                             .service(user_leagues)
                             .service(user_change_leagues)

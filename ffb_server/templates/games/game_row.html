@@ -14,7 +14,12 @@
 		{% when _ %}
 		{% if 2 < diff.num_hours() %}
 		{% if 2 < user_role %}
-		<button class="rounded-full w-8 h-8 bg-gradient-to-r from-cyan-500 to-blue-500 shadow-lg focus:ring focus:ring-violet-300" title="Add game to bets">+</button>
+		<form action="/games/update/status" method="POST">
+			<input hidden name="id" value="{{game.fixture.id}}"/> 
+			<input hidden name="value" value="true"/> 
+			<input hidden name="date" value="{{fetched_date}}"/> 
+		<button class="rounded-full w-8 h-8 bg-gradient-to-r from-cyan-500 to-blue-500 shadow-lg focus:ring focus:ring-violet-300" title="Add game to bets" type="submit">+</button>
+		</form>
 		{% endif %}
 		{% endif %}
 		{% endmatch %}
@@ -28,7 +33,12 @@
 	{% if is_bet %}
 	{%if 30 < diff.num_minutes() %}
 	{% if 2 < user_role %}
+		<form action="/games/update/status" method="POST">
+			<input hidden name="id" value="{{game.fixture.id}}"/> 
+			<input hidden name="value" value="false"/> 
+			<input hidden name="date" value="{{fetched_date}}"/> 
 	<button class="rounded-full w-8 h-8 bg-gradient-to-r from-orange-500 to-red-500 shadow-lg focus:ring focus:ring-orange-700" title="Drop games from bets">-</button>
+		</form>
 	{% endif %}
 	{% endif %}
 	{%if 2 < diff.num_minutes() %}

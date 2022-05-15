@@ -69,13 +69,14 @@ impl Entity {
         } else {
             let mut conn = Database::acquire_sql_connection().await?;
             let offset = per_page * page;
-            let models =
-                sqlx::query_as::<_, Model>("SELECT * FROM USER WHERE role_id < ? ORDER BY id LIMIT ?,?")
-                    .bind(&role)
-                    .bind(&offset)
-                    .bind(&per_page)
-                    .fetch_all(&mut conn)
-                    .await?;
+            let models = sqlx::query_as::<_, Model>(
+                "SELECT * FROM USER WHERE role_id < ? ORDER BY id LIMIT ?,?",
+            )
+            .bind(&role)
+            .bind(&offset)
+            .bind(&per_page)
+            .fetch_all(&mut conn)
+            .await?;
             redis::cmd("SET")
                 .arg(&redis_key)
                 .arg(&serde_json::to_string(&models)?)
@@ -161,7 +162,9 @@ impl Entity {
             redis::cmd("DEL").arg(keys_to_del).query(&mut redis_conn)?;
         }
         info!("User {} has been deleted", user_uuid);
-        Ok(TransactionResult::from_expected_affected_rows(result, 1))
+        Ok(TransactionResult::expect_single_result(
+            result.rows_affected(),
+        ))
     }
 
     pub async fn insert_user(
@@ -185,7 +188,9 @@ impl Entity {
             redis::cmd("DEL").arg(keys_to_del).query(&mut redis_conn)?;
         }
         info!("User {} has been inserted", gen_uuid);
-        Ok(TransactionResult::from_expected_affected_rows(result, 1))
+        Ok(TransactionResult::expect_single_result(
+            result.rows_affected(),
+        ))
     }
 
     pub async fn add_leagues_as_favorite(
@@ -202,7 +207,9 @@ impl Entity {
         redis::cmd("DEL")
             .arg(format!("fav_leagues:{}", user_id))
             .query(&mut redis_conn)?;
-        Ok(TransactionResult::from_expected_affected_rows(result, 1))
+        Ok(TransactionResult::expect_single_result(
+            result.rows_affected(),
+        ))
     }
 
     pub async fn remove_leagues_as_favorite(
@@ -219,7 +226,9 @@ impl Entity {
         redis::cmd("DEL")
             .arg(format!("fav_leagues:{}", user_id))
             .query(&mut redis_conn)?;
-        Ok(TransactionResult::from_expected_affected_rows(result, 1))
+        Ok(TransactionResult::expect_single_result(
+            result.rows_affected(),
+        ))
     }
 
     pub async fn change_activation_status_with_role_check(
@@ -244,7 +253,9 @@ impl Entity {
             redis::cmd("DEL").arg(keys_to_del).query(&mut redis_conn)?;
         }
         info!("User {} has been deleted", uuid);
-        Ok(TransactionResult::from_expected_affected_rows(result, 1))
+        Ok(TransactionResult::expect_single_result(
+            result.rows_affected(),
+        ))
     }
 
     pub async fn update_with_role_check(
@@ -268,7 +279,9 @@ impl Entity {
         if !keys_to_del.is_empty() {
             redis::cmd("DEL").arg(keys_to_del).query(&mut redis_conn)?;
         }
-        Ok(TransactionResult::from_expected_affected_rows(result, 1))
+        Ok(TransactionResult::expect_single_result(
+            result.rows_affected(),
+        ))
     }
 
     pub async fn update_self(model: Model) -> Result<TransactionResult, ApplicationError> {
@@ -285,7 +298,9 @@ impl Entity {
         if !keys_to_del.is_empty() {
             redis::cmd("DEL").arg(keys_to_del).query(&mut redis_conn)?;
         }
-        Ok(TransactionResult::from_expected_affected_rows(result, 1))
+        Ok(TransactionResult::expect_single_result(
+            result.rows_affected(),
+        ))
     }
 
     pub async fn login_exists(login: &str) -> Result<bool, ApplicationError> {

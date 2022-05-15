@@ -10,6 +10,7 @@ mod controllers;
 mod error;
 mod middleware;
 mod pages;
+mod uri_builder;
 
 use crate::application_data::ApplicationData;
 use crate::controllers::auth::{login, logout, register_user};

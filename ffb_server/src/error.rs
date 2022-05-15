@@ -121,3 +121,13 @@ impl From<actix_web::http::header::ToStrError> for ApplicationError {
         Self::InternalError
     }
 }
+
+impl From<actix_web::http::uri::InvalidUri> for ApplicationError {
+    fn from(invalid_uri_err: actix_web::http::uri::InvalidUri) -> Self {
+        error!(
+            "An invalid uri has been given : {}",
+            invalid_uri_err.to_string()
+        );
+        Self::InternalError
+    }
+}

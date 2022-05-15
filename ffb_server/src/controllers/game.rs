@@ -1,4 +1,6 @@
 use crate::error::ApplicationError;
+use crate::uri_builder::{MessageType, UriBuilder};
+use actix_web::http::Uri;
 use actix_web::{post, HttpRequest, HttpResponse};
 use ffb_structs::game;
 
@@ -23,7 +25,17 @@ pub async fn update_game_status(
         .get("referer")
         .ok_or(ApplicationError::InternalError)?
         .to_str()?;
+    let mut uri_builder: UriBuilder = UriBuilder::from_existing_uri(referer.parse::<Uri>()?);
+    if result {
+        let message = match game_status.value {
+            true => "The game has been added to the bets",
+            false => "The game has been dropped from the bets",
+        };
+        uri_builder.append_msg(MessageType::INFO, message);
+    } else {
+        uri_builder.append_msg(MessageType::ERROR,"The game couldn't have been added to the bets, please retry or contact the administrator");
+    }
     Ok(HttpResponse::Found()
-        .append_header(("Location", referer))
+        .append_header(("Location", uri_builder.build()))
         .finish())
 }

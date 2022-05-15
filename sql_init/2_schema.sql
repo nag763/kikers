@@ -1,8 +1,8 @@
--- MySQL dump 10.13  Distrib 8.0.28, for Linux (x86_64)
+-- MySQL dump 10.13  Distrib 8.0.29, for Linux (x86_64)
 --
 -- Host: localhost    Database: fbets
 -- ------------------------------------------------------
--- Server version	8.0.28-0ubuntu0.20.04.3
+-- Server version	8.0.29-0ubuntu0.20.04.3
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -29,7 +29,7 @@ CREATE TABLE `NAVACCESS` (
   `position` int unsigned DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `position` (`position`)
-) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -63,7 +63,7 @@ CREATE TABLE `ROLE_NAVACCESS` (
   KEY `role_id` (`role_id`),
   CONSTRAINT `ROLE_NAVACCESS_ibfk_1` FOREIGN KEY (`navaccess_id`) REFERENCES `NAVACCESS` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `ROLE_NAVACCESS_ibfk_2` FOREIGN KEY (`role_id`) REFERENCES `ROLE` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=27 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=29 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -87,7 +87,7 @@ CREATE TABLE `USER` (
   UNIQUE KEY `uuid` (`uuid`),
   KEY `role` (`role_id`),
   CONSTRAINT `USER_ibfk_1` FOREIGN KEY (`role_id`) REFERENCES `ROLE` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT
-) ENGINE=InnoDB AUTO_INCREMENT=54 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=65 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -104,7 +104,7 @@ CREATE TABLE `USER_LEAGUE` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `user_id` (`user_id`,`league_id`),
   CONSTRAINT `USER_LEAGUE_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `USER` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=44 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=63 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
@@ -116,4 +116,4 @@ CREATE TABLE `USER_LEAGUE` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2022-04-18 20:20:33
+-- Dump completed on 2022-05-15 22:09:58

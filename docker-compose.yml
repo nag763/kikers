@@ -37,16 +37,15 @@ services:
     env_file: .env
     deploy:
       replicas: 5
-    ports:
-      - "8080-8084:8080"
     volumes:
-      - ./log:/usr/src/friendly-football-bets/log
+      - /var/log/ffb:/usr/src/friendly-football-bets/log
   nginx:
     links:
         - app:app
     image: nginx
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf
+      - /var/log/nginx:/var/log/nginx
     ports:
       - 80:80
 volumes:

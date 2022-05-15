@@ -1,4 +1,4 @@
-use crate::common_api_structs::{Fixture, Goals, League, Teams};
+use crate::common_api_structs::{Fixture, Goals, League, Teams, Score};
 use crate::database::Database;
 use crate::error::ApplicationError;
 use futures::TryStreamExt;
@@ -11,6 +11,7 @@ pub struct Model {
     pub league: League,
     pub teams: Teams,
     pub goals: Goals,
+    pub score: Score,
 }
 
 pub struct Entity;

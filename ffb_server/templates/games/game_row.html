@@ -65,6 +65,8 @@
 				{% when "HT" %}
 				{% when "AET" %}
 				after extra time
+				{% when "PEN" %}
+				on pens
 				{% when _ %}
 				{% if let Some(elapsed) = game.fixture.status.elapsed %}
 				: {{elapsed}}'
@@ -90,6 +92,14 @@
 	     {{goals_away}}
 	     
 	     {% endif %}
+	     {% if let Some(pens) = game.score.penalty %}
+		     {%if let Some(pens_home) = pens.home %}
+		     ({{pens_home}} -
+		     {%endif%}
+		     {% if let Some(pens_away) = pens.away %}
+		     {{pens_away}})
+		     {%endif%}
+	     {%endif%}
 	     {% else %}
 	     Result unknown for this game
 	     {% endif %}

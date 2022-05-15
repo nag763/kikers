@@ -53,3 +53,14 @@ pub struct Goals {
     pub home: Option<u8>,
     pub away: Option<u8>,
 }
+
+#[derive(Debug, Clone, serde::Deserialize, serde::Serialize)]
+pub struct Penalty {
+    pub home: Option<u8>,
+    pub away: Option<u8>,
+}
+
+#[derive(Debug, Clone, serde::Deserialize, serde::Serialize)]
+pub struct Score {
+    pub penalty: Option<Penalty>
+}

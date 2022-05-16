@@ -75,9 +75,13 @@ impl Entity {
             .upsert(true)
             .build();
         for model in models {
-            let result = database
+            database
                 .collection::<Model>("fixture")
-                .update_one(doc!{"fixture.id":model.fixture.id}, doc!{"$set": bson::to_bson(&model)?}, Some(update_options.clone()))
+                .update_one(
+                    doc! {"fixture.id":model.fixture.id},
+                    doc! {"$set": bson::to_bson(&model)?},
+                    Some(update_options.clone()),
+                )
                 .await?;
         }
         let mut conn = Database::acquire_redis_connection()?;

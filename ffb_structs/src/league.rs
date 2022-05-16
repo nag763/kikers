@@ -47,15 +47,20 @@ impl Entity {
 
     pub async fn store(value: &str) -> Result<(), ApplicationError> {
         let database = Database::acquire_mongo_connection().await.unwrap();
+        let update_options = mongodb::options::UpdateOptions::builder()
+            .upsert(true)
+            .build();
         let models: Vec<Model> = serde_json::from_str(value)?;
-        database
-            .collection::<Model>("league")
-            .delete_many(doc! {}, None)
-            .await?;
-        database
-            .collection::<Model>("league")
-            .insert_many(models, None)
-            .await?;
+        for model in models {
+            database
+                .collection::<Model>("league")
+                .update_one(
+                    doc! {"league.id": model.league.id},
+                    doc! {"$set": bson::to_bson(&model)?},
+                    update_options.clone(),
+                )
+                .await?;
+        }
         Ok(())
     }
 }

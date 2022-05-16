@@ -7,6 +7,7 @@ use mongodb::bson::doc;
 
 #[derive(serde::Deserialize, serde::Serialize, Clone)]
 pub struct Model {
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub is_bet: Option<bool>,
     pub fixture: Fixture,
     pub league: League,
@@ -70,14 +71,15 @@ impl Entity {
     pub async fn store(date: &str, value: &str) -> Result<(), ApplicationError> {
         let database = Database::acquire_mongo_connection().await.unwrap();
         let models: Vec<Model> = serde_json::from_str(value)?;
-        database
-            .collection::<Model>("fixture")
-            .delete_many(doc! {"fixture.date": {"$regex" : date}}, None)
-            .await?;
-        database
-            .collection::<Model>("fixture")
-            .insert_many(models, None)
-            .await?;
+        let update_options = mongodb::options::UpdateOptions::builder()
+            .upsert(true)
+            .build();
+        for model in models {
+            let result = database
+                .collection::<Model>("fixture")
+                .update_one(doc!{"fixture.id":model.fixture.id}, doc!{"$set": bson::to_bson(&model)?}, Some(update_options.clone()))
+                .await?;
+        }
         let mut conn = Database::acquire_redis_connection()?;
         redis::cmd("HSET")
             .arg("fixtures_fetch_date")

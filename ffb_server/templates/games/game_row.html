@@ -5,7 +5,7 @@
     <div class="flex justify-end px-4 pt-4">
     </div>
     <div class="flex flex-row justify-between">
-        <img class="ml-2 mb-2 w-8 h-8 rounded-full shadow-lg" src="{{game.league.logo}}"/>
+        <img class="ml-2 mb-2 w-8 h-8 rounded-full shadow-lg" src="{{game.league.logo}}" loading="lazy"/>
 	<div class="mr-3 flex flex-row space-x-2">
 	{% match game.fixture.status.short.as_str() %}
 		{% when "NS" %}
@@ -54,13 +54,13 @@
 	    <span class="text-sm text-gray-500 dark:text-gray-400">{{round}}</span>
 	    {% endif %}
         <div class="flex mt-4 space-x-3 lg:mt-6">
-		<img width="48" src="{{game.teams.home.logo}}" title="{{game.teams.home.name}}" 
+		<img width="48" src="{{game.teams.home.logo}}" title="{{game.teams.home.name}}" loading="lazy"
 		{% if let Some(winner) = game.teams.home.winner %}
 		{% if winner %}
 		class="ring-offset-2 ring-2 ring-green-500 rounded-xl"
 		{% endif %}
 		{% endif%}/>
-		<img width="48" src="{{game.teams.away.logo}}" title="{{game.teams.away.name}}"
+		<img width="48" src="{{game.teams.away.logo}}" title="{{game.teams.away.name}}" loading="lazy"
 		{% if let Some(winner) = game.teams.away.winner %}
 		{% if winner %}
 		class="ring-offset-2 ring-2 ring-green-500 rounded-xl"

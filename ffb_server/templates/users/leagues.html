@@ -11,7 +11,7 @@
 		{% for league in leagues %}
 	      {% let is_league_in_favorite = fav_leagues_id.contains(league.league.id) %}
 	<div class="flex items-center gap-4 p-4">
-        <img class="w-12 h-12" src="{{league.league.logo}}" alt="logo">
+        <img class="w-12 h-12" src="{{league.league.logo}}" alt="logo" loading="lazy">
       <div class="flex flex-col">
               <strong class="text-sm font-medium">{{league.league.name}}</strong>
 	      <form action="/profile/leagues" method="post">
@@ -53,7 +53,7 @@
 	      {% if !fav_leagues.is_empty() %}
 		{% for league in fav_leagues %}
 	<div class="flex items-center gap-4 p-4">
-        <img class="w-12 h-12" src="{{league.league.logo}}" alt="logo">
+        <img class="w-12 h-12" src="{{league.league.logo}}" alt="logo" loading="lazy">
       <div class="flex flex-col">
               <strong class="text-sm font-medium">{{league.league.name}}</strong>
 	      <form action="/profile/leagues" method="post">
@@ -90,9 +90,9 @@
 	{% endif %}
 <div class="flex items-center gap-4 p-4">
 	{% if let Some(flag) = country.flag %}
-	<img class="w-12 h-12" src="{{flag}}" alt="flag">
+	<img class="w-12 h-12" src="{{flag}}" alt="flag" loading="lazy">
 	{% else %}
-	<img class="w-12 h-12" src="/assets/img/world.webp" alt="flag">
+	<img class="w-12 h-12" src="/assets/img/world.webp" alt="flag" loading="lazy">
 	{% endif %}
       <div class="flex flex-col">
 	      <strong class="text-sm font-medium">{{country.name}}</strong>

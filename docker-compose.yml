@@ -38,7 +38,8 @@ services:
     deploy:
       replicas: 5
     volumes:
-      - /var/log/ffb:/usr/src/friendly-football-bets/log
+      - /var/log/ffb:/usr/src/friendly-football-bets/ffb_server/log
+      - /var/www/ffb/assets:/usr/src/friendly-football-bets/ffb_server/assets
   nginx:
     links:
         - app:app

@@ -378,6 +378,7 @@ dependencies = [
  "futures-lite",
  "num_cpus",
  "once_cell",
+ "tokio",
 ]
 
 [[package]]
@@ -1108,6 +1109,7 @@ dependencies = [
 name = "ffb_cli"
 version = "0.1.0"
 dependencies = [
+ "async-std",
  "chrono",
  "clap",
  "dotenv",
@@ -1117,6 +1119,7 @@ dependencies = [
  "reqwest",
  "serde_json",
  "tokio",
+ "url",
 ]
 
 [[package]]
@@ -1157,6 +1160,7 @@ dependencies = [
  "log",
  "mongodb",
  "redis",
+ "regex",
  "serde",
  "serde_json",
  "sqlx",

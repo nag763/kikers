@@ -3,13 +3,25 @@ use crate::country::Model as Country;
 use crate::database::Database;
 use crate::error::ApplicationError;
 use bson::Bson;
+use futures::StreamExt;
 use futures::TryStreamExt;
 use mongodb::bson::doc;
+
+lazy_static! {
+    static ref ASSETS_BASE_PATH : String = std::env::var("ASSETS_BASE_PATH").unwrap();
+    static ref RE_HOST_REPLACER: regex::Regex =
+        regex::Regex::new(r#"(?P<host>http(?:s)+://[^/]+)"#).unwrap();
+}
 
 #[derive(Debug, Clone, serde::Deserialize, serde::Serialize)]
 pub struct Model {
     pub league: League,
     pub country: Country,
+}
+
+#[derive(Debug, Clone, serde::Deserialize, serde::Serialize)]
+struct ModelLogo {
+    logo: String,
 }
 
 pub struct Entity;
@@ -43,6 +55,46 @@ impl Entity {
             .try_collect()
             .await?;
         Ok(models)
+    }
+
+    pub async fn get_all_leagues_logo() -> Result<Vec<String>, ApplicationError> {
+        let database = Database::acquire_mongo_connection().await?;
+        let mut results = database
+            .collection::<Model>("league")
+            .aggregate(
+                vec![doc! {"$replaceRoot": { "newRoot": {"logo": "$league.logo"} }}],
+                None,
+            )
+            .await?;
+        let mut logos: Vec<String> = Vec::new();
+        while let Some(result) = results.next().await {
+            let doc: ModelLogo = bson::from_document(result?)?;
+            logos.push(doc.logo);
+        }
+        Ok(logos)
+    }
+
+    pub async fn replace_all_league_logo() -> Result<(), ApplicationError> {
+        let database = Database::acquire_mongo_connection().await?;
+        let assets_base_path : &str = &ASSETS_BASE_PATH;
+        let models: Vec<Model> = database
+            .collection::<Model>("league")
+            .find(doc! {}, None)
+            .await?
+            .try_collect()
+            .await?;
+        for model in models {
+            let replaced_path: String = RE_HOST_REPLACER.replace(&model.league.logo, assets_base_path).into();
+            database
+                .collection::<Model>("league")
+                .update_one(
+                    doc! {"league.id": model.league.id},
+                    doc! {"$set": {"league.logo": replaced_path}},
+                    None,
+                )
+                .await?;
+        }
+        Ok(())
     }
 
     pub async fn store(value: &str) -> Result<(), ApplicationError> {

@@ -1,9 +1,14 @@
 pub(crate) mod error;
 
+use async_std::{
+    fs::File,
+    io::{copy, Cursor},
+};
 use clap::{Parser, Subcommand};
 use dotenv::dotenv;
 use error::CliError;
 use ffb_structs::{country, game, league};
+use url::Url;
 
 #[macro_use]
 extern crate log;
@@ -17,6 +22,7 @@ struct Args {
 #[derive(Subcommand, Debug)]
 enum Getter {
     Leagues,
+    FetchLogo,
     Countries,
     Fixtures {
         #[clap(default_value = "0")]
@@ -26,10 +32,11 @@ enum Getter {
 
 #[tokio::main]
 async fn main() {
+    let now = std::time::Instant::now();
     env_logger::init();
     std::process::exit(match run_main().await {
         Ok(_) => {
-            println!("Process exited with success");
+            println!("Process exited in {} seconds with success", now.elapsed().as_secs());
             0
         }
         Err(err) => {
@@ -49,6 +56,7 @@ async fn run_main() -> Result<(), CliError> {
     match args.get {
         Getter::Leagues => fetch_leagues().await?,
         Getter::Countries => fetch_countries().await?,
+        Getter::FetchLogo => fetch_logo().await?,
         Getter::Fixtures { day_diff } => fetch_fixtures(day_diff).await?,
     }
     Ok(())
@@ -60,6 +68,31 @@ async fn fetch_leagues() -> Result<(), CliError> {
     let response: String = res["response"].to_string();
     league::Entity::store(&response).await?;
     debug!("League entity stored");
+    Ok(())
+}
+
+async fn fetch_logo() -> Result<(), CliError> {
+    debug!("Fetch logos called");
+    let leagues_logos: Vec<String> = league::Entity::get_all_leagues_logo().await?;
+    let tasks: Vec<async_std::task::JoinHandle<Result<(), CliError>>> = leagues_logos
+        .into_iter()
+        .map(|logo| {
+            async_std::task::spawn(async move {
+                let assets_path : String = std::env::var("ASSETS_LOCAL_PATH")?;
+                let url = Url::parse(&logo)?;
+                let file_name = url.path();
+                let resp = reqwest::get(logo).await?;
+                let mut content = Cursor::new(resp.bytes().await?);
+                let mut out = File::create(format!("{}/{}", assets_path, file_name)).await?;
+                copy(&mut content, &mut out).await?;
+                Ok(())
+            })
+        })
+        .collect();
+    for task in tasks {
+        task.await?;
+    }
+    league::Entity::replace_all_league_logo().await?;
     Ok(())
 }
 

@@ -55,3 +55,10 @@ impl From<bson::ser::Error> for ApplicationError {
         ApplicationError::MongoError(mongo_error.to_string())
     }
 }
+
+impl From<bson::de::Error> for ApplicationError {
+    fn from(mongo_error: bson::de::Error) -> Self {
+        error!("A bson deserialization error happened : {}", mongo_error);
+        ApplicationError::MongoError(mongo_error.to_string())
+    }
+}

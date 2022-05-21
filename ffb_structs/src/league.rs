@@ -37,6 +37,7 @@ impl Entity {
             .await?
             .try_collect()
             .await?;
+        println!("{:#?}", models);
         Ok(models)
     }
 
@@ -89,7 +90,7 @@ impl Entity {
                 .collection::<Model>("league")
                 .update_one(
                     doc! {"league.id": model.league.id},
-                    doc! {"$set": {"league.logo": replaced_path}},
+                    doc! {"$set": {"league.localLogo": replaced_path}},
                     None,
                 )
                 .await?;

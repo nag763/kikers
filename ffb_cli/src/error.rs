@@ -56,3 +56,9 @@ impl From<url::ParseError> for CliError {
         Self::UrlError(url_err.to_string())
     }
 }
+
+impl From<std::num::ParseIntError> for CliError {
+    fn from(int_err: std::num::ParseIntError) -> Self {
+        Self::VarError(int_err.to_string())
+    }
+}

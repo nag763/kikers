@@ -21,13 +21,21 @@ struct Args {
 
 #[derive(Subcommand, Debug)]
 enum Getter {
-    Leagues,
-    FetchLogo,
+    Leagues {
+        #[clap(arg_enum)]
+        fetchable : Fetchable
+    },
     Countries,
     Fixtures {
         #[clap(default_value = "0")]
         day_diff: i64,
     },
+}
+
+#[derive(clap::ArgEnum, Debug, Clone)]
+enum Fetchable {
+    Model,
+    Logo
 }
 
 #[tokio::main]
@@ -57,9 +65,12 @@ async fn run_main() -> Result<(), CliError> {
     let args = Args::parse();
     debug!("Args parsed : {:#?}", args);
     match args.get {
-        Getter::Leagues => fetch_leagues().await?,
+        Getter::Leagues { fetchable } => 
+            match fetchable {
+                Fetchable::Model =>   fetch_leagues().await?,
+                Fetchable::Logo => fetch_leagues_logo().await?
+            }
         Getter::Countries => fetch_countries().await?,
-        Getter::FetchLogo => fetch_logo().await?,
         Getter::Fixtures { day_diff } => fetch_fixtures(day_diff).await?,
     }
     Ok(())
@@ -74,13 +85,15 @@ async fn fetch_leagues() -> Result<(), CliError> {
     Ok(())
 }
 
-async fn fetch_logo() -> Result<(), CliError> {
+async fn fetch_leagues_logo() -> Result<(), CliError> {
     debug!("Fetch logos called");
     let leagues_logos: Vec<String> = league::Entity::get_all_leagues_logo().await?;
+    let cooldown : u64 = std::env::var("BULK_DOWNLOAD_COOLDOWN")?.parse()?;
+    let size : usize = std::env::var("BULK_DOWNLOAD_SIZE")?.parse()?;
     for (i, logo) in leagues_logos.into_iter().enumerate() {
-        if i % 20 == 0 {
+        if i % size == 0 {
             debug!("Sleep requested");
-            tokio::time::sleep(tokio::time::Duration::from_secs(2)).await;
+            tokio::time::sleep(tokio::time::Duration::from_secs(cooldown)).await;
         }
         async_std::task::spawn(async move {
             let assets_path: String = std::env::var("ASSETS_LOCAL_PATH")?;

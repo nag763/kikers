@@ -30,6 +30,8 @@ pub struct League {
     pub name: String,
     pub country: Option<String>,
     pub logo: String,
+    #[serde(rename = "localLogo")]
+    pub local_logo: Option<String>,
     pub flag: Option<String>,
     pub round: Option<String>,
 }

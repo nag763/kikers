@@ -36,7 +36,10 @@ async fn main() {
     env_logger::init();
     std::process::exit(match run_main().await {
         Ok(_) => {
-            println!("Process exited in {} seconds with success", now.elapsed().as_secs());
+            println!(
+                "Process exited in {} seconds with success",
+                now.elapsed().as_secs()
+            );
             0
         }
         Err(err) => {
@@ -74,23 +77,30 @@ async fn fetch_leagues() -> Result<(), CliError> {
 async fn fetch_logo() -> Result<(), CliError> {
     debug!("Fetch logos called");
     let leagues_logos: Vec<String> = league::Entity::get_all_leagues_logo().await?;
-    let tasks: Vec<async_std::task::JoinHandle<Result<(), CliError>>> = leagues_logos
-        .into_iter()
-        .map(|logo| {
-            async_std::task::spawn(async move {
-                let assets_path : String = std::env::var("ASSETS_LOCAL_PATH")?;
-                let url = Url::parse(&logo)?;
-                let file_name = url.path();
-                let resp = reqwest::get(logo).await?;
+    for (i, logo) in leagues_logos.into_iter().enumerate() {
+        if i % 20 == 0 {
+            debug!("Sleep requested");
+            tokio::time::sleep(tokio::time::Duration::from_secs(2)).await;
+        }
+        async_std::task::spawn(async move {
+            let assets_path: String = std::env::var("ASSETS_LOCAL_PATH")?;
+            let url = Url::parse(&logo)?;
+            let file_name = url.path();
+            let resp = reqwest::get(logo).await?;
+            if resp.status().is_success() {
                 let mut content = Cursor::new(resp.bytes().await?);
                 let mut out = File::create(format!("{}/{}", assets_path, file_name)).await?;
                 copy(&mut content, &mut out).await?;
+                debug!("File {} created with success", file_name);
                 Ok(())
-            })
-        })
-        .collect();
-    for task in tasks {
-        task.await?;
+            } else {
+                Err(CliError::RequestError(format!(
+                    "Request terminated with error : {} => {}",
+                    resp.status(),
+                    resp.text().await?
+                )))
+            }
+        });
     }
     league::Entity::replace_all_league_logo().await?;
     Ok(())

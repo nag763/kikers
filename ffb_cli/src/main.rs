@@ -100,7 +100,7 @@ async fn fetch_logo() -> Result<(), CliError> {
                     resp.text().await?
                 )))
             }
-        });
+        }).await?;
     }
     league::Entity::replace_all_league_logo().await?;
     Ok(())

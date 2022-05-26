@@ -6,12 +6,7 @@ use bson::Bson;
 use futures::StreamExt;
 use futures::TryStreamExt;
 use mongodb::bson::doc;
-
-lazy_static! {
-    static ref ASSETS_BASE_PATH : String = std::env::var("ASSETS_BASE_PATH").unwrap();
-    static ref RE_HOST_REPLACER: regex::Regex =
-        regex::Regex::new(r#"(?P<host>http(?:s)+://[^/]+)"#).unwrap();
-}
+use crate::{RE_HOST_REPLACER, ASSETS_BASE_PATH};
 
 #[derive(Debug, Clone, serde::Deserialize, serde::Serialize)]
 pub struct Model {
@@ -37,7 +32,6 @@ impl Entity {
             .await?
             .try_collect()
             .await?;
-        println!("{:#?}", models);
         Ok(models)
     }
 

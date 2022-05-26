@@ -101,11 +101,15 @@
 	<a href="?code=">
 	{% endif %}
 <div class="flex items-center gap-4 p-4">
-	{% if let Some(flag) = country.flag %}
-	<img class="w-12 h-12" src="{{flag}}" alt="flag" loading="lazy">
+	<img class="w-12 h-12" src="
+	{% if let Some(flag) = country.local_flag %}
+	{{flag}} 
+	{% else if let Some(flag) = country.flag %}
+	{{flag}} 
 	{% else %}
-	<img class="w-12 h-12" src="/assets/img/world.webp" alt="flag" loading="lazy">
+	/assets/img/world.webp
 	{% endif %}
+	" alt="flag" loading="lazy">
       <div class="flex flex-col">
 	      <strong class="text-sm font-medium">{{country.name}}</strong>
       </div>

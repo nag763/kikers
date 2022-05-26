@@ -81,7 +81,6 @@ impl From<Uri> for UriBuilder {
         }
         uri_builder.path = uri.path().to_string();
         if let Some(query) = uri.query() {
-            println!("Query : {}", query);
             let captures = RE_QUERY_PARAMS.captures_iter(query);
             for capture in captures {
                 uri_builder

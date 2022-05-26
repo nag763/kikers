@@ -23,9 +23,12 @@ struct Args {
 enum Getter {
     Leagues {
         #[clap(arg_enum)]
-        fetchable : Fetchable
+        fetchable: Fetchable,
     },
-    Countries,
+    Countries {
+        #[clap(arg_enum)]
+        fetchable: Fetchable,
+    },
     Fixtures {
         #[clap(default_value = "0")]
         day_diff: i64,
@@ -35,7 +38,7 @@ enum Getter {
 #[derive(clap::ArgEnum, Debug, Clone)]
 enum Fetchable {
     Model,
-    Logo
+    Logo,
 }
 
 #[tokio::main]
@@ -65,12 +68,14 @@ async fn run_main() -> Result<(), CliError> {
     let args = Args::parse();
     debug!("Args parsed : {:#?}", args);
     match args.get {
-        Getter::Leagues { fetchable } => 
-            match fetchable {
-                Fetchable::Model =>   fetch_leagues().await?,
-                Fetchable::Logo => fetch_leagues_logo().await?
-            }
-        Getter::Countries => fetch_countries().await?,
+        Getter::Leagues { fetchable } => match fetchable {
+            Fetchable::Model => fetch_leagues().await?,
+            Fetchable::Logo => fetch_leagues_logo().await?,
+        },
+        Getter::Countries { fetchable } => match fetchable {
+            Fetchable::Model => fetch_countries().await?,
+            Fetchable::Logo => fetch_countries_logo().await?,
+        },
         Getter::Fixtures { day_diff } => fetch_fixtures(day_diff).await?,
     }
     Ok(())
@@ -88,9 +93,23 @@ async fn fetch_leagues() -> Result<(), CliError> {
 async fn fetch_leagues_logo() -> Result<(), CliError> {
     debug!("Fetch logos called");
     let leagues_logos: Vec<String> = league::Entity::get_all_leagues_logo().await?;
-    let cooldown : u64 = std::env::var("BULK_DOWNLOAD_COOLDOWN")?.parse()?;
-    let size : usize = std::env::var("BULK_DOWNLOAD_SIZE")?.parse()?;
-    for (i, logo) in leagues_logos.into_iter().enumerate() {
+    bulk_download_files(leagues_logos).await?;
+    league::Entity::replace_all_league_logo().await?;
+    Ok(())
+}
+
+async fn fetch_countries_logo() -> Result<(), CliError> {
+    debug!("Fetch countries logo called");
+    let countries_logo: Vec<String> = country::Entity::get_all_countries_logo().await?;
+    bulk_download_files(countries_logo).await?;
+    country::Entity::replace_all_country_logo().await?;
+    Ok(())
+}
+
+async fn bulk_download_files(files_uri: Vec<String>) -> Result<(), CliError> {
+    let cooldown: u64 = std::env::var("BULK_DOWNLOAD_COOLDOWN")?.parse()?;
+    let size: usize = std::env::var("BULK_DOWNLOAD_SIZE")?.parse()?;
+    for (i, logo) in files_uri.into_iter().enumerate() {
         if i % size == 0 {
             debug!("Sleep requested");
             tokio::time::sleep(tokio::time::Duration::from_secs(cooldown)).await;
@@ -113,9 +132,9 @@ async fn fetch_leagues_logo() -> Result<(), CliError> {
                     resp.text().await?
                 )))
             }
-        }).await?;
+        })
+        .await?;
     }
-    league::Entity::replace_all_league_logo().await?;
     Ok(())
 }
 

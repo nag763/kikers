@@ -3,4 +3,4 @@
 **/migration/target
 **/log
 **/.env
-**/assets/img/football/*
+**/assets/img/protected/*

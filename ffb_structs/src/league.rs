@@ -2,11 +2,11 @@ use crate::common_api_structs::League;
 use crate::country::Model as Country;
 use crate::database::Database;
 use crate::error::ApplicationError;
+use crate::{ASSETS_BASE_PATH, RE_HOST_REPLACER};
 use bson::Bson;
 use futures::StreamExt;
 use futures::TryStreamExt;
 use mongodb::bson::doc;
-use crate::{RE_HOST_REPLACER, ASSETS_BASE_PATH};
 
 #[derive(Debug, Clone, serde::Deserialize, serde::Serialize)]
 pub struct Model {
@@ -71,7 +71,7 @@ impl Entity {
 
     pub async fn replace_all_league_logo() -> Result<(), ApplicationError> {
         let database = Database::acquire_mongo_connection().await?;
-        let assets_base_path : &str = &ASSETS_BASE_PATH;
+        let assets_base_path: &str = &ASSETS_BASE_PATH;
         let models: Vec<Model> = database
             .collection::<Model>("league")
             .find(doc! {}, None)
@@ -79,7 +79,9 @@ impl Entity {
             .try_collect()
             .await?;
         for model in models {
-            let replaced_path: String = RE_HOST_REPLACER.replace(&model.league.logo, assets_base_path).into();
+            let replaced_path: String = RE_HOST_REPLACER
+                .replace(&model.league.logo, assets_base_path)
+                .into();
             database
                 .collection::<Model>("league")
                 .update_one(

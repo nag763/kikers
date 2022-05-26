@@ -23,6 +23,7 @@ use crate::controllers::user::{
 use crate::error::ApplicationError;
 use crate::middleware::cookie_approval::CookieChecker;
 use crate::middleware::ddos_limiter::DDosLimiter;
+use crate::middleware::protect_assets::AssetsProtector;
 use crate::middleware::role_checker::RoleChecker;
 use crate::pages::admin::admin_dashboard;
 use crate::pages::game::games;
@@ -78,8 +79,12 @@ async fn main() -> std::io::Result<()> {
             }))
             .app_data(web::Data::clone(&mydata))
             // File services
+            .service(
+                web::scope("assets")
+                    .wrap(AssetsProtector::default())
             .service(fs::Files::new("/styles", "./styles").use_last_modified(true))
-            .service(fs::Files::new("/assets", "./assets").use_last_modified(true))
+                    .service(fs::Files::new("", "./assets").use_last_modified(true))
+            )
             .service(cookies_approved)
             .service(
                 web::scope("")

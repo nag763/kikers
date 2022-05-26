@@ -3,7 +3,7 @@
 	<head>
 		<meta charset="utf-8">
 		<title>An error happened :(</title>
-		<link rel="stylesheet" href="/styles/tailwind.css"/>
+		<link rel="stylesheet" href="/assets/styles/tailwind.css"/>
 		{% match redirect_url %}
   		{% when Some with (val) %}
 		<meta http-equiv="Refresh" content="5; url= {{val}}"/>

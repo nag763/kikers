@@ -1,20 +1,20 @@
 use crate::database::Database;
 use crate::error::ApplicationError;
-use futures::TryStreamExt;
-use futures::StreamExt;
-use mongodb::bson::doc;
+use crate::{ASSETS_BASE_PATH, RE_HOST_REPLACER};
 use bson::oid::ObjectId;
-use crate::{RE_HOST_REPLACER, ASSETS_BASE_PATH};
+use futures::StreamExt;
+use futures::TryStreamExt;
+use mongodb::bson::doc;
 
 #[derive(Debug, Clone, serde::Deserialize, serde::Serialize)]
 pub struct Model {
     #[serde(rename = "_id", skip_serializing)]
-    pub id : Option<ObjectId>,
+    pub id: Option<ObjectId>,
     pub name: String,
     pub code: Option<String>,
     pub flag: Option<String>,
     #[serde(rename = "localFlag")]
-    pub local_flag : Option<String>
+    pub local_flag: Option<String>,
 }
 
 #[derive(Debug, Clone, serde::Deserialize, serde::Serialize)]
@@ -71,7 +71,7 @@ impl Entity {
 
     pub async fn replace_all_country_logo() -> Result<(), ApplicationError> {
         let database = Database::acquire_mongo_connection().await?;
-        let assets_base_path : &str = &ASSETS_BASE_PATH;
+        let assets_base_path: &str = &ASSETS_BASE_PATH;
         let models: Vec<Model> = database
             .collection::<Model>("country")
             .find(doc! {}, None)
@@ -80,7 +80,8 @@ impl Entity {
             .await?;
         for model in models {
             if let (Some(id), Some(flag)) = (model.id, model.flag) {
-                let replaced_path: String = RE_HOST_REPLACER.replace(&flag, assets_base_path).into();
+                let replaced_path: String =
+                    RE_HOST_REPLACER.replace(&flag, assets_base_path).into();
                 let result = database
                     .collection::<Model>("country")
                     .update_one(
@@ -93,7 +94,6 @@ impl Entity {
         }
         Ok(())
     }
-
 
     pub async fn store(value: &str) -> Result<(), ApplicationError> {
         let mut conn = Database::acquire_redis_connection()?;

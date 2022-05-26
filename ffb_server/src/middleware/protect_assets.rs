@@ -7,6 +7,7 @@ use crate::ApplicationData;
 use actix_service::{Service, Transform};
 use actix_web::ResponseError;
 use actix_web::{dev::ServiceRequest, dev::ServiceResponse, Error};
+use actix_web::http::Uri;
 use futures::future::{ok, Ready};
 use futures::Future;
 
@@ -49,8 +50,20 @@ where
         let app_data = req
             .app_data::<actix_web::web::Data<ApplicationData>>()
             .unwrap();
-        match req.headers().get("Host") {
-            Some(v) if app_data.is_host_trusted(v.to_str().unwrap()) => (),
+        match req.headers().get("Referer") {
+            Some(v) => {
+                let value :&str = v.to_str().unwrap();
+                let uri : Uri = value.parse::<Uri>().unwrap();
+                let host : &str = uri.host().unwrap();
+                let path : &str = uri.path();
+                if !app_data.is_host_trusted(host) || !app_data.is_path_bypassed(path) {
+                return Box::pin(async move {
+                    Ok(req.into_response(ApplicationError::BadRequest.error_response()))
+                });
+
+                }
+
+            },
             _ => {
                 return Box::pin(async move {
                     Ok(req.into_response(ApplicationError::BadRequest.error_response()))

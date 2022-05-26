@@ -9,6 +9,7 @@ pub struct ApplicationData {
     pub cookie_approval_path: String,
     pub assets_base_path: String,
     pub trusted_hosts: Vec<String>,
+    pub bypassed_pathes: Vec<String>,
 }
 
 impl ApplicationData {
@@ -20,6 +21,10 @@ impl ApplicationData {
             cookie_approval_path: std::env::var("COOKIE_APPROVAL_PATH")?,
             assets_base_path: std::env::var("ASSETS_BASE_PATH")?,
             trusted_hosts: std::env::var("TRUSTED_HOSTS")?
+                .split(",")
+                .map(|host| host.to_string())
+                .collect(),
+            bypassed_pathes: std::env::var("BYPASSED_PATHES")?
                 .split(",")
                 .map(|host| host.to_string())
                 .collect(),
@@ -51,5 +56,9 @@ impl ApplicationData {
 
     pub fn is_host_trusted(&self, host: &str) -> bool {
         self.trusted_hosts.contains(&host.to_string())
+    }
+
+    pub fn is_path_bypassed(&self, path: &str) -> bool {
+        self.bypassed_pathes.contains(&path.to_string())
     }
 }

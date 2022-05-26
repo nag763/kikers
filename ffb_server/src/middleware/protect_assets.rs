@@ -61,26 +61,28 @@ where
                     }
                     _ => (),
                 },
-                None => {
-        match req.headers().get("Referer") {
-            Some(v) => {
-                let value: &str = v.to_str().unwrap();
-                let uri: Uri = value.parse::<Uri>().unwrap();
-                let host: &str = uri.host().unwrap();
-                let path: &str = uri.path();
-                if !app_data.is_host_trusted(host) || !app_data.is_path_bypassed(path) {
-                    return Box::pin(async move {
-                        Ok(req.into_response(ApplicationError::BadRequest.error_response()))
-                    });
-                }
-            }
-            _ => {
-                return Box::pin(async move {
-                    Ok(req.into_response(ApplicationError::BadRequest.error_response()))
-                });
-            }
-        }
-                }
+                None => match req.headers().get("Referer") {
+                    Some(v) => {
+                        let value: &str = v.to_str().unwrap();
+                        let uri: Uri = value.parse::<Uri>().unwrap();
+                        let host: &str = uri.host().unwrap();
+                        let path: &str = uri.path();
+                        if !app_data.is_host_trusted(host) || !app_data.is_path_bypassed(path) {
+                            return Box::pin(async move {
+                                Ok(
+                                    req.into_response(
+                                        ApplicationError::BadRequest.error_response(),
+                                    ),
+                                )
+                            });
+                        }
+                    }
+                    _ => {
+                        return Box::pin(async move {
+                            Ok(req.into_response(ApplicationError::BadRequest.error_response()))
+                        });
+                    }
+                },
             };
         }
         let fut = self.service.call(req);

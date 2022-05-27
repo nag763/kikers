@@ -7,7 +7,7 @@ use async_std::{
 use clap::{Parser, Subcommand};
 use dotenv::dotenv;
 use error::CliError;
-use ffb_structs::{country, game, league, club};
+use ffb_structs::{club, country, game, league};
 use url::Url;
 
 #[macro_use]
@@ -31,7 +31,7 @@ enum Getter {
     },
     Clubs {
         #[clap(arg_enum)]
-        fetchable: Fetchable,
+        indexable: Indexable,
     },
     Fixtures {
         #[clap(default_value = "0")]
@@ -43,6 +43,13 @@ enum Getter {
 enum Fetchable {
     Model,
     Logo,
+}
+
+#[derive(clap::ArgEnum, Debug, Clone)]
+enum Indexable {
+    Model,
+    Logo,
+    Index,
 }
 
 #[tokio::main]
@@ -80,9 +87,10 @@ async fn run_main() -> Result<(), CliError> {
             Fetchable::Model => fetch_countries().await?,
             Fetchable::Logo => fetch_countries_logo().await?,
         },
-        Getter::Clubs { fetchable } => match fetchable {
-            Fetchable::Model => fetch_clubs().await?,
-            Fetchable::Logo => fetch_clubs_logo().await?,
+        Getter::Clubs { indexable } => match indexable {
+            Indexable::Model => fetch_clubs().await?,
+            Indexable::Logo => fetch_clubs_logo().await?,
+            Indexable::Index => index_clubs().await?,
         },
         Getter::Fixtures { day_diff } => fetch_fixtures(day_diff).await?,
     }
@@ -95,6 +103,11 @@ async fn fetch_leagues() -> Result<(), CliError> {
     let response: String = res["response"].to_string();
     league::Entity::store(&response).await?;
     debug!("League entity stored");
+    Ok(())
+}
+
+async fn index_clubs() -> Result<(), CliError> {
+    club::Entity::index().await?;
     Ok(())
 }
 

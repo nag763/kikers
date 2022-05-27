@@ -12,6 +12,7 @@ lazy_static! {
 pub struct ContextQuery {
     info: Option<String>,
     error: Option<String>,
+    search: Option<String>,
     page: Option<u32>,
     #[validate(range(min = 0))]
     id: Option<u32>,

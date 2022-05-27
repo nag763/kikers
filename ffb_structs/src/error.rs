@@ -5,6 +5,7 @@ pub enum ApplicationError {
     DatabaseError(String),
     RedisError(String),
     MongoError(String),
+    ElasticError(String),
     SerialError,
 }
 
@@ -15,6 +16,7 @@ impl fmt::Display for ApplicationError {
             Self::DatabaseError(db_err) => format!("A database error happened, it has been reported and will be resolved as soon as possible : {} ", db_err) ,
             Self::MongoError(db_err) => format!("A mongo error happened, it has been reported and will be resolved as soon as possible : {} ", db_err) ,
             Self::RedisError(redis_err) => format!("A redis error happened, it has been reported and will be resolved as soon as possible : {} ", redis_err) ,
+            Self::ElasticError(elastic_err) => format!("An elasticsearch error happened, it has been reported and will be resolved as soon as possible : {} ", elastic_err),
             Self::SerialError => "A serial error happened".into(),
         };
         write!(f, "{}", reason)
@@ -60,5 +62,12 @@ impl From<bson::de::Error> for ApplicationError {
     fn from(mongo_error: bson::de::Error) -> Self {
         error!("A bson deserialization error happened : {}", mongo_error);
         ApplicationError::MongoError(mongo_error.to_string())
+    }
+}
+
+impl From<elasticsearch::Error> for ApplicationError {
+    fn from(elastic_err: elasticsearch::Error) -> Self {
+        error!("An elasticsearch error happened : {}", elastic_err);
+        ApplicationError::ElasticError(elastic_err.to_string())
     }
 }

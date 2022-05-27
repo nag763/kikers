@@ -50,6 +50,36 @@ impl Entity {
         Ok(fav_leagues)
     }
 
+    pub async fn get_favorite_clubs_id(id: u32) -> Result<Vec<u32>, ApplicationError> {
+        let mut redis_conn = Database::acquire_redis_connection()?;
+        let fav_leagues_as_string: Option<String> = redis::cmd("GET")
+            .arg(format!("fav_clubs:{}", id))
+            .query(&mut redis_conn)?;
+        let fav_clubs = match fav_leagues_as_string {
+            Some(v) => {
+                let fav_clubs: Vec<u32> = serde_json::from_str(v.as_str())?;
+                fav_clubs
+            }
+            None => {
+                let mut conn = Database::acquire_sql_connection().await?;
+                let rows: Vec<(u32,)> =
+                    sqlx::query_as("SELECT club_id FROM USER_CLUB WHERE user_id=?")
+                        .bind(&id)
+                        .fetch_all(&mut conn)
+                        .await?;
+                let result: Vec<u32> = rows.iter().map(|row| row.0).collect();
+                redis::cmd("SET")
+                    .arg(format!("fav_clubs:{}", id))
+                    .arg(&serde_json::to_string(&result)?)
+                    .arg("EX")
+                    .arg(3600)
+                    .query(&mut redis_conn)?;
+                result
+            }
+        };
+        Ok(fav_clubs)
+    }
+
     pub async fn get_users_with_pagination(
         role: u32,
         per_page: u32,
@@ -225,6 +255,44 @@ impl Entity {
             .await?;
         redis::cmd("DEL")
             .arg(format!("fav_leagues:{}", user_id))
+            .query(&mut redis_conn)?;
+        Ok(TransactionResult::expect_single_result(
+            result.rows_affected(),
+        ))
+    }
+
+    pub async fn add_club_as_favorite(
+        user_id: u32,
+        club_id: u32,
+    ) -> Result<TransactionResult, ApplicationError> {
+        let mut redis_conn = Database::acquire_redis_connection()?;
+        let mut conn = Database::acquire_sql_connection().await?;
+        let result = sqlx::query("INSERT INTO USER_CLUB(user_id, club_id) VALUES(?,?)")
+            .bind(&user_id)
+            .bind(&club_id)
+            .execute(&mut conn)
+            .await?;
+        redis::cmd("DEL")
+            .arg(format!("fav_clubs:{}", user_id))
+            .query(&mut redis_conn)?;
+        Ok(TransactionResult::expect_single_result(
+            result.rows_affected(),
+        ))
+    }
+
+    pub async fn remove_club_as_favorite(
+        user_id: u32,
+        club_id: u32,
+    ) -> Result<TransactionResult, ApplicationError> {
+        let mut redis_conn = Database::acquire_redis_connection()?;
+        let mut conn = Database::acquire_sql_connection().await?;
+        let result = sqlx::query("DELETE FROM USER_CLUB WHERE user_id=? AND club_id=? LIMIT 1")
+            .bind(&user_id)
+            .bind(&club_id)
+            .execute(&mut conn)
+            .await?;
+        redis::cmd("DEL")
+            .arg(format!("fav_clubs:{}", user_id))
             .query(&mut redis_conn)?;
         Ok(TransactionResult::expect_single_result(
             result.rows_affected(),

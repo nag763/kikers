@@ -1,7 +1,105 @@
 {% extends "users/user.html" %}
 {%block rcontent%}
-Type club name here
+{%if let Some(user) = user %}
+<div class="grid grid-cols-2 gap-4">
+	<div>
+{% if let Some(clubs) = searched_clubs %}
+<h2 class="text-gray-800 text-xl font-semibold mb-15">Search results</h2>
+<hr/>
+{% if !clubs.is_empty() %}
+	<div class="overflow-auto  h-96">
 {% for club in clubs %}
-{{club.name}}
+	{% let is_club_in_favorite = fav_clubs_id.contains(club.id) %}
+	<div class="flex items-center gap-4 p-4">
+        <img class="w-12 h-12" src="
+		{% if let Some(logo) = club.local_logo %}
+		{{logo}}
+		{% else if let Some(logo) = club.logo %}
+		{{logo}}
+		{%endif%}
+" loading="lazy" />
+      <div class="flex flex-col">
+              <strong class="text-sm font-medium">{{club.name}}</strong>
+	      <form action="/profile/clubs" method="post">
+	      <input name="user_id" value="{{user.id}}" hidden/>
+	      <input name="club_id" value="{{club.id}}" hidden/>
+	      <input name="name" value="{{club.name}}" hidden/>
+	      {% if is_club_in_favorite %}
+	      <input name="action" value="remove" hidden/>
+	      {% else %}
+	      <input name="action" value="add" hidden/>
+	      {% endif %}
+	      <button type="submit">
+	      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="
+		{% if is_club_in_favorite %}
+		      yellow
+		      {% else %}
+		      none
+		      {% endif %}
+		      " viewBox="0 0 24 24" stroke="yellow" stroke-width="2">
+  <path stroke-linecap="round" stroke-linejoin="round" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+	</svg>
+	     </button>
+	      </form>
+      </div>
+	</div>
 {% endfor %}
+	</div>
+{% else %}
+<p>No results are matching your research criterira</p> 
+{% endif %}
+	<a href="/profile/clubs"><button type="button" class="text-white bg-gradient-to-br from-green-400 to-blue-600 hover:bg-gradient-to-bl focus:ring-4 focus:ring-green-200 dark:focus:ring-green-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-2 mb-2">Go back</button></a>
+{% else if let Some(clubs) = fav_clubs %}
+<h2 class="text-gray-800 text-xl font-semibold mb-15">Your favorite clubs</h2>
+<p>Find below your favorite clubs</p>
+<hr/>
+{% if !clubs.is_empty() %}
+	<div class="overflow-auto  h-96">
+{% for club in clubs %}
+	<div class="flex items-center gap-4 p-4">
+        <img class="w-12 h-12" src="
+		{% if let Some(logo) = club.local_logo %}
+		{{logo}}
+		{% else if let Some(logo) = club.logo %}
+		{{logo}}
+		{%endif%}
+" loading="lazy" />
+      <div class="flex flex-col">
+              <strong class="text-sm font-medium">{{club.name}}</strong>
+	      <form action="/profile/clubs" method="post">
+	      <input name="user_id" value="{{user.id}}" hidden/>
+	      <input name="club_id" value="{{club.id}}" hidden/>
+	      <input name="name" value="{{club.name}}" hidden/>
+	      <input name="action" value="remove" hidden/>
+	      <button type="submit">
+	      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="yellow" viewBox="0 0 24 24" stroke="yellow" stroke-width="2">
+  <path stroke-linecap="round" stroke-linejoin="round" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+	</svg>
+	     </button>
+	      </form>
+      </div>
+	</div>
+{% endfor %}
+	</div>
+{% else %}
+You don't have any club so far that has been added to your profile, do a search and mark the clubs you like as favorites.
+{% endif %}
+{% endif%}
+</div>
+<div>
+<h2 class="text-gray-800 text-xl font-semibold mb-15">Search for a club</h2>
+<p>Type the club you want to do a search for on the search bar below</p>
+<hr/>
+    <div class="input-group relative flex items-stretch w-full mb-4">
+	    <form method="get" action="/profile/clubs">
+      <input type="search" class="form-control relative flex-auto min-w-0 block w-full px-3 py-1.5 text-base font-normal text-gray-700 bg-white bg-clip-padding border border-solid border-gray-300 rounded transition ease-in-out m-0 focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none" placeholder="Search club" aria-label="Search" aria-describedby="button-addon2" name="search" minlength="1">
+      <button class="btn inline-block px-6 py-2.5 bg-blue-600 text-white font-medium text-xs leading-tight uppercase rounded shadow-md hover:bg-blue-700 hover:shadow-lg focus:bg-blue-700  focus:shadow-lg focus:outline-none focus:ring-0 active:bg-blue-800 active:shadow-lg transition duration-150 ease-in-out flex items-center" type="submit">
+        <svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="search" class="w-4" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+          <path fill="currentColor" d="M505 442.7L405.3 343c-4.5-4.5-10.6-7-17-7H372c27.6-35.3 44-79.7 44-128C416 93.1 322.9 0 208 0S0 93.1 0 208s93.1 208 208 208c48.3 0 92.7-16.4 128-44v16.3c0 6.4 2.5 12.5 7 17l99.7 99.7c9.4 9.4 24.6 9.4 33.9 0l28.3-28.3c9.4-9.4 9.4-24.6.1-34zM208 336c-70.7 0-128-57.2-128-128 0-70.7 57.2-128 128-128 70.7 0 128 57.2 128 128 0 70.7-57.2 128-128 128z"></path>
+        </svg>
+      </button>
+      </form>
+    </div>
+</div>
+{%endif%}
 {%endblock%}

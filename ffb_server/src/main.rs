@@ -14,6 +14,7 @@ mod uri_builder;
 
 use crate::application_data::ApplicationData;
 use crate::controllers::auth::{login, logout, register_user};
+use crate::controllers::club::update_club_status;
 use crate::controllers::cookies::cookies_approved;
 use crate::controllers::game::update_game_status;
 use crate::controllers::user::{
@@ -110,7 +111,8 @@ async fn main() -> std::io::Result<()> {
                             .service(user_search)
                             .service(user_activation)
                             .service(user_deletion)
-                            .service(user_modification),
+                            .service(user_modification)
+                            .service(update_club_status),
                     ),
             )
     })

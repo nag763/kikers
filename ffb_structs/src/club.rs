@@ -1,9 +1,14 @@
 use crate::database::Database;
 use crate::error::ApplicationError;
 use crate::{ASSETS_BASE_PATH, RE_HOST_REPLACER};
+use elasticsearch::http::request::JsonBody;
+use elasticsearch::BulkParts;
+use elasticsearch::SearchParts;
 use futures::StreamExt;
 use futures::TryStreamExt;
 use mongodb::bson::doc;
+use serde_json::json;
+use serde_json::Value;
 
 #[derive(Debug, Clone, serde::Deserialize, serde::Serialize)]
 pub struct Model {
@@ -22,11 +27,24 @@ struct ModelLogo {
 pub struct Entity;
 
 impl Entity {
-    pub async fn find_all() -> Result<Vec<Model>, ApplicationError> {
+    async fn find_all() -> Result<Vec<Model>, ApplicationError> {
         let database = Database::acquire_mongo_connection().await?;
         let models: Vec<Model> = database
             .collection::<Model>("club")
             .find(doc! {}, None)
+            .await?
+            .try_collect()
+            .await?;
+        Ok(models)
+    }
+
+    pub async fn get_fav_clubs_of_user(
+        fav_clubs_id: Vec<u32>,
+    ) -> Result<Vec<Model>, ApplicationError> {
+        let database = Database::acquire_mongo_connection().await?;
+        let models: Vec<Model> = database
+            .collection::<Model>("club")
+            .find(doc! { "id" : { "$in" : fav_clubs_id }}, None)
             .await?
             .try_collect()
             .await?;
@@ -97,6 +115,60 @@ impl Entity {
         Self::upsert_list_of_docs(home_teams, updatable.clone(), update_options.clone()).await?;
         Self::upsert_list_of_docs(away_teams, updatable.clone(), update_options.clone()).await?;
         Ok(())
+    }
+
+    pub async fn index() -> Result<(), ApplicationError> {
+        let client = Database::acquire_elastic_connection().await?;
+        let models: Vec<Model> = Self::find_all().await?;
+        let mut body: Vec<JsonBody<_>> = Vec::with_capacity(models.len() * 2);
+        for model in models {
+            body.push(json!({"index": {"_id":model.id}}).into());
+            body.push(json!(model).into())
+        }
+        let response = client
+            .bulk(BulkParts::Index("club"))
+            .body(body)
+            .send()
+            .await?;
+        if response.status_code().is_success() {
+            Ok(())
+        } else {
+            Err(ApplicationError::ElasticError(format!(
+                "Error while joining the elastics daemon : {:?}",
+                response
+            )))
+        }
+    }
+
+    pub async fn search_name(name: &str) -> Result<Vec<Model>, ApplicationError> {
+        let client = Database::acquire_elastic_connection().await?;
+        let response = client
+            .search(SearchParts::Index(&["club"]))
+            .from(0)
+            .size(10)
+            .body(json!(
+                    {
+                        "query": {
+                            "match": {
+                                "name": name
+                            }
+                        }
+                    }
+            ))
+            .send()
+            .await?;
+        let response_body = response.json::<Value>().await?;
+        let mut models: Vec<Model> = Vec::with_capacity(10);
+        for object in
+            response_body["hits"]["hits"]
+                .as_array()
+                .ok_or(ApplicationError::ElasticError(
+                    "Elasticsearch result is in bad format".into(),
+                ))?
+        {
+            models.push(serde_json::from_value(object["_source"].clone())?);
+        }
+        Ok(models)
     }
 
     async fn upsert_list_of_docs(

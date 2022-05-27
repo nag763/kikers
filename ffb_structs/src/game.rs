@@ -22,9 +22,10 @@ impl Entity {
     pub async fn find_all_for_date(
         date: &str,
         fav_leagues: Option<Vec<u32>>,
+        fav_clubs: Option<Vec<u32>>,
         limit: Option<i64>,
     ) -> Result<Vec<Model>, ApplicationError> {
-        let redis_key: String = format!("games:{}::{:?}::{:?}", date, fav_leagues, limit);
+        let redis_key: String = format!("games:{}::{:?}::{:?}::{:?}", date, fav_leagues, fav_clubs, limit);
         let mut conn = Database::acquire_redis_connection()?;
         let cached_struct: Option<String> =
             redis::cmd("GET").arg(redis_key.as_str()).query(&mut conn)?;
@@ -49,6 +50,10 @@ impl Entity {
             key.insert("fixture.date", doc! {"$regex" : date});
             if let Some(fav_leagues) = fav_leagues.clone() {
                 key.insert("league.id", doc! {"$in": fav_leagues});
+            }
+            if let Some(fav_clubs) = fav_clubs.clone() {
+                // {$or : [{"teams.home.id":3005}, {"teams.away.id":3005}]}
+                key.insert("league.id", doc! {"$in": fav_clubs});
             }
             let model: Vec<Model> = database
                 .collection::<Model>("fixture")

@@ -82,7 +82,7 @@ impl Entity {
             if let (Some(id), Some(flag)) = (model.id, model.flag) {
                 let replaced_path: String =
                     RE_HOST_REPLACER.replace(&flag, assets_base_path).into();
-                let result = database
+                database
                     .collection::<Model>("country")
                     .update_one(
                         doc! {"_id": id},

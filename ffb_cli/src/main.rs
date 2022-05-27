@@ -7,7 +7,7 @@ use async_std::{
 use clap::{Parser, Subcommand};
 use dotenv::dotenv;
 use error::CliError;
-use ffb_structs::{country, game, league};
+use ffb_structs::{country, game, league, club};
 use url::Url;
 
 #[macro_use]
@@ -29,6 +29,7 @@ enum Getter {
         #[clap(arg_enum)]
         fetchable: Fetchable,
     },
+    Clubs,
     Fixtures {
         #[clap(default_value = "0")]
         day_diff: i64,
@@ -76,6 +77,7 @@ async fn run_main() -> Result<(), CliError> {
             Fetchable::Model => fetch_countries().await?,
             Fetchable::Logo => fetch_countries_logo().await?,
         },
+        Getter::Clubs => fetch_clubs().await?,
         Getter::Fixtures { day_diff } => fetch_fixtures(day_diff).await?,
     }
     Ok(())
@@ -87,6 +89,12 @@ async fn fetch_leagues() -> Result<(), CliError> {
     let response: String = res["response"].to_string();
     league::Entity::store(&response).await?;
     debug!("League entity stored");
+    Ok(())
+}
+
+async fn fetch_clubs() -> Result<(), CliError> {
+    debug!("Fetch clubs called");
+    club::Entity::store().await?;
     Ok(())
 }
 

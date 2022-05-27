@@ -20,6 +20,7 @@ pub mod game;
 pub mod league;
 pub mod navaccess;
 pub mod role;
+pub mod club;
 pub mod token;
 pub mod transaction_result;
 pub mod user;

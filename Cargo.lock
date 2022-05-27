@@ -1151,7 +1151,6 @@ dependencies = [
 name = "ffb_structs"
 version = "0.1.0"
 dependencies = [
- "async-std",
  "bson",
  "chrono",
  "derive_more",

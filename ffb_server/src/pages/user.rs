@@ -3,7 +3,7 @@ use crate::ApplicationData;
 use askama::Template;
 use ffb_auth::JwtUser;
 
-use ffb_structs::{country, country::Model as Country, league, league::Model as APILeague, user};
+use ffb_structs::{country, country::Model as Country, league, league::Model as APILeague, user, club, club::Model as Club};
 
 use crate::error::ApplicationError;
 use actix_web::web;
@@ -91,6 +91,7 @@ struct UserClubsTemplate {
     user: Option<JwtUser>,
     error: Option<String>,
     info: Option<String>,
+    clubs : Vec<Club>,
     app_data: web::Data<ApplicationData>,
 }
 
@@ -101,12 +102,14 @@ pub async fn user_club(
     app_data: web::Data<ApplicationData>,
 ) -> Result<HttpResponse, ApplicationError> {
     let jwt_user: JwtUser = JwtUser::from_request(req)?;
+    let clubs : Vec<Club> = club::Entity::find_all().await?;
     let index = UserClubsTemplate {
         title: "Your favorite club".into(),
         user: Some(jwt_user),
         error: context_query.error.clone(),
         info: context_query.info.clone(),
         app_data,
+        clubs
     };
     Ok(HttpResponse::Ok().body(index.render()?))
 }

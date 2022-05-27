@@ -29,7 +29,10 @@ enum Getter {
         #[clap(arg_enum)]
         fetchable: Fetchable,
     },
-    Clubs,
+    Clubs {
+        #[clap(arg_enum)]
+        fetchable: Fetchable,
+    },
     Fixtures {
         #[clap(default_value = "0")]
         day_diff: i64,
@@ -77,7 +80,10 @@ async fn run_main() -> Result<(), CliError> {
             Fetchable::Model => fetch_countries().await?,
             Fetchable::Logo => fetch_countries_logo().await?,
         },
-        Getter::Clubs => fetch_clubs().await?,
+        Getter::Clubs { fetchable } => match fetchable {
+            Fetchable::Model => fetch_clubs().await?,
+            Fetchable::Logo => fetch_clubs_logo().await?,
+        },
         Getter::Fixtures { day_diff } => fetch_fixtures(day_diff).await?,
     }
     Ok(())
@@ -111,6 +117,14 @@ async fn fetch_countries_logo() -> Result<(), CliError> {
     let countries_logo: Vec<String> = country::Entity::get_all_countries_logo().await?;
     bulk_download_files(countries_logo).await?;
     country::Entity::replace_all_country_logo().await?;
+    Ok(())
+}
+
+async fn fetch_clubs_logo() -> Result<(), CliError> {
+    debug!("Fetch countries logo called");
+    let clubs_logo: Vec<String> = club::Entity::get_logos().await?;
+    bulk_download_files(clubs_logo).await?;
+    club::Entity::replace_all_club_logo().await?;
     Ok(())
 }
 

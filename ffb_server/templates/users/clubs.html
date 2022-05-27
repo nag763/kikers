@@ -1,4 +1,7 @@
 {% extends "users/user.html" %}
 {%block rcontent%}
 Type club name here
+{% for club in clubs %}
+{{club.name}}
+{% endfor %}
 {%endblock%}

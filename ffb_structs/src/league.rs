@@ -1,16 +1,14 @@
-use crate::common_api_structs::League;
-use crate::country::Model as Country;
+use crate::common_api_structs::{Country, League};
 use crate::database::Database;
 use crate::error::ApplicationError;
 use crate::{ASSETS_BASE_PATH, RE_HOST_REPLACER};
 use bson::Bson;
+use elasticsearch::http::request::JsonBody;
+use elasticsearch::{BulkParts, SearchParts};
 use futures::StreamExt;
 use futures::TryStreamExt;
 use mongodb::bson::doc;
-use elasticsearch::http::request::JsonBody;
-use elasticsearch::{BulkParts, SearchParts};
 use serde_json::{json, Value};
-
 
 #[derive(Debug, Clone, serde::Deserialize, serde::Serialize)]
 pub struct Model {
@@ -60,7 +58,7 @@ impl Entity {
         let database = Database::acquire_mongo_connection().await?;
         let models = database
             .collection::<Model>("league")
-            .find(doc!{}, None)
+            .find(doc! {}, None)
             .await?
             .try_collect()
             .await?;

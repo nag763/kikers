@@ -66,3 +66,10 @@ pub struct Penalty {
 pub struct Score {
     pub penalty: Option<Penalty>,
 }
+
+#[derive(Debug, Clone, serde::Deserialize, serde::Serialize)]
+pub struct Country {
+    pub name: String,
+    pub code: Option<String>,
+    pub flag: Option<String>,
+}

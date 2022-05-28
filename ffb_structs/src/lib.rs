@@ -13,7 +13,6 @@ lazy_static! {
 
 pub mod club;
 pub(crate) mod common_api_structs;
-pub mod country;
 pub(crate) mod database;
 pub mod ddos;
 pub mod error;

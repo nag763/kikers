@@ -3,10 +3,7 @@ use crate::ApplicationData;
 use askama::Template;
 use ffb_auth::JwtUser;
 
-use ffb_structs::{
-    club, club::Model as Club, league,
-    league::Model as APILeague, user,
-};
+use ffb_structs::{club, club::Model as Club, league, league::Model as APILeague, user};
 
 use crate::error::ApplicationError;
 use actix_web::web;

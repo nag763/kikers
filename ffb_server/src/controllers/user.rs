@@ -240,11 +240,12 @@ pub async fn user_change_leagues(
             }
         }
         "remove" => {
-            let result :bool = user::Entity::remove_leagues_as_favorite(
+            let result: bool = user::Entity::remove_leagues_as_favorite(
                 user_change_league_form.user_id,
                 user_change_league_form.league_id,
             )
-            .await?.into();
+            .await?
+            .into();
 
             match result {
                 true => uri_builder.append_msg(
@@ -264,10 +265,7 @@ pub async fn user_change_leagues(
     };
 
     Ok(HttpResponse::Found()
-        .append_header((
-            "Location",
-            uri_builder.build(),
-        ))
+        .append_header(("Location", uri_builder.build()))
         .finish())
 }
 

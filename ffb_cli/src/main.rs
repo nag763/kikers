@@ -7,7 +7,7 @@ use async_std::{
 use clap::{Parser, Subcommand};
 use dotenv::dotenv;
 use error::CliError;
-use ffb_structs::{club, country, game, league};
+use ffb_structs::{club, game, league};
 use url::Url;
 
 #[macro_use]
@@ -24,10 +24,6 @@ enum Getter {
     Leagues {
         #[clap(arg_enum)]
         indexable: Indexable,
-    },
-    Countries {
-        #[clap(arg_enum)]
-        fetchable: Fetchable,
     },
     Clubs {
         #[clap(arg_enum)]
@@ -84,10 +80,6 @@ async fn run_main() -> Result<(), CliError> {
             Indexable::Logo => fetch_leagues_logo().await?,
             Indexable::Index => league::Entity::index().await?,
         },
-        Getter::Countries { fetchable } => match fetchable {
-            Fetchable::Model => fetch_countries().await?,
-            Fetchable::Logo => fetch_countries_logo().await?,
-        },
         Getter::Clubs { indexable } => match indexable {
             Indexable::Model => fetch_clubs().await?,
             Indexable::Logo => fetch_clubs_logo().await?,
@@ -123,14 +115,6 @@ async fn fetch_leagues_logo() -> Result<(), CliError> {
     let leagues_logos: Vec<String> = league::Entity::get_all_leagues_logo().await?;
     bulk_download_files(leagues_logos).await?;
     league::Entity::replace_all_league_logo().await?;
-    Ok(())
-}
-
-async fn fetch_countries_logo() -> Result<(), CliError> {
-    debug!("Fetch countries logo called");
-    let countries_logo: Vec<String> = country::Entity::get_all_countries_logo().await?;
-    bulk_download_files(countries_logo).await?;
-    country::Entity::replace_all_country_logo().await?;
     Ok(())
 }
 
@@ -171,14 +155,6 @@ async fn bulk_download_files(files_uri: Vec<String>) -> Result<(), CliError> {
         })
         .await?;
     }
-    Ok(())
-}
-
-async fn fetch_countries() -> Result<(), CliError> {
-    let res = call_api_endpoint("countries".into()).await?;
-    let response: String = res["response"].to_string();
-    country::Entity::store(&response).await?;
-    debug!("Countries stored");
     Ok(())
 }
 

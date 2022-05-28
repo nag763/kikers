@@ -122,9 +122,14 @@ DROP TABLE IF EXISTS `TRANSLATION`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `TRANSLATION` (
   `id` int unsigned NOT NULL AUTO_INCREMENT,
+  `label_id` int unsigned NOT NULL,
   `locale_id` int unsigned NOT NULL,
   `translation` int DEFAULT NULL,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `label_id` (`label_id`),
+  KEY `locale_id` (`locale_id`),
+  CONSTRAINT `TRANSLATION_ibfk_1` FOREIGN KEY (`label_id`) REFERENCES `LABEL` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `TRANSLATION_ibfk_2` FOREIGN KEY (`locale_id`) REFERENCES `LOCALE` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -167,7 +172,8 @@ CREATE TABLE `USER_CLUB` (
   `user_id` int unsigned NOT NULL,
   `club_id` int unsigned NOT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `user_id` (`user_id`,`club_id`)
+  UNIQUE KEY `user_id` (`user_id`,`club_id`),
+  CONSTRAINT `USER_CLUB_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `USER` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB AUTO_INCREMENT=23 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -197,4 +203,4 @@ CREATE TABLE `USER_LEAGUE` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2022-05-28 16:03:55
+-- Dump completed on 2022-05-28 16:10:01

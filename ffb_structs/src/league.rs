@@ -7,6 +7,10 @@ use bson::Bson;
 use futures::StreamExt;
 use futures::TryStreamExt;
 use mongodb::bson::doc;
+use elasticsearch::http::request::JsonBody;
+use elasticsearch::{BulkParts, SearchParts};
+use serde_json::{json, Value};
+
 
 #[derive(Debug, Clone, serde::Deserialize, serde::Serialize)]
 pub struct Model {
@@ -46,6 +50,17 @@ impl Entity {
         let models: Vec<Model> = database
             .collection::<Model>("league")
             .find(doc! { "country.code" : search_key}, None)
+            .await?
+            .try_collect()
+            .await?;
+        Ok(models)
+    }
+
+    async fn find_all() -> Result<Vec<Model>, ApplicationError> {
+        let database = Database::acquire_mongo_connection().await?;
+        let models = database
+            .collection::<Model>("league")
+            .find(doc!{}, None)
             .await?
             .try_collect()
             .await?;
@@ -111,5 +126,59 @@ impl Entity {
                 .await?;
         }
         Ok(())
+    }
+
+    pub async fn index() -> Result<(), ApplicationError> {
+        let client = Database::acquire_elastic_connection().await?;
+        let models: Vec<Model> = Self::find_all().await?;
+        let mut body: Vec<JsonBody<_>> = Vec::with_capacity(models.len() * 2);
+        for model in models {
+            body.push(json!({"index": {"_id":model.league.id}}).into());
+            body.push(json!(model).into())
+        }
+        let response = client
+            .bulk(BulkParts::Index("league"))
+            .body(body)
+            .send()
+            .await?;
+        if response.status_code().is_success() {
+            Ok(())
+        } else {
+            Err(ApplicationError::ElasticError(format!(
+                "Error while joining the elastics daemon : {:?}",
+                response
+            )))
+        }
+    }
+
+    pub async fn search_name(name: &str) -> Result<Vec<Model>, ApplicationError> {
+        let client = Database::acquire_elastic_connection().await?;
+        let response = client
+            .search(SearchParts::Index(&["league"]))
+            .from(0)
+            .size(10)
+            .body(json!(
+                    {
+                        "query": {
+                            "match": {
+                                "league.name": name
+                            }
+                        }
+                    }
+            ))
+            .send()
+            .await?;
+        let response_body = response.json::<Value>().await?;
+        let mut models: Vec<Model> = Vec::with_capacity(10);
+        for object in
+            response_body["hits"]["hits"]
+                .as_array()
+                .ok_or(ApplicationError::ElasticError(
+                    "Elasticsearch result is in bad format".into(),
+                ))?
+        {
+            models.push(serde_json::from_value(object["_source"].clone())?);
+        }
+        Ok(models)
     }
 }

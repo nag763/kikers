@@ -55,13 +55,17 @@ pub async fn games(
 ) -> Result<HttpResponse, ApplicationError> {
     let jwt_user: JwtUser = JwtUser::from_request(req)?;
     let now: DateTime<Utc> = Utc::now();
-    let (fav_leagues, fav_clubs) : (Option<Vec<u32>>, Option<Vec<u32>>) = match context_query.all {
+    let (fav_leagues, fav_clubs): (Option<Vec<u32>>, Option<Vec<u32>>) = match context_query.all {
         Some(v) if v => (None, None),
-        _ => (Some(user::Entity::get_favorite_leagues_id(jwt_user.id).await?), Some(user::Entity::get_favorite_clubs_id(jwt_user.id).await?)),
+        _ => (
+            Some(user::Entity::get_favorite_leagues_id(jwt_user.id).await?),
+            Some(user::Entity::get_favorite_clubs_id(jwt_user.id).await?),
+        ),
     };
     if let Some(query_date) = &context_query.date {
         let games: Vec<Game> =
-            GameEntity::find_all_for_date(query_date.as_str(), fav_leagues, fav_clubs, None).await?;
+            GameEntity::find_all_for_date(query_date.as_str(), fav_leagues, fav_clubs, None)
+                .await?;
         let subtemplate: Option<GamesRowTemplate> = match games.is_empty() {
             false => Some(GamesRowTemplate {
                 games,
@@ -95,9 +99,13 @@ pub async fn games(
     tomorow_as_simple_date.truncate(10);
     let now_as_simple_date: String = now_as_simple_date;
 
-    let next_three_games: Vec<Game> =
-        GameEntity::find_all_for_date(now_as_simple_date.as_str(), fav_leagues.clone(), fav_clubs.clone(), Some(3))
-            .await?;
+    let next_three_games: Vec<Game> = GameEntity::find_all_for_date(
+        now_as_simple_date.as_str(),
+        fav_leagues.clone(),
+        fav_clubs.clone(),
+        Some(3),
+    )
+    .await?;
 
     let next_three_games: Option<GamesRowTemplate> = match next_three_games.is_empty() {
         false => Some(GamesRowTemplate {
@@ -134,9 +142,13 @@ pub async fn games(
         }),
         _ => None,
     };
-    let tomorow_three_games: Vec<Game> =
-        GameEntity::find_all_for_date(tomorow_as_simple_date.as_str(), fav_leagues, fav_clubs, Some(3))
-            .await?;
+    let tomorow_three_games: Vec<Game> = GameEntity::find_all_for_date(
+        tomorow_as_simple_date.as_str(),
+        fav_leagues,
+        fav_clubs,
+        Some(3),
+    )
+    .await?;
 
     let tomorow_three_games: Option<GamesRowTemplate> = match tomorow_three_games.is_empty() {
         false => Some(GamesRowTemplate {

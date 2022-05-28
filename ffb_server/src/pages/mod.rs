@@ -16,7 +16,6 @@ pub struct ContextQuery {
     page: Option<u32>,
     #[validate(range(min = 0))]
     id: Option<u32>,
-    code: Option<String>,
     #[validate(regex = "RE_VALID_DATE")]
     date: Option<String>,
     per_page: Option<u32>,

@@ -1,7 +1,8 @@
 use ffb_auth::JwtUser;
 
 use crate::error::ApplicationError;
-use actix_web::{post, HttpRequest, HttpResponse, Responder};
+use crate::uri_builder::{MessageType, UriBuilder};
+use actix_web::{http::Uri, post, HttpRequest, HttpResponse, Responder};
 use ffb_structs::user;
 use ffb_structs::user::Model as User;
 
@@ -197,7 +198,6 @@ pub async fn user_self_modification(
 pub struct UserChangeLeague {
     league_id: u32,
     user_id: u32,
-    code: Option<String>,
     action: String,
     name: String,
 }
@@ -207,44 +207,66 @@ pub async fn user_change_leagues(
     user_change_league_form: actix_web_validator::Form<UserChangeLeague>,
     req: HttpRequest,
 ) -> Result<impl Responder, ApplicationError> {
+    let referer: &str = req
+        .headers()
+        .get("referer")
+        .ok_or(ApplicationError::InternalError)?
+        .to_str()?;
+    let mut uri_builder: UriBuilder = UriBuilder::from_existing_uri(referer.parse::<Uri>()?);
     let jwt_user: JwtUser = JwtUser::from_request(req)?;
     if jwt_user.id != user_change_league_form.user_id {
         return Err(ApplicationError::BadRequest);
     }
-    let res_msg: String = match user_change_league_form.action.as_str() {
+    match user_change_league_form.action.as_str() {
         "add" => {
-            user::Entity::add_leagues_as_favorite(
+            let result: bool = user::Entity::add_leagues_as_favorite(
                 user_change_league_form.user_id,
                 user_change_league_form.league_id,
             )
-            .await?;
-            format!(
-                "{} has been added as favorite",
-                user_change_league_form.name
-            )
+            .await?
+            .into();
+            match result {
+                true => uri_builder.append_msg(
+                    MessageType::INFO,
+                    &format!(
+                        "{} has been added as favorite",
+                        user_change_league_form.name
+                    ),
+                ),
+                false => uri_builder.append_msg(
+                    MessageType::ERROR,
+                    "An error happened while adding the league to your profile",
+                ),
+            }
         }
         "remove" => {
-            user::Entity::remove_leagues_as_favorite(
+            let result :bool = user::Entity::remove_leagues_as_favorite(
                 user_change_league_form.user_id,
                 user_change_league_form.league_id,
             )
-            .await?;
-            format!(
-                "{} has been removed from the favorite list",
-                user_change_league_form.name
-            )
+            .await?.into();
+
+            match result {
+                true => uri_builder.append_msg(
+                    MessageType::INFO,
+                    &format!(
+                        "{} has been removed from your favorites",
+                        user_change_league_form.name
+                    ),
+                ),
+                false => uri_builder.append_msg(
+                    MessageType::ERROR,
+                    "An error happened while removing the league from your profile",
+                ),
+            }
         }
         _ => return Err(ApplicationError::BadRequest),
     };
 
-    let code_redirect: String = match &user_change_league_form.code {
-        Some(v) => format!("&code={}", v),
-        None => String::new(),
-    };
     Ok(HttpResponse::Found()
         .append_header((
             "Location",
-            format!("/profile/leagues?info={}{}", res_msg, code_redirect),
+            uri_builder.build(),
         ))
         .finish())
 }

@@ -4,7 +4,7 @@ use askama::Template;
 use ffb_auth::JwtUser;
 
 use ffb_structs::{
-    club, club::Model as Club, country, country::Model as Country, league,
+    club, club::Model as Club, league,
     league::Model as APILeague, user,
 };
 
@@ -46,9 +46,8 @@ struct UserLeagueTemplate {
     user: Option<JwtUser>,
     error: Option<String>,
     info: Option<String>,
-    countries: Vec<Country>,
     fav_leagues_id: Vec<u32>,
-    leagues: Option<Vec<APILeague>>,
+    searched_leagues: Option<Vec<APILeague>>,
     fav_leagues: Option<Vec<APILeague>>,
     app_data: web::Data<ApplicationData>,
 }
@@ -61,27 +60,22 @@ pub async fn user_leagues(
 ) -> Result<HttpResponse, ApplicationError> {
     let jwt_user: JwtUser = JwtUser::from_request(req)?;
     let fav_leagues_id: Vec<u32> = user::Entity::get_favorite_leagues_id(jwt_user.id).await?;
-    let (leagues, fav_leagues): (Option<Vec<APILeague>>, Option<Vec<APILeague>>) =
-        match &context_query.code {
-            Some(v) => (
-                Some(league::Entity::get_leagues_for_country_code(v).await?),
-                None,
-            ),
+    let (searched_leagues, fav_leagues): (Option<Vec<APILeague>>, Option<Vec<APILeague>>) =
+        match &context_query.search {
+            Some(v) => (Some(league::Entity::search_name(v).await?), None),
             None => (
                 None,
                 Some(league::Entity::get_fav_leagues_of_user(fav_leagues_id.clone()).await?),
             ),
         };
-    let countries: Vec<Country> = country::Entity::find_all().await?;
     let index = UserLeagueTemplate {
         title: "Your informations".into(),
         user: Some(jwt_user),
         error: context_query.error.clone(),
         info: context_query.info.clone(),
-        leagues,
+        searched_leagues,
         fav_leagues,
         fav_leagues_id,
-        countries,
         app_data,
     };
     Ok(HttpResponse::Ok().body(index.render()?))

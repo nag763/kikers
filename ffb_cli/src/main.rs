@@ -23,7 +23,7 @@ struct Args {
 enum Getter {
     Leagues {
         #[clap(arg_enum)]
-        fetchable: Fetchable,
+        indexable: Indexable,
     },
     Countries {
         #[clap(arg_enum)]
@@ -79,9 +79,10 @@ async fn run_main() -> Result<(), CliError> {
     let args = Args::parse();
     debug!("Args parsed : {:#?}", args);
     match args.get {
-        Getter::Leagues { fetchable } => match fetchable {
-            Fetchable::Model => fetch_leagues().await?,
-            Fetchable::Logo => fetch_leagues_logo().await?,
+        Getter::Leagues { indexable } => match indexable {
+            Indexable::Model => fetch_leagues().await?,
+            Indexable::Logo => fetch_leagues_logo().await?,
+            Indexable::Index => league::Entity::index().await?,
         },
         Getter::Countries { fetchable } => match fetchable {
             Fetchable::Model => fetch_countries().await?,

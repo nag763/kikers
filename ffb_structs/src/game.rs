@@ -1,6 +1,7 @@
-use crate::common_api_structs::{Fixture, Goals, League, Score, Teams};
+use crate::common_api_structs::{Fixture, Goals, Score, Teams};
 use crate::database::Database;
 use crate::error::ApplicationError;
+use crate::league::Model as League;
 use crate::transaction_result::TransactionResult;
 use futures::TryStreamExt;
 use mongodb::bson::doc;

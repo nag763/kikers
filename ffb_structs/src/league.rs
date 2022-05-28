@@ -1,8 +1,6 @@
-use crate::common_api_structs::{Country, League};
 use crate::database::Database;
 use crate::error::ApplicationError;
 use crate::{ASSETS_BASE_PATH, RE_HOST_REPLACER};
-use bson::Bson;
 use elasticsearch::http::request::JsonBody;
 use elasticsearch::{BulkParts, SearchParts};
 use futures::StreamExt;
@@ -12,8 +10,14 @@ use serde_json::{json, Value};
 
 #[derive(Debug, Clone, serde::Deserialize, serde::Serialize)]
 pub struct Model {
-    pub league: League,
-    pub country: Country,
+    pub id: u32,
+    pub name: String,
+    pub country: Option<String>,
+    pub logo: String,
+    #[serde(rename = "localLogo")]
+    pub local_logo: Option<String>,
+    pub flag: Option<String>,
+    pub round: Option<String>,
 }
 
 #[derive(Debug, Clone, serde::Deserialize, serde::Serialize)]
@@ -30,24 +34,7 @@ impl Entity {
         let database = Database::acquire_mongo_connection().await?;
         let models: Vec<Model> = database
             .collection::<Model>("league")
-            .find(doc! { "league.id" : { "$in" : fav_leagues_id }}, None)
-            .await?
-            .try_collect()
-            .await?;
-        Ok(models)
-    }
-
-    pub async fn get_leagues_for_country_code(
-        country_code: &str,
-    ) -> Result<Vec<Model>, ApplicationError> {
-        let database = Database::acquire_mongo_connection().await?;
-        let search_key: Bson = match country_code {
-            v if !v.is_empty() => Bson::String(v.into()),
-            _ => Bson::Null,
-        };
-        let models: Vec<Model> = database
-            .collection::<Model>("league")
-            .find(doc! { "country.code" : search_key}, None)
+            .find(doc! { "id" : { "$in" : fav_leagues_id }}, None)
             .await?
             .try_collect()
             .await?;
@@ -70,7 +57,7 @@ impl Entity {
         let mut results = database
             .collection::<Model>("league")
             .aggregate(
-                vec![doc! {"$replaceRoot": { "newRoot": {"logo": "$league.logo"} }}],
+                vec![doc! {"$replaceRoot": { "newRoot": {"logo": "$logo"} }}],
                 None,
             )
             .await?;
@@ -93,13 +80,13 @@ impl Entity {
             .await?;
         for model in models {
             let replaced_path: String = RE_HOST_REPLACER
-                .replace(&model.league.logo, assets_base_path)
+                .replace(&model.logo, assets_base_path)
                 .into();
             database
                 .collection::<Model>("league")
                 .update_one(
-                    doc! {"league.id": model.league.id},
-                    doc! {"$set": {"league.localLogo": replaced_path}},
+                    doc! {"id": model.id},
+                    doc! {"$set": {"localLogo": replaced_path}},
                     None,
                 )
                 .await?;
@@ -117,7 +104,7 @@ impl Entity {
             database
                 .collection::<Model>("league")
                 .update_one(
-                    doc! {"league.id": model.league.id},
+                    doc! {"id": model.id},
                     doc! {"$set": bson::to_bson(&model)?},
                     update_options.clone(),
                 )
@@ -131,7 +118,7 @@ impl Entity {
         let models: Vec<Model> = Self::find_all().await?;
         let mut body: Vec<JsonBody<_>> = Vec::with_capacity(models.len() * 2);
         for model in models {
-            body.push(json!({"index": {"_id":model.league.id}}).into());
+            body.push(json!({"index": {"_id":model.id}}).into());
             body.push(json!(model).into())
         }
         let response = client
@@ -159,7 +146,7 @@ impl Entity {
                     {
                         "query": {
                             "match": {
-                                "league.name": name
+                                "name": name
                             }
                         }
                     }

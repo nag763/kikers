@@ -7,6 +7,7 @@ pub enum CliError {
     StructError(String),
     InputOutput(String),
     UrlError(String),
+    SerdeErr(String),
 }
 
 impl fmt::Display for CliError {
@@ -20,6 +21,7 @@ impl fmt::Display for CliError {
                 CliError::StructError(reason) => reason,
                 CliError::InputOutput(reason) => reason,
                 CliError::UrlError(reason) => reason,
+                CliError::SerdeErr(reason) => reason,
             }
         )
     }
@@ -60,5 +62,11 @@ impl From<url::ParseError> for CliError {
 impl From<std::num::ParseIntError> for CliError {
     fn from(int_err: std::num::ParseIntError) -> Self {
         Self::VarError(int_err.to_string())
+    }
+}
+
+impl From<serde_json::Error> for CliError {
+    fn from(serde_err: serde_json::Error) -> Self {
+        Self::SerdeErr(serde_err.to_string())
     }
 }

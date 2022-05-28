@@ -93,8 +93,13 @@ async fn run_main() -> Result<(), CliError> {
 async fn fetch_leagues() -> Result<(), CliError> {
     debug!("Fetch leagues called");
     let res = call_api_endpoint("leagues".into()).await?;
-    let response: String = res["response"].to_string();
-    league::Entity::store(&response).await?;
+    let mut storable: Vec<serde_json::Value> = Vec::new();
+    for elt in res["response"].as_array().ok_or(CliError::RequestError(
+        "Data received in the wrong format for the server".into(),
+    ))? {
+        storable.push(elt["league"].clone());
+    }
+    league::Entity::store(&serde_json::to_string(&storable)?).await?;
     debug!("League entity stored");
     Ok(())
 }

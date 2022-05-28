@@ -25,18 +25,6 @@ pub struct Fixture {
 }
 
 #[derive(Debug, Clone, serde::Deserialize, serde::Serialize)]
-pub struct League {
-    pub id: u32,
-    pub name: String,
-    pub country: Option<String>,
-    pub logo: String,
-    #[serde(rename = "localLogo")]
-    pub local_logo: Option<String>,
-    pub flag: Option<String>,
-    pub round: Option<String>,
-}
-
-#[derive(Debug, Clone, serde::Deserialize, serde::Serialize)]
 pub struct Team {
     pub id: u32,
     pub name: String,

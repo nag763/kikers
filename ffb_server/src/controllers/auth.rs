@@ -83,6 +83,7 @@ pub struct SignUpForm {
     password: String,
     #[validate(length(min = 2))]
     name: String,
+    locale_id: u32,
 }
 
 #[post("/signup")]
@@ -103,6 +104,7 @@ pub async fn register_user(
     let result: bool = user::Entity::insert_user(
         &sign_up_form.login,
         &sign_up_form.name,
+        sign_up_form.locale_id,
         &JwtUser::encrypt_key(&sign_up_form.password)?,
     )
     .await?

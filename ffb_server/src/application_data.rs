@@ -1,5 +1,5 @@
 use crate::ApplicationError;
-use ffb_structs::{navaccess, navaccess::Model as NavAccess, role::Model as Role};
+use ffb_structs::{navaccess, navaccess::Model as NavAccess, role::Model as Role, locale::Model as Locale, locale};
 use std::collections::HashMap;
 
 #[derive(Clone)]
@@ -10,6 +10,7 @@ pub struct ApplicationData {
     pub assets_base_path: String,
     pub trusted_hosts: Vec<String>,
     pub bypassed_pathes: Vec<String>,
+    pub locales: Vec<Locale>,
 }
 
 impl ApplicationData {
@@ -28,6 +29,7 @@ impl ApplicationData {
                 .split(",")
                 .map(|host| host.to_string())
                 .collect(),
+            locales : locale::Entity::get_locales().await?
         };
         info!("Application data initialized with succes :)");
         Ok(application_data)
@@ -60,5 +62,9 @@ impl ApplicationData {
 
     pub fn is_path_bypassed(&self, path: &str) -> bool {
         self.bypassed_pathes.contains(&path.to_string())
+    }
+
+    pub fn get_locales(&self) -> Vec<Locale> {
+        self.locales.clone()
     }
 }

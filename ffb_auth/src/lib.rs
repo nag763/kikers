@@ -26,6 +26,7 @@ pub struct JwtUser {
     pub name: String,
     pub is_authorized: bool,
     pub role: u32,
+    pub locale_id: u32,
     pub emited_on: i64,
 }
 
@@ -49,6 +50,7 @@ impl JwtUser {
                 name: user.name,
                 is_authorized: user.is_authorized,
                 role: user.role_id,
+                locale_id: user.locale_id,
                 emited_on: time::OffsetDateTime::now_utc().unix_timestamp(),
             },
         );

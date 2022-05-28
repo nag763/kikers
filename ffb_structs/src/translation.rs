@@ -14,7 +14,6 @@ pub struct Model {
     pub login: String,
     pub password: String,
     pub is_authorized: bool,
-    pub locale_id: u32,
     pub role_id: u32,
 }
 
@@ -201,17 +200,15 @@ impl Entity {
     pub async fn insert_user(
         login: &str,
         name: &str,
-        locale_id: u32,
         password: &str,
     ) -> Result<TransactionResult, ApplicationError> {
         let gen_uuid = Uuid::new_v4();
         let mut conn = Database::acquire_sql_connection().await?;
         let mut redis_conn = Database::acquire_redis_connection()?;
-        let result = sqlx::query("INSERT INTO USER(uuid, login, name, locale_id, password) VALUES(?, ?,?,?,?)")
+        let result = sqlx::query("INSERT INTO USER(uuid, login, name, password) VALUES(?, ?,?,?)")
             .bind(gen_uuid.to_string())
             .bind(login)
             .bind(name)
-            .bind(locale_id)
             .bind(password)
             .execute(&mut conn)
             .await?;
@@ -358,10 +355,9 @@ impl Entity {
     pub async fn update_self(model: Model) -> Result<TransactionResult, ApplicationError> {
         let mut redis_conn = Database::acquire_redis_connection()?;
         let mut conn = Database::acquire_sql_connection().await?;
-        let result = sqlx::query("UPDATE USER SET name=?,password=?, locale_id=? WHERE id =?")
+        let result = sqlx::query("UPDATE USER SET name=?,password=? WHERE id =?")
             .bind(&model.name)
             .bind(&model.password)
-            .bind(model.locale_id)
             .bind(&model.id)
             .execute(&mut conn)
             .await?;

@@ -1,0 +1,5 @@
+cluster.name: "ffb_elastic"
+node.name: "ffb_elasticsignlenode"
+discovery.type: single-node
+node.data : true
+network.host : 0.0.0.0

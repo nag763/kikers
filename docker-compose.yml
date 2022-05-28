@@ -21,6 +21,16 @@ services:
     image: mongo:4.4.13
     volumes: 
       - mongo:/data/db
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.4.0
+    environment:
+      - xpack.security.enabled=false
+      - discovery.type=single-node
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    restart: unless-stopped
+    volumes:
+      - elasticsearch-data:/usr/share/elasticsearch/data
+      - ./elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml
   app:
     build:
         context: .
@@ -29,10 +39,12 @@ services:
         - redis:redishost
         - mysqldb:dbhost
         - mongodb:mongohost
+        - elasticsearch:elastichost
     depends_on:
         - mysqldb
         - mongodb
         - redis
+        - elasticsearch
     restart: unless-stopped
     env_file: .env
     deploy:
@@ -53,4 +65,5 @@ volumes:
   db:
   cache:
   mongo:
+  elasticsearch-data:
   ffb_assets:

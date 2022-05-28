@@ -22,12 +22,13 @@ impl Entity {
     pub async fn find_all_for_date(
         date: &str,
         fav_leagues: Option<Vec<u32>>,
-//        fav_clubs: Option<Vec<u32>>,
+        fav_clubs: Option<Vec<u32>>,
         limit: Option<i64>,
     ) -> Result<Vec<Model>, ApplicationError> {
-        let redis_key: String = format!("games:{}::{:?}::{:?}", date, fav_leagues, 
-                                        //fav_clubs, 
-                                        limit);
+        let redis_key: String = format!(
+            "games:{}::{:?}::{:?}::{:?}",
+            date, fav_leagues, fav_clubs, limit
+        );
         let mut conn = Database::acquire_redis_connection()?;
         let cached_struct: Option<String> =
             redis::cmd("GET").arg(redis_key.as_str()).query(&mut conn)?;
@@ -50,13 +51,31 @@ impl Entity {
             };
             let mut key: bson::Document = bson::Document::new();
             key.insert("fixture.date", doc! {"$regex" : date});
-            if let Some(fav_leagues) = fav_leagues.clone() {
-                key.insert("league.id", doc! {"$in": fav_leagues});
+            match (fav_leagues, fav_clubs) {
+                (Some(leagues), Some(clubs)) => {
+                    key.insert(
+                        "$or",
+                        vec![
+                            doc! {"teams.home.id" : {"$in" : &clubs}},
+                            doc! {"teams.away.id" : {"$in" : &clubs}},
+                            doc! {"league.id": doc! {"$in": leagues}},
+                        ],
+                    );
+                }
+                (None, Some(clubs)) => {
+                    key.insert(
+                        "$or",
+                        vec![
+                            doc! {"teams.home.id" : {"$in" : &clubs}},
+                            doc! {"teams.away.id" : {"$in" : &clubs}},
+                        ],
+                    );
+                }
+                (Some(leagues), None) => {
+                    key.insert("league.id", doc! {"$in": leagues});
+                }
+                (None, None) => {}
             }
-            /*if let Some(fav_clubs) = fav_clubs.clone() {
-                // {$or : [{"teams.home.id":3005}, {"teams.away.id":3005}]}
-                key.insert("league.id", doc! {"$in": fav_clubs});
-            }*/
             let model: Vec<Model> = database
                 .collection::<Model>("fixture")
                 .find(key, options)

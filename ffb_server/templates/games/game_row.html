@@ -82,9 +82,9 @@
 				{% when "FT" %}
 				{% when "HT" %}
 				{% when "AET" %}
-				{{app_data.translate("10010_AET", user.locale_id)?}}
+				{{app_data.translate("M10010_AET", user.locale_id)?}}
 				{% when "PEN" %}
-				{{app_data.translate("10010_ON_PENS", user.locale_id)?}}
+				{{app_data.translate("M10010_ON_PENS", user.locale_id)?}}
 				{% when _ %}
 				{% if let Some(elapsed) = game.fixture.status.elapsed %}
 				: {{elapsed}}'
@@ -95,7 +95,7 @@
 		</div>
 		<div>
 		{% if 0 < diff.num_minutes() %}
-		<small>{{app_data.translate("10010_STARTS_IN", user.locale_id)?}}
+		<small>{{app_data.translate("M10010_STARTS_IN", user.locale_id)?}}
 		{% if diff.num_minutes() < 60 && 0 < diff.num_minutes()%}
 			{{diff.num_minutes()}}  {{app_data.translate("COMMON_MINUTES", user.locale_id)?}}
 		{% else %}
@@ -119,7 +119,7 @@
 		     {%endif%}
 	     {%endif%}
 	     {% else %}
-	{{app_data.translate("10010_RESULT_UNKNOWN", user.locale_id)?}}
+	{{app_data.translate("M10010_RESULT_UNKNOWN", user.locale_id)?}}
 	     {% endif %}
 	     {% endif %}
 		</small>

@@ -1,5 +1,8 @@
 use crate::ApplicationError;
-use ffb_structs::{navaccess, navaccess::Model as NavAccess, role::Model as Role, locale::Model as Locale, locale};
+use ffb_structs::{
+    locale, locale::Model as Locale, navaccess, navaccess::Model as NavAccess, role::Model as Role,
+    translation_manager, translation_manager::Model as TranslationManager
+};
 use std::collections::HashMap;
 
 #[derive(Clone)]
@@ -11,6 +14,7 @@ pub struct ApplicationData {
     pub trusted_hosts: Vec<String>,
     pub bypassed_pathes: Vec<String>,
     pub locales: Vec<Locale>,
+    translation_manager: TranslationManager,
 }
 
 impl ApplicationData {
@@ -29,7 +33,8 @@ impl ApplicationData {
                 .split(",")
                 .map(|host| host.to_string())
                 .collect(),
-            locales : locale::Entity::get_locales().await?
+            locales: locale::Entity::get_locales().await?,
+            translation_manager: translation_manager::Entity::init().await?,
         };
         info!("Application data initialized with succes :)");
         Ok(application_data)
@@ -66,5 +71,10 @@ impl ApplicationData {
 
     pub fn get_locales(&self) -> Vec<Locale> {
         self.locales.clone()
+    }
+
+    pub fn translate(&self, label: &str, locale_id: &u32) -> Result<&str, ApplicationError> {
+        let translation = self.translation_manager.translate(label, *locale_id)?;
+        Ok(translation)
     }
 }

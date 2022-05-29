@@ -1,1 +1,3 @@
-<p>This is some random text right here</p>
+{% if let Some(user) = user %}
+<p>{{app_data.translate("HOME_PARAGRAPH", user.locale_id)?}}</p>
+{% endif %}

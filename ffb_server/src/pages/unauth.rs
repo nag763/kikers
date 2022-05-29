@@ -28,7 +28,7 @@ pub async fn index(
         Some(token) => {
             let jwt_user = JwtUser::from_token(token.value())?;
             index = Index {
-                title: format!("Welcome back {}", jwt_user.name),
+                title: app_data.translate("HOME_WELCOME_BACK", &jwt_user.locale_id)?.to_string(),
                 user: Some(jwt_user),
                 error: context_query.error.clone(),
                 info: context_query.info.clone(),

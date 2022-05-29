@@ -184,7 +184,9 @@ pub async fn user_self_modification(
     }
     user.name = user_modification_form.name.clone();
     if let Some(password) = &user_modification_form.password {
-        user.password = JwtUser::encrypt_key(&password)?
+        if !password.is_empty() {
+            user.password = JwtUser::encrypt_key(&password)?
+        }
     }
     user.locale_id = user_modification_form.locale_id;
     let result: bool = user::Entity::update_self(user).await?.into();

@@ -1,6 +1,7 @@
 use actix_web::{http::header, http::StatusCode, HttpResponse, HttpResponseBuilder};
 use askama::Template;
 
+use serde::ser::StdError;
 use ffb_auth::error::ApplicationError as AuthApplicationError;
 use ffb_structs::error::ApplicationError as StructApplicationError;
 
@@ -56,6 +57,10 @@ impl ApplicationError {
             _ => None,
         }
     }
+}
+
+impl StdError for ApplicationError {
+
 }
 
 impl actix_web::error::ResponseError for ApplicationError {

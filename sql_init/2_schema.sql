@@ -26,8 +26,9 @@ CREATE TABLE `LABEL` (
   `id` int unsigned NOT NULL AUTO_INCREMENT,
   `name` varchar(32) NOT NULL,
   `default_translation` varchar(256) NOT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `name` (`name`)
+) ENGINE=InnoDB AUTO_INCREMENT=75 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -40,6 +41,7 @@ DROP TABLE IF EXISTS `LANGUAGE`;
 CREATE TABLE `LANGUAGE` (
   `id` int unsigned NOT NULL AUTO_INCREMENT,
   `name` varchar(64) NOT NULL,
+  `short` varchar(4) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -59,7 +61,7 @@ CREATE TABLE `LOCALE` (
   PRIMARY KEY (`id`),
   KEY `language_id` (`language_id`),
   CONSTRAINT `LOCALE_ibfk_1` FOREIGN KEY (`language_id`) REFERENCES `LANGUAGE` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -124,13 +126,13 @@ CREATE TABLE `TRANSLATION` (
   `id` int unsigned NOT NULL AUTO_INCREMENT,
   `label_id` int unsigned NOT NULL,
   `locale_id` int unsigned NOT NULL,
-  `translation` int DEFAULT NULL,
+  `translation` varchar(256) DEFAULT NULL,
   PRIMARY KEY (`id`),
-  KEY `label_id` (`label_id`),
+  UNIQUE KEY `label_id` (`label_id`,`locale_id`),
   KEY `locale_id` (`locale_id`),
   CONSTRAINT `TRANSLATION_ibfk_1` FOREIGN KEY (`label_id`) REFERENCES `LABEL` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `TRANSLATION_ibfk_2` FOREIGN KEY (`locale_id`) REFERENCES `LOCALE` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=68 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -157,7 +159,7 @@ CREATE TABLE `USER` (
   KEY `locale_id` (`locale_id`),
   CONSTRAINT `USER_ibfk_1` FOREIGN KEY (`role_id`) REFERENCES `ROLE` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT,
   CONSTRAINT `USER_ibfk_2` FOREIGN KEY (`locale_id`) REFERENCES `LOCALE` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT
-) ENGINE=InnoDB AUTO_INCREMENT=67 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=69 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -203,4 +205,4 @@ CREATE TABLE `USER_LEAGUE` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2022-05-28 16:10:01
+-- Dump completed on 2022-05-29 19:15:57

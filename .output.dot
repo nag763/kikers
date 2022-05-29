@@ -62,6 +62,12 @@ digraph doteur {
         <FONT COLOR="black" FACE="Roboto">varchar(64) NOT NULL</FONT>
         </TD></TR>
 
+        <TR><TD ALIGN="LEFT" BORDER="0">
+        <FONT COLOR="black" FACE="Roboto"><B>short</B></FONT>
+        </TD><TD ALIGN="LEFT">
+        <FONT COLOR="black" FACE="Roboto">varchar(4) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL</FONT>
+        </TD></TR>
+
 	</TABLE> >]
 
 
@@ -216,7 +222,7 @@ digraph doteur {
         <TR><TD ALIGN="LEFT" BORDER="0">
         <FONT COLOR="black" FACE="Roboto"><B>translation</B></FONT>
         </TD><TD ALIGN="LEFT">
-        <FONT COLOR="black" FACE="Roboto">int DEFAULT NULL</FONT>
+        <FONT COLOR="black" FACE="Roboto">varchar(256) DEFAULT NULL</FONT>
         </TD></TR>
 
 	</TABLE> >]

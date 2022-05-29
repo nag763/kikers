@@ -6,6 +6,7 @@ pub enum ApplicationError {
     RedisError(String),
     MongoError(String),
     ElasticError(String),
+    TranslationError(String, u32),
     SerialError,
 }
 
@@ -17,6 +18,7 @@ impl fmt::Display for ApplicationError {
             Self::MongoError(db_err) => format!("A mongo error happened, it has been reported and will be resolved as soon as possible : {} ", db_err) ,
             Self::RedisError(redis_err) => format!("A redis error happened, it has been reported and will be resolved as soon as possible : {} ", redis_err) ,
             Self::ElasticError(elastic_err) => format!("An elasticsearch error happened, it has been reported and will be resolved as soon as possible : {} ", elastic_err),
+            Self::TranslationError(label_name, locale_id) => format!("A translatione error happened : the label {} has been request for locale {} but this mapping doesn't exist.", label_name, locale_id),
             Self::SerialError => "A serial error happened".into(),
         };
         write!(f, "{}", reason)

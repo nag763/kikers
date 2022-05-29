@@ -1,3 +1,5 @@
+{# 10010 #}
+{% if let Some(user) = user %}
 <h2 class="text-xl col-span-full">{{title}}<a class="text-indigo-600" href="/games?date={{fetched_date}}"> (see more)</a></h2>
 {% for game in games %}
 {% let diff = (game.fixture.date - now) %}
@@ -80,9 +82,9 @@
 				{% when "FT" %}
 				{% when "HT" %}
 				{% when "AET" %}
-				after extra time
+				{{app_data.translate("10010_AET", user.locale_id)?}}
 				{% when "PEN" %}
-				on pens
+				{{app_data.translate("10010_ON_PENS", user.locale_id)?}}
 				{% when _ %}
 				{% if let Some(elapsed) = game.fixture.status.elapsed %}
 				: {{elapsed}}'
@@ -93,11 +95,11 @@
 		</div>
 		<div>
 		{% if 0 < diff.num_minutes() %}
-		<small>Starts in 
+		<small>{{app_data.translate("10010_STARTS_IN", user.locale_id)?}}
 		{% if diff.num_minutes() < 60 && 0 < diff.num_minutes()%}
-			{{diff.num_minutes()}} minutes
+			{{diff.num_minutes()}}  {{app_data.translate("COMMON_MINUTES", user.locale_id)?}}
 		{% else %}
-		{{diff.num_hours()}} hours and {{diff.num_minutes() % 60}} minutes
+		{{diff.num_hours()}} {{app_data.translate("COMMON_HOURS", user.locale_id)?}} {{app_data.translate("COMMON_AND", user.locale_id)?}} {{diff.num_minutes() % 60}} {{app_data.translate("COMMON_MINUTES", user.locale_id)?}}
 		{% endif %}
 	     {% else %}
 	     {% if game.goals.home.is_some() && game.goals.away.is_some() %}
@@ -117,7 +119,7 @@
 		     {%endif%}
 	     {%endif%}
 	     {% else %}
-	     Result unknown for this game
+	{{app_data.translate("10010_RESULT_UNKNOWN", user.locale_id)?}}
 	     {% endif %}
 	     {% endif %}
 		</small>
@@ -128,3 +130,5 @@
 {% if let Some(fetched_on) = fetched_on %}
 <small class="col-span-full">Last updated on {{fetched_on}}</small>
 {% endif %}
+{% endif %}
+

@@ -27,7 +27,7 @@ pub async fn user_profile(
 ) -> Result<HttpResponse, ApplicationError> {
     let jwt_user: JwtUser = JwtUser::from_request(req)?;
     let index = UserTemplate {
-        title: "Your informations".into(),
+        title: app_data.translate("2002_TITLE", &jwt_user.locale_id)?.into(),
         user: Some(jwt_user),
         error: context_query.error.clone(),
         info: context_query.info.clone(),
@@ -66,7 +66,7 @@ pub async fn user_leagues(
             ),
         };
     let index = UserLeagueTemplate {
-        title: "Your informations".into(),
+        title: app_data.translate("2003_TITLE", &jwt_user.locale_id)?.into(),
         user: Some(jwt_user),
         error: context_query.error.clone(),
         info: context_query.info.clone(),
@@ -108,7 +108,7 @@ pub async fn user_club(
             ),
         };
     let index = UserClubsTemplate {
-        title: "Your favorite club".into(),
+        title: app_data.translate("2004_TITLE", &jwt_user.locale_id)?.into(),
         user: Some(jwt_user),
         error: context_query.error.clone(),
         info: context_query.info.clone(),

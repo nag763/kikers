@@ -19,6 +19,8 @@ struct GamesRowTemplate {
     fetched_date: String,
     title: String,
     fetched_on: Option<String>,
+    app_data: web::Data<ApplicationData>,
+    user: Option<JwtUser>,
 }
 
 #[derive(Template)]
@@ -73,7 +75,9 @@ pub async fn games(
                 fetched_date: query_date.clone(),
                 fetched_on: GameEntity::get_last_fetched_timestamp_for_date(query_date)?,
                 user_role: jwt_user.role,
-                title: format!("Games for the {0}", query_date.as_str()),
+                title: app_data.translate("10001_GAME_OF_DAY", &jwt_user.locale_id)?.into(),
+                app_data: app_data.clone(),
+                user: Some(jwt_user.clone()),
             }),
             true => None,
         };
@@ -115,8 +119,10 @@ pub async fn games(
             )?,
             now,
             fetched_date: now_as_simple_date,
-            title: "Next three games".to_string(),
+            title: app_data.translate("10001_TODAY_TITLE", &jwt_user.locale_id)?.into(),
             user_role: jwt_user.role,
+            app_data:app_data.clone(),
+                user: Some(jwt_user.clone()),
         }),
         true => None,
     };
@@ -134,11 +140,13 @@ pub async fn games(
             games: yesterday_three_games,
             now,
             fetched_date: yesterday_as_simple_date.clone(),
-            title: "Yesterday games".to_string(),
+            title: app_data.translate("10001_YESTERDAY_TITLE", &jwt_user.locale_id)?.into(),
             fetched_on: GameEntity::get_last_fetched_timestamp_for_date(
                 yesterday_as_simple_date.as_str(),
             )?,
             user_role: jwt_user.role,
+            app_data:app_data.clone(),
+                user: Some(jwt_user.clone()),
         }),
         _ => None,
     };
@@ -155,17 +163,19 @@ pub async fn games(
             games: tomorow_three_games,
             now,
             fetched_date: tomorow_as_simple_date.clone(),
-            title: "Tomorow games".to_string(),
+            title: app_data.translate("10001_TOMOROW_TITLE", &jwt_user.locale_id)?.into(),
             fetched_on: GameEntity::get_last_fetched_timestamp_for_date(
                 tomorow_as_simple_date.as_str(),
             )?,
             user_role: jwt_user.role,
+            app_data:app_data.clone(),
+                user: Some(jwt_user.clone()),
         }),
         true => None,
     };
 
     let index = GamesTemplate {
-        title: "Games".into(),
+        title: app_data.translate("10001_TITLE", &jwt_user.locale_id)?.into(),
         user: Some(jwt_user),
         error: context_query.error.clone(),
         info: context_query.info.clone(),

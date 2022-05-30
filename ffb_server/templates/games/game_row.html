@@ -1,6 +1,6 @@
 {# 10010 #}
 {% if let Some(user) = user %}
-<h2 class="text-xl col-span-full">{{title}}<a class="text-indigo-600" href="/games?date={{fetched_date}}"> (see more)</a></h2>
+<h2 class="text-xl col-span-full">{{title}}<a class="text-indigo-600" href="/games?date={{fetched_date}}"> ({{app_data.translate("M10010_SEE_MORE", user.locale_id)?}})</a></h2>
 {% for game in games %}
 {% let diff = (game.fixture.date - now) %}
 <div class="max-w-sm bg-white rounded-lg border border-gray-700 shadow-md">
@@ -128,7 +128,7 @@
 </div>
 {% endfor %}
 {% if let Some(fetched_on) = fetched_on %}
-<small class="col-span-full">Last updated on {{fetched_on}}</small>
+<small class="col-span-full">{{app_data.translate("M10010_LAST_UPDATED", user.locale_id)?}} {{fetched_on}}</small>
 {% endif %}
 {% endif %}
 

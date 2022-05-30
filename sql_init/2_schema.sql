@@ -28,7 +28,7 @@ CREATE TABLE `LABEL` (
   `default_translation` varchar(256) NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `name` (`name`)
-) ENGINE=InnoDB AUTO_INCREMENT=75 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=79 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -74,6 +74,7 @@ DROP TABLE IF EXISTS `NAVACCESS`;
 CREATE TABLE `NAVACCESS` (
   `id` int unsigned NOT NULL AUTO_INCREMENT,
   `label` varchar(32) NOT NULL,
+  `label_id` int DEFAULT NULL,
   `href` varchar(32) NOT NULL,
   `position` int unsigned DEFAULT NULL,
   PRIMARY KEY (`id`),
@@ -132,7 +133,7 @@ CREATE TABLE `TRANSLATION` (
   KEY `locale_id` (`locale_id`),
   CONSTRAINT `TRANSLATION_ibfk_1` FOREIGN KEY (`label_id`) REFERENCES `LABEL` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `TRANSLATION_ibfk_2` FOREIGN KEY (`locale_id`) REFERENCES `LOCALE` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=68 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=72 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -205,4 +206,4 @@ CREATE TABLE `USER_LEAGUE` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2022-05-29 19:46:08
+-- Dump completed on 2022-05-30 19:17:50

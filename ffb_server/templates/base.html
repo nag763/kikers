@@ -15,9 +15,10 @@
 		</style>
 	</head>
 	<body>
+		<div class="h-screen lg:h-auto"> 
 		{% include "nav.html" %}
-			<div class="flex justify-center">
-          <div class="w-4/5 py-4 px-8 bg-white shadow-xl rounded-xl my-10 selection:bg-indigo-300 selection:text-indigo-900">
+			<div class="lg:flex lg:justify-center h-max lg:h-auto">
+          <div class="w-full lg:w-4/5 py-4 px-8 bg-white shadow-xl lg:rounded-xl lg:my-10 selection:bg-indigo-300 selection:text-indigo-900">
             <div class="mb-5">
 		    <h2 class="text-gray-800 text-3xl font-semibold mb-2">{{title}}</h2>
               <hr class="mb-5">
@@ -49,9 +50,11 @@
 		{% block body %}
 		{% endblock %}
 
+		{% include "footer.html" %}
+
 			</div>
 		</div>
-		{% include "footer.html" %}
+		</div>
 	</body>
 		<script nonce="2726c7f26c">
 			var infobox = document.getElementById("infobox");

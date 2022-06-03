@@ -84,7 +84,7 @@ pub async fn games(
 
         return Ok(HttpResponse::Ok().body(
             GamesOfDayTemplate {
-                title: "Games".into(),
+                title: app_data.translate("M10001_TITLE", &jwt_user.locale_id)?.into(),
                 user: Some(jwt_user),
                 error: context_query.error.clone(),
                 fetched_date: Some(query_date.clone()),

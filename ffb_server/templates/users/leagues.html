@@ -2,7 +2,7 @@
 {% extends "users/user.html" %}
 {%block rcontent%}
 {% if let Some(user) = user %}
-<div class="grid grid-cols-2 gap-4">
+<div class="flex lg:flex-none flex-col-reverse lg:grid lg:grid-cols-2 gap-2 lg:gap-4">
 	<div>
 		{% if let Some(leagues) = searched_leagues %}
 <h2 class="text-gray-800 text-xl font-semibold mb-15">{{app_data.translate("M2003_SEARCH_RESULTS", user.locale_id)?}}</h2>

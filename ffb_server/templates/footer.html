@@ -1,7 +1,7 @@
 <div class="inset-x-0 bottom-0 row-span-1 lg:row-span-auto">
-	<section id="bottom-navigation" class="lg:hidden block shadow bg-white">
-		<div id="tabs" class="flex justify-between">
+	<section id="bottom-navigation" class="lg:hidden block bg-white">
 			{% if let Some(user) = user %}
+		<div id="tabs" class="flex justify-between">
 	    {% for ref in app_data.get_navaccess_for_role(user.role) %}
 		{% if ref.position.is_some() %}
 		<a href="{{ref.href}}" class="w-full focus:text-teal-500 hover:text-teal-500 justify-center inline-block text-center pt-2 pb-1">
@@ -14,9 +14,14 @@
 		</a>
 		{% endif %}
       {% endfor %}
+		</div>
+      {% else %}
+      <div class="inset-x-0 bottom-0 text-xs">
+      	<span>&#169;</span>kikers is under private and authorized usage, you will need to have your account manually verified and checked in order to use the application</span>
+      </div>
       {% endif %}
 	</section>
 <footer class="font-bold text-center mt-4 text-xs hidden lg:visible">
-	<span>&#169;</span> Friendly Football Bets, 2022
+	<span>&#169;</span>kikers, 2022
 </footer>
 </div>

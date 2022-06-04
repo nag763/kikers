@@ -2,7 +2,7 @@
 {% extends "base.html" %}
 {% macro sideli(href, svgd, label) %}
          <li>
-		 <a href="{{href}}" class="flex items-center p-2 text-base font-normal text-gray-900 rounded-lg hover:bg-gray-100">
+		 <a href="{{href}}" class="flex items-center p-2 text-base font-normal text-gray-900 rounded-lg bg-gray-200 2xl:bg-inherit hover:bg-gray-100">
 			 <svg class="flex-shrink-0 w-6 h-6 text-gray-500 transition duration-75 group-hover:text-gray-900" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="{{svgd}}" clip-rule="evenodd"></path></svg>
 			 <span class="flex-1 ml-3 whitespace-nowrap">{{app_data.translate(label, user.locale_id)?}}</span>
             </a>
@@ -10,11 +10,9 @@
 {% endmacro %}
 
 {% block body %}
-<div class="grid grid-cols-4 gap-4">
-	<div>
-<aside aria-label="Sidebar">
-   <div class="overflow-y-auto py-4 px-3 rounded">
-      <ul class="space-y-2">
+<div class="grid grid-rows-8 2xl:grid-rows-none 2xl:grid-cols-4 gap-4">
+   <div class="overflow-x-auto 2xl:overflow-y-auto lg:py-4 px-3 rounded">
+      <ul class="flex flex-row 2xl:flex-col 2xl:space-y-2 space-x-2 2xl:space-x-0 overflow-x-scroll">
 	      {% if let Some(user) = user %}
 	
 	      {% call sideli("/profile/edit", "M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z", "M2001_SIDE_YOUR_INFOS") %}
@@ -22,10 +20,8 @@
 	      {% call sideli("/profile/clubs", "M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v3h-3zM4.75 12.094A5.973 5.973 0 004 15v3H1v-3a3 3 0 013.75-2.906z", "M2001_SIDE_YOUR_CLUBS") %}
 	      {% endif %}
       </ul>
-   </div>
-</aside>
-	</div>
-	<div class="col-span-3">
+</div>
+	<div class="2xl:col-span-3 row-span-7 2xl:row-span-none">
 	{% block rcontent %}{% endblock %}
 	</div>
 </div>

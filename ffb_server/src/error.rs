@@ -1,9 +1,9 @@
 use actix_web::{http::header, http::StatusCode, HttpResponse, HttpResponseBuilder};
 use askama::Template;
 
-use serde::ser::StdError;
 use ffb_auth::error::ApplicationError as AuthApplicationError;
 use ffb_structs::error::ApplicationError as StructApplicationError;
+use serde::ser::StdError;
 
 #[derive(Debug, Display)]
 pub enum ApplicationError {
@@ -59,9 +59,7 @@ impl ApplicationError {
     }
 }
 
-impl StdError for ApplicationError {
-
-}
+impl StdError for ApplicationError {}
 
 impl actix_web::error::ResponseError for ApplicationError {
     fn error_response(&self) -> HttpResponse {

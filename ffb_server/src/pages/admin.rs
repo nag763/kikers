@@ -40,7 +40,9 @@ pub async fn admin_dashboard(
         None => None,
     };
     let index = Admin {
-        title: app_data.translate("M30001_TITLE", &jwt_user.locale_id)?.into(),
+        title: app_data
+            .translate("M30001_TITLE", &jwt_user.locale_id)?
+            .into(),
         user: Some(jwt_user),
         error: context_query.error.clone(),
         info: context_query.info.clone(),

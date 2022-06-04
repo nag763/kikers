@@ -46,9 +46,17 @@ where
     actix_web::dev::forward_ready!(service);
 
     fn call(&self, req: ServiceRequest) -> Self::Future {
-        if let Some(peer_addr) = req.peer_addr() {
-            let real_ip: String = peer_addr.ip().to_string();
-            let is_banned: bool = DDosEntity::is_ip_banned(&real_ip).unwrap();
+        let (is_banned, real_ip): (Option<bool>, Option<String>) =
+            if let Some(peer_addr) = req.connection_info().realip_remote_addr() {
+                let real_ip: String = peer_addr.to_string();
+                (
+                    Some(DDosEntity::is_ip_banned(&real_ip).unwrap()),
+                    Some(real_ip),
+                )
+            } else {
+                (None, None)
+            };
+        if let (Some(is_banned), Some(real_ip)) = (is_banned, real_ip) {
             if is_banned {
                 return Box::pin(async move {
                     Ok(req.into_response(ApplicationError::PeerBanned(real_ip).error_response()))
@@ -60,8 +68,8 @@ where
         Box::pin(async move {
             let res = fut.await?;
             if res.status().is_client_error() {
-                if let Some(peer_addr) = res.request().peer_addr() {
-                    DDosEntity::register_client_error(&peer_addr.ip().to_string()).unwrap();
+                if let Some(peer_addr) = res.request().connection_info().realip_remote_addr() {
+                    DDosEntity::register_client_error(peer_addr).unwrap();
                 }
             }
             Ok(res)

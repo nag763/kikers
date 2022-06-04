@@ -75,7 +75,9 @@ pub async fn games(
                 fetched_date: query_date.clone(),
                 fetched_on: GameEntity::get_last_fetched_timestamp_for_date(query_date)?,
                 user_role: jwt_user.role,
-                title: app_data.translate("M10001_GAME_OF_DAY", &jwt_user.locale_id)?.into(),
+                title: app_data
+                    .translate("M10001_GAME_OF_DAY", &jwt_user.locale_id)?
+                    .into(),
                 app_data: app_data.clone(),
                 user: Some(jwt_user.clone()),
             }),
@@ -84,7 +86,9 @@ pub async fn games(
 
         return Ok(HttpResponse::Ok().body(
             GamesOfDayTemplate {
-                title: app_data.translate("M10001_TITLE", &jwt_user.locale_id)?.into(),
+                title: app_data
+                    .translate("M10001_TITLE", &jwt_user.locale_id)?
+                    .into(),
                 user: Some(jwt_user),
                 error: context_query.error.clone(),
                 fetched_date: Some(query_date.clone()),
@@ -119,10 +123,12 @@ pub async fn games(
             )?,
             now,
             fetched_date: now_as_simple_date,
-            title: app_data.translate("M10001_TODAY_TITLE", &jwt_user.locale_id)?.into(),
+            title: app_data
+                .translate("M10001_TODAY_TITLE", &jwt_user.locale_id)?
+                .into(),
             user_role: jwt_user.role,
-            app_data:app_data.clone(),
-                user: Some(jwt_user.clone()),
+            app_data: app_data.clone(),
+            user: Some(jwt_user.clone()),
         }),
         true => None,
     };
@@ -140,13 +146,15 @@ pub async fn games(
             games: yesterday_three_games,
             now,
             fetched_date: yesterday_as_simple_date.clone(),
-            title: app_data.translate("M10001_YESTERDAY_TITLE", &jwt_user.locale_id)?.into(),
+            title: app_data
+                .translate("M10001_YESTERDAY_TITLE", &jwt_user.locale_id)?
+                .into(),
             fetched_on: GameEntity::get_last_fetched_timestamp_for_date(
                 yesterday_as_simple_date.as_str(),
             )?,
             user_role: jwt_user.role,
-            app_data:app_data.clone(),
-                user: Some(jwt_user.clone()),
+            app_data: app_data.clone(),
+            user: Some(jwt_user.clone()),
         }),
         _ => None,
     };
@@ -163,19 +171,23 @@ pub async fn games(
             games: tomorow_three_games,
             now,
             fetched_date: tomorow_as_simple_date.clone(),
-            title: app_data.translate("M10001_TOMOROW_TITLE", &jwt_user.locale_id)?.into(),
+            title: app_data
+                .translate("M10001_TOMOROW_TITLE", &jwt_user.locale_id)?
+                .into(),
             fetched_on: GameEntity::get_last_fetched_timestamp_for_date(
                 tomorow_as_simple_date.as_str(),
             )?,
             user_role: jwt_user.role,
-            app_data:app_data.clone(),
-                user: Some(jwt_user.clone()),
+            app_data: app_data.clone(),
+            user: Some(jwt_user.clone()),
         }),
         true => None,
     };
 
     let index = GamesTemplate {
-        title: app_data.translate("M10001_TITLE", &jwt_user.locale_id)?.into(),
+        title: app_data
+            .translate("M10001_TITLE", &jwt_user.locale_id)?
+            .into(),
         user: Some(jwt_user),
         error: context_query.error.clone(),
         info: context_query.info.clone(),

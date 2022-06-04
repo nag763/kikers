@@ -1,7 +1,7 @@
 use crate::ApplicationError;
 use ffb_structs::{
     locale, locale::Model as Locale, navaccess, navaccess::Model as NavAccess, role::Model as Role,
-    translation_manager, translation_manager::Model as TranslationManager
+    translation_manager, translation_manager::Model as TranslationManager,
 };
 use std::collections::HashMap;
 

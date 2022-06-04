@@ -91,8 +91,8 @@ async fn main() -> std::io::Result<()> {
             .service(
                 web::scope("")
                     .service(cookies)
-                    .wrap(DDosLimiter::default())
                     .wrap(CookieChecker::default())
+                    .wrap(DDosLimiter::default())
                     .service(index)
                     .service(login)
                     .service(register_user)

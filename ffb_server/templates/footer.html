@@ -1,5 +1,5 @@
-<div class="inset-x-0 bottom-0 row-span-1 lg:row-span-auto">
-	<section id="bottom-navigation" class="lg:hidden block bg-white">
+<div class="inset-x-0 bottom-0 row-span-1 lg:row-span-auto bg-white dark:bg-gray-800 dark:text-white">
+	<section id="bottom-navigation" class="lg:hidden block">
 			{% if let Some(user) = user %}
 		<div id="tabs" class="flex justify-between">
 	    {% for ref in app_data.get_navaccess_for_role(user.role) %}

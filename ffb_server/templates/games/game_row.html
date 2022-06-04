@@ -3,7 +3,7 @@
 <h2 class="text-xl col-span-full">{{title}}<a class="text-indigo-600" href="/games?date={{fetched_date}}"> ({{app_data.translate("M10010_SEE_MORE", user.locale_id)?}})</a></h2>
 {% for game in games %}
 {% let diff = (game.fixture.date - now) %}
-<div class="max-w-sm bg-white rounded-lg border border-gray-700 shadow-md">
+<div class="max-w-sm bg-white dark:text-white dark:bg-gray-700 rounded-lg border border-gray-700 dark:border-gray-600 shadow-md">
     <div class="flex justify-end px-4 pt-4">
     </div>
     <div class="flex flex-row justify-between">
@@ -57,9 +57,9 @@
 	</div>
     </div>
     <div class="flex flex-col items-center pb-5">
-	    <h5 class="mb-1 text-xl font-medium text-gray-500 py-4 px-2 text-center">{{game.league.name}} {% if let Some(country) = game.league.country %} ({{country}}) {% endif %}</h5>
+	    <h5 class="mb-1 text-xl font-medium text-gray-500 dark:text-white py-4 px-2 text-center">{{game.league.name}} {% if let Some(country) = game.league.country %} ({{country}}) {% endif %}</h5>
 	    {% if let Some(round) = game.league.round %}
-	    <span class="text-sm text-gray-500 dark:text-gray-400">{{round}}</span>
+	    <span class="text-sm text-gray-500 dark:text-white">{{round}}</span>
 	    {% endif %}
         <div class="flex mt-4 space-x-3 lg:mt-6">
 		<img width="48" src="{{game.teams.home.logo}}" title="{{game.teams.home.name}}" loading="lazy"

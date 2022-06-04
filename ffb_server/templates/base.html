@@ -15,10 +15,10 @@
 	<body class="lg:bg-[url('/assets/img/stadium.jpg')]">
 		<div class="h-screen lg:h-auto grid lg:grid-none grid-rows-12 lg:grid-rows-none"> 
 		{% include "nav.html" %}
-	<div class="lg:flex lg:justify-center row-span-10 lg:row-auto bg-white lg:bg-inherit py-4 lg:py-0 px-8 lg:px-0 overflow-y-auto lg:overflow-visible">
-          <div class="w-full lg:w-4/5 lg:py-4 lg:px-8 bg-inherit lg:bg-white lg:shadow-xl lg:rounded-xl lg:my-10 selection:bg-indigo-300 selection:text-indigo-900">
+	<div class="lg:flex lg:justify-center row-span-10 lg:row-auto bg-white dark:bg-gray-800 lg:bg-inherit py-4 lg:py-0 px-8 lg:px-0 overflow-y-auto lg:overflow-visible">
+          <div class="w-full lg:w-4/5 lg:py-4 lg:px-8 bg-inherit lg:bg-white lg:dark:bg-gray-800 lg:shadow-xl lg:rounded-xl lg:my-10 selection:bg-indigo-300 selection:text-indigo-900">
             <div class="mb-5">
-		    <h2 class="text-gray-800 text-3xl font-semibold mb-2">{{title}}</h2>
+		    <h2 class="text-gray-800 dark:text-white text-3xl font-semibold mb-2">{{title}}</h2>
               <hr class="mb-5">
 		{% match info %}
   			{% when Some with (val) %}
@@ -45,7 +45,7 @@
 			{% when None %}
 		{% endmatch %}
             </div>
-	    <div class="text-xl lg:text-base">
+	    <div class="text-xl lg:text-base dark:text-white">
 		{% block body %}
 		{% endblock %}
 	    </div>

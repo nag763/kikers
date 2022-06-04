@@ -5,21 +5,21 @@
 <form method="post" action="signup" class="mt-5">
   <div class="mb-4">
     <label class="block text-md font-light mb-2" for="username">Login</label>
-    <input class="w-full bg-drabya-gray border-gray-500 appearance-none border p-4 font-light leading-tight focus:outline-none focus:shadow-outline focus:ring-2 focus:ring-blue-600 rounded-lg" type="text" name="login" id="login" placeholder="Login" minlength="3" maxlength="32" pattern="^(?:[0-9a-zA-Z\-_]{3,32})$" required>
+    <input class="w-full bg-drabya-gray border-gray-500 appearance-none border p-4 font-light leading-tight focus:outline-none focus:shadow-outline focus:ring-2 focus:ring-blue-600 rounded-lg dark:text-white dark:bg-gray-700" type="text" name="login" id="login" placeholder="Login" minlength="3" maxlength="32" pattern="^(?:[0-9a-zA-Z\-_]{3,32})$" required>
   </div>
   <div class="mb-4">
     <label class="block text-md font-light mb-2" for="username">Name</label>
-    <input class="w-full bg-drabya-gray border-gray-500 appearance-none border p-4 font-light leading-tight focus:outline-none focus:shadow-outline focus:ring-2 focus:ring-blue-600 rounded-lg" type="text" name="name" id="name" placeholder="Username" minlength="3" required>
+    <input class="w-full bg-drabya-gray border-gray-500 appearance-none border p-4 font-light leading-tight focus:outline-none focus:shadow-outline focus:ring-2 focus:ring-blue-600 rounded-lg dark:text-white dark:bg-gray-700" type="text" name="name" id="name" placeholder="Username" minlength="3" required>
   </div>
   <div class="mb-4">
     <label class="block text-md font-light mb-2" for="password">Password</label>
-    <input class="w-full bg-drabya-gray border-gray-500 appearance-none border p-4 font-light leading-tight focus:outline-none focus:shadow-outline focus:ring-2 focus:ring-blue-600 rounded-lg" type="password" name="password" id="password" placeholder="Password" minlength="4" required>
+    <input class="w-full bg-drabya-gray border-gray-500 appearance-none border p-4 font-light leading-tight focus:outline-none focus:shadow-outline focus:ring-2 focus:ring-blue-600 rounded-lg dark:text-white dark:bg-gray-700" type="password" name="password" id="password" placeholder="Password" minlength="4" required>
   </div>
   <div class="mb-4">
       <label class="block text-md font-light mb-2" for="locale_id">
         Favorite language
       </label>
-	    <select class="appearance-none block w-full text-gray-700 border border-gray-500 rounded py-3 px-4 mb-3 leading-tight focus:outline-none bg-white focus:border-gray-500" name="locale_id">
+	    <select class="appearance-none block w-full text-gray-700 border border-gray-500 rounded py-3 px-4 mb-3 leading-tight focus:outline-none bg-white focus:border-gray-500 dark:text-white dark:bg-gray-700" name="locale_id">
 		{% for locale in app_data.get_locales() %}
 			<option value="{{locale.id}}"
 			>{{locale.long_name}}</option>

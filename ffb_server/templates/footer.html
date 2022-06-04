@@ -1,5 +1,22 @@
-<div class="inset-x-0 bottom-0">
-<footer class="font-bold text-center mt-4 text-xs">
+<div class="inset-x-0 bottom-0 row-span-1 lg:row-span-auto">
+	<section id="bottom-navigation" class="lg:hidden block shadow bg-white">
+		<div id="tabs" class="flex justify-between">
+			{% if let Some(user) = user %}
+	    {% for ref in app_data.get_navaccess_for_role(user.role) %}
+		{% if ref.position.is_some() %}
+		<a href="{{ref.href}}" class="w-full focus:text-teal-500 hover:text-teal-500 justify-center inline-block text-center pt-2 pb-1">
+			{% if let Some(logo) = ref.logo %}
+				<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 inline-block mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+					<path stroke-linecap="round" stroke-linejoin="round" d="{{logo}}" />
+</svg>
+			{% endif %}
+			<span class="tab tab-home block text-xs">{{app_data.translate(ref.label, user.locale_id)?}}</span>
+		</a>
+		{% endif %}
+      {% endfor %}
+      {% endif %}
+	</section>
+<footer class="font-bold text-center mt-4 text-xs hidden lg:visible">
 	<span>&#169;</span> Friendly Football Bets, 2022
 </footer>
 </div>

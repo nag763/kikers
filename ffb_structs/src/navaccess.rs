@@ -9,6 +9,7 @@ use std::collections::HashMap;
 pub struct Model {
     pub id: u32,
     pub label: String,
+    pub logo: Option<String>,
     pub href: String,
     pub position: Option<u32>,
 }

@@ -31,7 +31,7 @@ UNLOCK TABLES;
 
 LOCK TABLES `NAVACCESS` WRITE;
 /*!40000 ALTER TABLE `NAVACCESS` DISABLE KEYS */;
-INSERT INTO `NAVACCESS` VALUES (1,'M00010_LEADERBOARD',69,'/leaderboard',0),(2,'M00010_BETS',70,'/mybets',1),(3,'M00010_ADMIN',71,'/admin',3),(4,'Activation of users',NULL,'/user/activation',NULL),(5,'Deletion of users',NULL,'/user/deletion',NULL),(6,'User modification',NULL,'/user/modification',NULL),(7,'User search',NULL,'/user/search',NULL),(8,'M00010_GAMES',72,'/games',2),(10,'See profile',NULL,'/profile/edit',NULL),(11,'Favorite user\'s leagues',NULL,'/profile/leagues',NULL),(12,'Favorite clubs',NULL,'/profile/clubs',NULL),(13,'Games status update',NULL,'/games/update/status',NULL),(14,'Clubs search',NULL,'/clubs/search',NULL);
+INSERT INTO `NAVACCESS` VALUES (1,'M00010_LEADERBOARD','M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z','/leaderboard',0),(2,'M00010_BETS','M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z','/mybets',1),(3,'M00010_ADMIN','M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z','/admin',3),(4,'Activation of users',NULL,'/user/activation',NULL),(5,'Deletion of users',NULL,'/user/deletion',NULL),(6,'User modification',NULL,'/user/modification',NULL),(7,'User search',NULL,'/user/search',NULL),(8,'M00010_GAMES','M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z','/games',2),(10,'See profile',NULL,'/profile/edit',NULL),(11,'Favorite user\'s leagues',NULL,'/profile/leagues',NULL),(12,'Favorite clubs',NULL,'/profile/clubs',NULL),(13,'Games status update',NULL,'/games/update/status',NULL),(14,'Clubs search',NULL,'/clubs/search',NULL);
 /*!40000 ALTER TABLE `NAVACCESS` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -94,4 +94,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2022-06-03 10:17:26
+-- Dump completed on 2022-06-04 12:50:42

@@ -3,7 +3,7 @@
 {% block body %}
 {% include "./game_picker_pills.html" %}
 {% if let Some(day_games) = day_games %}
-<div class="grid grid-cols-4 gap-4">
+<div class="lg:grid lg:grid-cols-4 space-y-4 lg:space-y-0 gap-4 overflow">
 {{day_games|safe}}
 </div>
 {% else %}

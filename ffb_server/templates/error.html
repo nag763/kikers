@@ -7,11 +7,11 @@
 		<link rel="stylesheet" href="/assets/styles/tailwind.css"/>
 		{% match redirect_url %}
   		{% when Some with (val) %}
-		<meta http-equiv="Refresh" content="5; url= {{val}}"/>
+		<meta http-equiv="Refresh" content="5; url= {{val}}">
   		{% when None %}
 		{% endmatch %}
 	</head>
-	<body class="bg-gray-100">
+	<body class="bg-gray-800">
 		{% match redirect_url %}
 		{% when Some with (val) %}
 		{% when None %}
@@ -22,15 +22,15 @@
 		</script>
 		{% endmatch %}
 			<div class="flex justify-center">
-          <div class="w-4/5 py-4 px-8 bg-white shadow-xl rounded-xl my-10">
+          <div class="w-4/5 py-4 px-8 bg-white dark:bg-gray-700 shadow-xl rounded-xl my-10">
             <div class="mb-5">
-		    <h2 class="text-gray-800 text-3xl font-semibold mb-2">An error happened :(</h2>
+		    <h2 class="text-gray-800 dark:text-white text-3xl font-semibold mb-2">An error happened :(</h2>
               <hr>
             </div>
-	    <b class="mt-3 text-bold">{{status_code|escape}}</b>
-		<p class="mt-3 mb-3">{{error_desc|escape}}</p>
+	    <b class="mt-3 text-bold dark:text-white">{{status_code|escape}}</b>
+		<p class="mt-3 mb-3 dark:text-white">{{error_desc|escape}}</p>
 		<hr/>
-		<p class="mt-3">If you aren't being redirected within the next seconds, click on this 
+		<p class="mt-3 dark:text-white">If you aren't being redirected within the next seconds, click on this 
 		<a class="underline text-indigo-800" href="
 		{% match redirect_url %}
   		{% when Some with (val) %}

@@ -52,7 +52,7 @@ async fn main() -> std::io::Result<()> {
             .wrap(actix_middleware::DefaultHeaders::new()
                   .add(("X-Version", "0.1"))
                   .add(("Upgrade-Insecure-Requests", "1"))
-                  .add(("Content-Security-Policy", "default-src 'self'; base-uri 'self'; object-src 'none'; script-src 'nonce-2726c7f26c'; style-src 'self' 'nonce-7a616b6f6b'; img-src 'self' https://media.api-sports.io"))
+                  .add(("Content-Security-Policy", "default-src 'self'; base-uri 'self'; object-src 'none'; script-src 'nonce-2726c7f26c'; style-src 'self'; img-src 'self' https://media.api-sports.io"))
                   .add(("Content-Type", "text/html; charset=utf-8"))
                   .add(("X-Frame-Options", "DENY"))
                   .add(("Referrer-Policy", "origin-when-cross-origin"))

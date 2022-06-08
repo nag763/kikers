@@ -2,7 +2,7 @@ use ffb_auth::JwtUser;
 
 use crate::error::ApplicationError;
 use crate::ApplicationData;
-use actix_web::cookie::Cookie;
+use actix_web::cookie::{Cookie, time::Duration};
 use actix_web::{get, post, web, HttpRequest, HttpResponse, Responder};
 use ffb_structs::user;
 
@@ -31,6 +31,8 @@ pub async fn login(
             let cookie: Cookie = Cookie::build(cookie_path, &token)
                 .path("/")
                 .http_only(true)
+                .secure(true)
+                .max_age(Duration::days(7))
                 .finish();
             Ok(HttpResponse::Found()
                 .append_header(("Location", "/"))

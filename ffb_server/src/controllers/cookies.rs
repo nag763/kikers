@@ -9,8 +9,13 @@ pub async fn cookies_approved(
     app_data: web::Data<ApplicationData>,
 ) -> Result<impl Responder, ApplicationError> {
     info!("Peer {:?} approved cookie usage", req.peer_addr());
+    let cookie : Cookie = Cookie::build(app_data.get_cookie_approval_path(), "1")
+        .secure(true)
+        .http_only(true)
+        .permanent()
+        .finish();
     Ok(HttpResponse::Found()
         .append_header(("Location", "/"))
-        .cookie(Cookie::new(app_data.get_cookie_approval_path(), "1"))
+        .cookie(cookie)
         .finish())
 }

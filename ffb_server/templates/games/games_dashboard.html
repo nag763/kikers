@@ -4,21 +4,21 @@
 {% include "./game_picker_pills.html" %}
 {% if let Some(user) = user %}
 <div class="flex flex-col lg:grid lg:grid-cols-3">
-	<div class="flex flex-col space-y-4 px-4">
+	<div class="flex flex-col space-y-4 lg:px-4">
 {% if let Some(next_three_games) = next_three_games %}
 {{next_three_games|safe}}
 {% else %}
 <p>{{app_data.translate("M10001_TODAY_NO", user.locale_id)?}}</p>
 {% endif %}
 	</div>
-	<div class="flex flex-col space-y-4 px-4">
+	<div class="flex flex-col space-y-4 lg:px-4">
 {% if let Some(yesterday_three_games) = yesterday_three_games %}
 {{yesterday_three_games|safe}}
 {% else %}
 <p>{{app_data.translate("M10001_YESTERDAY_NO", user.locale_id)?}}</p>
 {% endif %}
 	</div>
-	<div class="flex flex-col space-y-4 px-4">
+	<div class="flex flex-col space-y-4 lg:px-4">
 {% if let Some(tomorow_three_games) = tomorow_three_games %}
 {{tomorow_three_games|safe}}
 {% else %}

@@ -4,9 +4,7 @@
 {% for game in games %}
 {% let diff = (game.fixture.date - now) %}
 <div class="max-w-sm bg-white dark:text-white dark:bg-gray-700 rounded-lg border border-gray-700 dark:border-gray-600 shadow-md">
-    <div class="flex justify-end px-4 pt-4">
-    </div>
-    <div class="flex flex-row justify-between">
+    <div class="flex flex-row justify-between mt-4">
         <img class="ml-2 mb-2 w-8 h-8 rounded-full shadow-lg" src="
         {% if let Some(local_logo) = game.league.local_logo %}
 	{{local_logo}}

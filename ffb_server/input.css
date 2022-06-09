@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 @layer components {
-	input:not([type]), input[type="password"], select {
+	input:not([type]), input[type="text"], input[type="password"], select {
 		@apply w-full border-gray-500 appearance-none border p-4 font-light leading-tight focus:outline-none focus:ring-2 focus:ring-blue-600 rounded-lg dark:text-white dark:bg-gray-700 mt-1;
 	}
 

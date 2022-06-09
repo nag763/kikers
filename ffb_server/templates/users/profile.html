@@ -5,37 +5,37 @@
 	<form class="" method="post" action="/profile/edit">
 	    <input hidden name="uuid" value="{{user.uuid}}"/>
     	    <div class=" px-3">
-      <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2 dark:text-white" for="Login">
+      <label for="Login">
 	{{app_data.translate("FORM_LOGIN", user.locale_id)?}}
       </label>
-      <input class="app-input" name="login" placeholder="{{user.login}}" value="{{user.login}}" readonly>
+      <input name="login" placeholder="{{user.login}}" value="{{user.login}}" readonly>
     </div>
     <div class=" px-3">
-      <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2 dark:text-white" for="name">
+      <label for="name">
 	{{app_data.translate("FORM_NAME", user.locale_id)?}}
       </label>
-      <input class="app-input" name="name" placeholder="{{user.name}}" value="{{user.name}}" minlength="3">
+      <input name="name" placeholder="{{user.name}}" value="{{user.name}}" minlength="3">
     </div>
     <div class=" px-3">
-      <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" for="locale_id dark:text-white">
+      <label for="locale_id dark:text-white">
 	{{app_data.translate("FORM_LANGUAGE", user.locale_id)?}}
       </label>
-	    <select class="appearance-none block w-full text-gray-700 border border-gray-200 rounded py-3 px-4 mb-3 leading-tight focus:outline-none dark:text-white dark:bg-gray-700" name="locale_id">
+	    <select  name="locale_id">
 		{% for locale in app_data.get_locales() %}
 			<option value="{{locale.id}}"
 				{% if locale.id == user.locale_id %}
 					selected
 				{% endif %}
 			>{{locale.long_name}}</option>
-			
+
 		{% endfor %}
 	    </select>
     </div>
     <div class=" px-3">
-      <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2 dark:text-white" for="password">
+      <label for="password">
 	{{app_data.translate("FORM_PASSWORD", user.locale_id)?}}
       </label>
-      <input class="app-input" name="password" placeholder="Type your password only if you want to modify it" type="password" value="" minlength="3">
+      <input name="password" placeholder="Type your password only if you want to modify it" type="password" value="" minlength="3">
     </div>
 
 

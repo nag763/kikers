@@ -1,3 +1,3 @@
 #!/bin/sh
 
-npx tailwindcss -o styles/tailwind.css -c tailwind.config.js --minify
+npx tailwindcss -i input.css -o styles/tailwind.css -c tailwind.config.js --minify

@@ -1,0 +1,26 @@
+{# 30002 #}
+
+{% extends "admin/admin.html" %}
+{%block rcontent %}
+{% if let Some(user) = user %}
+{{app_data.translate("M30002_PICK_A_BM", user.locale_id)?}}
+<form method="post">
+<select name="id">
+{% for bookmaker in data %}
+<option value="{{bookmaker.id}}"
+	{% if let Some(current) = bookmaker.is_main_bookmaker %}
+		{% if current %}
+			selected
+		{%endif%}
+	{%endif%}
+>{{bookmaker.name}}</option>
+{% endfor %}
+</select>
+    <div class="mt-5 flex flex-row-reverse">
+	    <button class="h-10 px-5 m-2 text-white transition-colors duration-150 bg-blue-700 rounded-lg focus:shadow-outline hover:bg-blue-800" type="submit">
+			{{app_data.translate("FORM_SAVE", user.locale_id)?}}
+    </div>
+</form>
+</div>
+{% endif %}
+{% endblock %}

@@ -207,14 +207,16 @@ impl Entity {
         let gen_uuid = Uuid::new_v4();
         let mut conn = Database::acquire_sql_connection().await?;
         let mut redis_conn = Database::acquire_redis_connection()?;
-        let result = sqlx::query("INSERT INTO USER(uuid, login, name, locale_id, password) VALUES(?, ?,?,?,?)")
-            .bind(gen_uuid.to_string())
-            .bind(login)
-            .bind(name)
-            .bind(locale_id)
-            .bind(password)
-            .execute(&mut conn)
-            .await?;
+        let result = sqlx::query(
+            "INSERT INTO USER(uuid, login, name, locale_id, password) VALUES(?, ?,?,?,?)",
+        )
+        .bind(gen_uuid.to_string())
+        .bind(login)
+        .bind(name)
+        .bind(locale_id)
+        .bind(password)
+        .execute(&mut conn)
+        .await?;
         info!("User {} has been created", login);
         let keys_to_del: Vec<String> = redis::cmd("KEYS").arg("users:*").query(&mut redis_conn)?;
         if !keys_to_del.is_empty() {

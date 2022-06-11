@@ -13,7 +13,6 @@ pub struct Model {
 pub struct Entity;
 
 impl Entity {
-
     pub async fn get_all() -> Result<Vec<Model>, ApplicationError> {
         let mut conn = Database::acquire_sql_connection().await?;
         let models : Vec<Model> = sqlx::query_as("SELECT loc.id as 'locale_id',  lbl.id as 'label_id', lbl.name as 'label_name', IF(tra.translation IS NULL, lbl.default_translation, tra.translation) AS 'translation'
@@ -25,5 +24,4 @@ ON tra.label_id = lbl.id AND loc.id = tra.locale_id")
             .await?;
         Ok(models)
     }
-
 }

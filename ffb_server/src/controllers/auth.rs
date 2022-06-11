@@ -2,7 +2,7 @@ use ffb_auth::JwtUser;
 
 use crate::error::ApplicationError;
 use crate::ApplicationData;
-use actix_web::cookie::{Cookie, time::Duration};
+use actix_web::cookie::{time::Duration, Cookie};
 use actix_web::{get, post, web, HttpRequest, HttpResponse, Responder};
 use ffb_structs::user;
 

@@ -8,10 +8,10 @@ use crate::ApplicationData;
 use actix_web::web;
 use actix_web::{get, HttpRequest, HttpResponse};
 
-use ffb_structs::{user, user::Model as User};
+use ffb_structs::{bookmaker, bookmaker::Model as Bookmaker, user, user::Model as User};
 
 #[derive(Template)]
-#[template(path = "admin.html")]
+#[template(path = "admin/users.html")]
 struct Admin {
     title: String,
     user: Option<JwtUser>,
@@ -24,7 +24,7 @@ struct Admin {
     app_data: web::Data<ApplicationData>,
 }
 
-#[get("/admin")]
+#[get("/admin/users")]
 pub async fn admin_dashboard(
     req: HttpRequest,
     context_query: web::Query<ContextQuery>,
@@ -50,6 +50,38 @@ pub async fn admin_dashboard(
         chosen_user,
         page,
         per_page,
+        app_data,
+    };
+    Ok(HttpResponse::Ok().body(index.render()?))
+}
+
+#[derive(Template)]
+#[template(path = "admin/bookmakers.html")]
+struct AdminBookmakers {
+    title: String,
+    user: Option<JwtUser>,
+    error: Option<String>,
+    info: Option<String>,
+    data: Vec<Bookmaker>,
+    app_data: web::Data<ApplicationData>,
+}
+
+#[get("/admin/bookmakers")]
+pub async fn admin_bookmakers(
+    req: HttpRequest,
+    context_query: web::Query<ContextQuery>,
+    app_data: web::Data<ApplicationData>,
+) -> Result<HttpResponse, ApplicationError> {
+    let jwt_user: JwtUser = JwtUser::from_request(req)?;
+    let bookmakers: Vec<Bookmaker> = bookmaker::Entity::get_all().await?;
+    let index = AdminBookmakers {
+        title: app_data
+            .translate("M30002_TITLE", &jwt_user.locale_id)?
+            .into(),
+        user: Some(jwt_user),
+        error: context_query.error.clone(),
+        info: context_query.info.clone(),
+        data: bookmakers,
         app_data,
     };
     Ok(HttpResponse::Ok().body(index.render()?))

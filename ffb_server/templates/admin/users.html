@@ -1,5 +1,7 @@
 {# 30001 #}
 
+{% extends "admin/admin.html" %}
+{% block rcontent %}
 {% if let Some(user) = user %}
 {% if data.is_empty() %}
 <p>There are no more results, go back if you need to see again the list of users</p>
@@ -167,3 +169,4 @@
 	{% endif %}
 	</div>
 {% endif %}
+{% endblock %}

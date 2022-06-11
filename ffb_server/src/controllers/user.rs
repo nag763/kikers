@@ -51,7 +51,7 @@ pub async fn user_activation(
         .append_header((
             "Location",
             format!(
-                "/admin?{}&page={}&per_page={}",
+                "/admin/users?{}&page={}&per_page={}",
                 result, user_activation_form.page, user_activation_form.per_page
             ),
         ))
@@ -94,7 +94,7 @@ pub async fn user_deletion(
         .append_header((
             "Location",
             format!(
-                "/admin?{}&page={}&per_page={}",
+                "/admin/users?{}&page={}&per_page={}",
                 &result, user_deletion_form.page, user_deletion_form.per_page
             ),
         ))
@@ -149,7 +149,7 @@ pub async fn user_modification(
         .append_header((
             "Location",
             format!(
-                "/admin?{}&page={}&per_page={}&id={}",
+                "/admin/users?{}&page={}&per_page={}&id={}",
                 &result,
                 user_modification_form.page,
                 user_modification_form.per_page,
@@ -294,12 +294,12 @@ pub async fn user_search(
             .await?;
     let result: String = match user {
         Some(v) => format!(
-            "/admin?page={}&per_page={}&id={}",
+            "/admin/users?page={}&per_page={}&id={}",
             user_search_form.page, user_search_form.per_page, v.id
         ),
         None => {
             format!(
-                "/admin?error=User {} has either not been found or you don't have rights on him&page={}&per_page={}",
+                "/admin/users?error=User {} has either not been found or you don't have rights on him&page={}&per_page={}",
                 user_search_form.login, user_search_form.page, user_search_form.per_page,
             )
         }

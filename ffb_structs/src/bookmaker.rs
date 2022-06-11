@@ -1,5 +1,6 @@
 use crate::database::Database;
 use crate::error::ApplicationError;
+use crate::transaction_result::TransactionResult;
 use futures::TryStreamExt;
 use mongodb::bson::doc;
 
@@ -14,8 +15,7 @@ pub struct Model {
 pub struct Entity;
 
 impl Entity {
-
-    async fn find_all() -> Result<Vec<Model>, ApplicationError> {
+    pub async fn get_all() -> Result<Vec<Model>, ApplicationError> {
         let database = Database::acquire_mongo_connection().await?;
         let models = database
             .collection::<Model>("bookmaker")
@@ -24,6 +24,31 @@ impl Entity {
             .try_collect()
             .await?;
         Ok(models)
+    }
+
+    pub async fn set_main_bookmaker(
+        bookmaker_id: u32,
+    ) -> Result<TransactionResult, ApplicationError> {
+        let database = Database::acquire_mongo_connection().await?;
+        database
+            .collection::<Model>("bookmaker")
+            .update_many(
+                doc! {"id": {"$ne": bookmaker_id}},
+                doc! {"$set": {"is_main_bookmaker": false}},
+                None,
+            )
+            .await?;
+        let result = database
+            .collection::<Model>("bookmaker")
+            .update_many(
+                doc! {"id": bookmaker_id},
+                doc! {"$set": {"is_main_bookmaker": true}},
+                None,
+            )
+            .await?;
+        Ok(TransactionResult::expect_single_result(
+            result.modified_count,
+        ))
     }
 
     pub async fn store(value: &str) -> Result<(), ApplicationError> {
@@ -44,5 +69,4 @@ impl Entity {
         }
         Ok(())
     }
-
 }

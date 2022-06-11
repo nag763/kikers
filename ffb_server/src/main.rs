@@ -17,6 +17,7 @@ use crate::controllers::auth::{login, logout, register_user};
 use crate::controllers::club::update_club_status;
 use crate::controllers::cookies::cookies_approved;
 use crate::controllers::game::update_game_status;
+use crate::controllers::admin::admin_bookmakers as c_admin_bookmakers;
 use crate::controllers::user::{
     user_activation, user_change_leagues, user_deletion, user_modification, user_search,
     user_self_modification,
@@ -26,7 +27,7 @@ use crate::middleware::cookie_approval::CookieChecker;
 use crate::middleware::ddos_limiter::DDosLimiter;
 use crate::middleware::protect_assets::AssetsProtector;
 use crate::middleware::role_checker::RoleChecker;
-use crate::pages::admin::admin_dashboard;
+use crate::pages::admin::{admin_bookmakers, admin_dashboard};
 use crate::pages::game::games;
 use crate::pages::unauth::{cookies, index, signup};
 use crate::pages::user::{user_club, user_leagues, user_profile};
@@ -110,11 +111,13 @@ async fn main() -> std::io::Result<()> {
                             .service(user_club)
                             .service(user_self_modification)
                             .service(admin_dashboard)
+                            .service(admin_bookmakers)
                             .service(user_search)
                             .service(user_activation)
                             .service(user_deletion)
                             .service(user_modification)
-                            .service(update_club_status),
+                            .service(update_club_status)
+                            .service(c_admin_bookmakers),
                     ),
             )
     })

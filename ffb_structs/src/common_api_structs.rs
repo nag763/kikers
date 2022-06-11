@@ -30,6 +30,7 @@ pub struct Team {
     pub name: String,
     pub logo: String,
     pub winner: Option<bool>,
+    pub odd: Option<f32>,
 }
 
 #[derive(Debug, Clone, serde::Deserialize, serde::Serialize)]
@@ -70,7 +71,7 @@ pub struct Value {
 
 #[derive(Debug, Clone, serde::Deserialize, serde::Serialize)]
 pub struct Bet {
-    id: u32,
-    name: String,
-    values: Vec<Value>,
+    pub id: u32,
+    pub name: String,
+    pub values: Vec<Value>,
 }

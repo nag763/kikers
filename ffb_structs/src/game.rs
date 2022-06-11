@@ -10,6 +10,8 @@ use mongodb::bson::doc;
 pub struct Model {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub is_bet: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub has_odds: Option<bool>,
     pub fixture: Fixture,
     pub league: League,
     pub teams: Teams,

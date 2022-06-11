@@ -9,6 +9,7 @@ pub enum ApplicationError {
     TranslationError(String, u32),
     SerialError,
     NoTokenStored,
+    ParseError(String),
 }
 
 impl fmt::Display for ApplicationError {
@@ -22,6 +23,7 @@ impl fmt::Display for ApplicationError {
             Self::TranslationError(label_name, locale_id) => format!("A translatione error happened : the label {} has been request for locale {} but this mapping doesn't exist.", label_name, locale_id),
             Self::SerialError => "A serial error happened".into(),
             Self::NoTokenStored => "There are no tokens stored to call the remote API endpoint".into(),
+            Self::ParseError(err)=> format!("A parse error happened : {}", err)
         };
         write!(f, "{}", reason)
     }
@@ -73,5 +75,12 @@ impl From<elasticsearch::Error> for ApplicationError {
     fn from(elastic_err: elasticsearch::Error) -> Self {
         error!("An elasticsearch error happened : {}", elastic_err);
         ApplicationError::ElasticError(elastic_err.to_string())
+    }
+}
+
+impl From<std::num::ParseFloatError> for ApplicationError {
+    fn from(parse_float_err: std::num::ParseFloatError) -> Self {
+        error!("A float parsing error happened : {}", parse_float_err);
+        ApplicationError::ParseError(parse_float_err.to_string())
     }
 }

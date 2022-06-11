@@ -54,7 +54,7 @@ async fn main() -> std::io::Result<()> {
                   .add(("X-Version", "0.1"))
                   .add(("Upgrade-Insecure-Requests", "1"))
                   .add(("Strict-Transport-Security", "max-age=63072000; includeSubDomains; preload"))
-                  .add(("Content-Security-Policy", "default-src 'self'; base-uri 'self'; object-src 'none'; script-src 'nonce-2726c7f26c'; style-src 'self'; img-src 'self' https://media.api-sports.io"))
+                  .add(("Content-Security-Policy", "default-src 'self'; base-uri 'self'; object-src 'none'; script-src 'nonce-2726c7f26c'; style-src 'self'; img-src 'self'"))
                   .add(("Content-Type", "text/html; charset=utf-8"))
                   .add(("X-Frame-Options", "DENY"))
                   .add(("Referrer-Policy", "origin-when-cross-origin"))

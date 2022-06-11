@@ -1,6 +1,7 @@
 use crate::database::Database;
 use crate::error::ApplicationError;
 use crate::{ASSETS_BASE_PATH, RE_HOST_REPLACER};
+use crate::game;
 use elasticsearch::http::request::JsonBody;
 use elasticsearch::BulkParts;
 use elasticsearch::SearchParts;
@@ -87,12 +88,29 @@ impl Entity {
                     .collection::<Model>("club")
                     .update_one(
                         doc! {"id": model.id},
-                        doc! {"$set": {"localLogo": replaced_path}},
+                        doc! {"$set": {"localLogo": &replaced_path}},
+                        None,
+                    )
+                    .await?;
+                database
+                    .collection::<Model>("fixture")
+                    .update_many(
+                        doc! {"teams.home.id": model.id},
+                        doc! {"$set": {"teams.home.localLogo": &replaced_path}},
+                        None,
+                    )
+                    .await?;
+                database
+                    .collection::<Model>("fixture")
+                    .update_many(
+                        doc! {"teams.away.id": model.id},
+                        doc! {"$set": {"teams.away.localLogo": &replaced_path}},
                         None,
                     )
                     .await?;
             }
         }
+        game::Entity::clear_cache()?;
         Ok(())
     }
 

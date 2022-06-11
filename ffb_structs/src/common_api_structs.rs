@@ -31,6 +31,8 @@ pub struct Team {
     pub logo: String,
     pub winner: Option<bool>,
     pub odd: Option<f32>,
+    #[serde(rename = "localLogo")]
+    pub local_logo: Option<String>,
 }
 
 #[derive(Debug, Clone, serde::Deserialize, serde::Serialize)]

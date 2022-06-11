@@ -1,7 +1,7 @@
 use crate::database::Database;
 use crate::error::ApplicationError;
-use crate::{ASSETS_BASE_PATH, RE_HOST_REPLACER};
 use crate::game;
+use crate::{ASSETS_BASE_PATH, RE_HOST_REPLACER};
 use elasticsearch::http::request::JsonBody;
 use elasticsearch::BulkParts;
 use elasticsearch::SearchParts;
@@ -57,7 +57,10 @@ impl Entity {
         let mut results = database
             .collection::<Model>("club")
             .aggregate(
-                vec![doc! {"$replaceRoot": { "newRoot": {"logo": "$logo"} }}],
+                vec![
+                    doc! {"$match": {"localLogo":null}},
+                    doc! {"$replaceRoot": { "newRoot": {"logo": "$logo"} }},
+                ],
                 None,
             )
             .await?;

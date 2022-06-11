@@ -1,7 +1,7 @@
 use crate::database::Database;
 use crate::error::ApplicationError;
-use crate::{ASSETS_BASE_PATH, RE_HOST_REPLACER};
 use crate::game;
+use crate::{ASSETS_BASE_PATH, RE_HOST_REPLACER};
 use elasticsearch::http::request::JsonBody;
 use elasticsearch::{BulkParts, SearchParts};
 use futures::StreamExt;
@@ -58,7 +58,10 @@ impl Entity {
         let mut results = database
             .collection::<Model>("league")
             .aggregate(
-                vec![doc! {"$replaceRoot": { "newRoot": {"logo": "$logo"} }}],
+                vec![
+                    doc! {"$match" : {"localLogo":null}},
+                    doc! {"$replaceRoot": { "newRoot": {"logo": "$logo"} }},
+                ],
                 None,
             )
             .await?;
@@ -91,14 +94,14 @@ impl Entity {
                     None,
                 )
                 .await?;
-                database
-                    .collection::<Model>("fixture")
-                    .update_many(
-                        doc! {"league.id": model.id},
-                        doc! {"$set": {"league.localLogo": &replaced_path}},
-                        None,
-                    )
-                    .await?;
+            database
+                .collection::<Model>("fixture")
+                .update_many(
+                    doc! {"league.id": model.id},
+                    doc! {"$set": {"league.localLogo": &replaced_path}},
+                    None,
+                )
+                .await?;
         }
         game::Entity::clear_cache()?;
         Ok(())

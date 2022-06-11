@@ -1,3 +1,4 @@
+use crate::common_api_structs::Bet;
 use crate::database::Database;
 use crate::error::ApplicationError;
 use crate::transaction_result::TransactionResult;
@@ -10,6 +11,8 @@ pub struct Model {
     pub name: String,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub is_main_bookmaker: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub bets: Option<Vec<Bet>>,
 }
 
 pub struct Entity;
@@ -24,6 +27,19 @@ impl Entity {
             .try_collect()
             .await?;
         Ok(models)
+    }
+
+    pub async fn get_main_bookmaker_id() -> Result<Option<u32>, ApplicationError> {
+        let database = Database::acquire_mongo_connection().await?;
+        let model: Option<Model> = database
+            .collection::<Model>("bookmaker")
+            .find_one(doc! {"is_main_bookmaker": true}, None)
+            .await?;
+        if let Some(model) = model {
+            Ok(Some(model.id))
+        } else {
+            Ok(None)
+        }
     }
 
     pub async fn set_main_bookmaker(

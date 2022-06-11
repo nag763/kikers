@@ -6,7 +6,7 @@ use crate::transaction_result::TransactionResult;
 use futures::TryStreamExt;
 use mongodb::bson::doc;
 
-#[derive(serde::Deserialize, serde::Serialize, Clone)]
+#[derive(serde::Deserialize, serde::Serialize, Clone, Debug)]
 pub struct Model {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub is_bet: Option<bool>,

@@ -61,3 +61,16 @@ pub struct Country {
     pub code: Option<String>,
     pub flag: Option<String>,
 }
+
+#[derive(Debug, Clone, serde::Deserialize, serde::Serialize)]
+pub struct Value {
+    pub value: String,
+    pub odd: String,
+}
+
+#[derive(Debug, Clone, serde::Deserialize, serde::Serialize)]
+pub struct Bet {
+    id: u32,
+    name: String,
+    values: Vec<Value>,
+}

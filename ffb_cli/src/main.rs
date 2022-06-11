@@ -7,7 +7,7 @@ use async_std::{
 use clap::{Parser, Subcommand};
 use dotenv::dotenv;
 use error::CliError;
-use ffb_structs::{club, game, league, bookmaker, api_token};
+use ffb_structs::{api_token, bookmaker, club, game, league, odd};
 use url::Url;
 
 #[macro_use]
@@ -33,10 +33,14 @@ enum Getter {
         #[clap(default_value = "0")]
         day_diff: i64,
     },
+    Odds {
+        #[clap(default_value = "0")]
+        day_diff: i64,
+    },
     Bookmakers,
     ApiToken {
-        token: String
-    }
+        token: String,
+    },
 }
 
 #[derive(clap::ArgEnum, Debug, Clone)]
@@ -90,8 +94,9 @@ async fn run_main() -> Result<(), CliError> {
             Indexable::Index => index_clubs().await?,
         },
         Getter::Fixtures { day_diff } => fetch_fixtures(day_diff).await?,
-        Getter::Bookmakers  => fetch_bookmakers().await?,
+        Getter::Bookmakers => fetch_bookmakers().await?,
         Getter::ApiToken { token } => api_token::Entity::register(&token)?,
+        Getter::Odds { day_diff } => fetch_odds(day_diff).await?,
     }
     Ok(())
 }
@@ -168,11 +173,48 @@ async fn bulk_download_files(files_uri: Vec<String>) -> Result<(), CliError> {
     }
     Ok(())
 }
+
 async fn fetch_bookmakers() -> Result<(), CliError> {
     let res = call_api_endpoint("odds/bookmakers".into()).await?;
     let response: String = res["response"].to_string();
     bookmaker::Entity::store(&response).await?;
     debug!("Games stored");
+    Ok(())
+}
+
+async fn fetch_odds(day_diff: i64) -> Result<(), CliError> {
+    let now = chrono::Utc::now();
+    let mut date_to_fetch = (now + chrono::Duration::days(day_diff)).to_rfc3339();
+    date_to_fetch.truncate(10);
+    let main_bookmaker_id: u32 = bookmaker::Entity::get_main_bookmaker_id()
+        .await?
+        .ok_or(CliError::NoMainBookmaker)?;
+    let mut page: u64 = 1;
+    loop {
+        info!(
+            "Page {} being called for bookmaker id {} and date {}",
+            page, main_bookmaker_id, date_to_fetch
+        );
+        let res = call_api_endpoint(
+            format!(
+                "odds?date={}&bookmaker={}&bet=1&page={}",
+                date_to_fetch, main_bookmaker_id, page
+            )
+            .into(),
+        )
+        .await?;
+        let response: String = res["response"].to_string();
+        let total_pages: Option<u64> = res["paging"]["total"].as_u64();
+        odd::Entity::store(&response).await?;
+        match total_pages {
+            Some(v) if v != page => {
+                info!("Page {}/{} successfully stored", page, v);
+                page += 1;
+            }
+            _ => break,
+        }
+    }
+    debug!("Odds stored");
     Ok(())
 }
 
@@ -190,25 +232,25 @@ async fn fetch_fixtures(day_diff: i64) -> Result<(), CliError> {
 
 async fn call_api_endpoint(endpoint: String) -> Result<serde_json::Value, CliError> {
     let client = reqwest::Client::builder().build()?;
-    let token : String = api_token::Entity::get_token()?;
+    let token: String = api_token::Entity::get_token()?;
     info!("Endpoint called : {}", endpoint.as_str());
     let res = client
         .get(std::env::var("API_PROVIDER")? + endpoint.as_str())
         .header("x-rapidapi-host", "api-football-v1.p.rapidapi.com")
         .header("x-rapidapi-key", &token)
         .send()
-        .await?; 
+        .await?;
 
     if let Some(rem) = res.headers().get("X-RateLimit-requests-Remaining") {
-        let remaining_calls : i32 = rem.to_str().unwrap().parse()?;
-        info!("Number of calls remaining for token {} : {}", token, remaining_calls);
+        let remaining_calls: i32 = rem.to_str().unwrap().parse()?;
+        info!(
+            "Number of calls remaining for token {} : {}",
+            token, remaining_calls
+        );
         api_token::Entity::update_threshold(&token, remaining_calls)?;
-
     }
 
-    let value : serde_json::Value = res
-        .json::<serde_json::Value>()
-        .await?;
+    let value: serde_json::Value = res.json::<serde_json::Value>().await?;
     info!("Endpoint successfully reached");
     Ok(value)
 }

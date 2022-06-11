@@ -8,6 +8,7 @@ pub enum CliError {
     InputOutput(String),
     UrlError(String),
     SerdeErr(String),
+    NoMainBookmaker,
 }
 
 impl fmt::Display for CliError {
@@ -22,6 +23,8 @@ impl fmt::Display for CliError {
                 CliError::InputOutput(reason) => reason,
                 CliError::UrlError(reason) => reason,
                 CliError::SerdeErr(reason) => reason,
+                CliError::NoMainBookmaker =>
+                    "No main bookmaker has been set, set one before fetching the odds",
             }
         )
     }

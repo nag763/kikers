@@ -11,6 +11,7 @@ lazy_static! {
         regex::Regex::new(r#"(?P<host>http(?:s)+://[^/]+)"#).unwrap();
 }
 
+pub mod api_token;
 pub mod bookmaker;
 pub mod club;
 pub(crate) mod common_api_structs;
@@ -21,10 +22,10 @@ pub mod game;
 pub mod league;
 pub mod locale;
 pub mod navaccess;
+pub mod odd;
 pub mod role;
 pub mod token;
 pub mod transaction_result;
 pub(crate) mod translation;
 pub mod translation_manager;
 pub mod user;
-pub mod api_token;

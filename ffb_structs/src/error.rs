@@ -8,6 +8,7 @@ pub enum ApplicationError {
     ElasticError(String),
     TranslationError(String, u32),
     SerialError,
+    NoTokenStored,
 }
 
 impl fmt::Display for ApplicationError {
@@ -20,6 +21,7 @@ impl fmt::Display for ApplicationError {
             Self::ElasticError(elastic_err) => format!("An elasticsearch error happened, it has been reported and will be resolved as soon as possible : {} ", elastic_err),
             Self::TranslationError(label_name, locale_id) => format!("A translatione error happened : the label {} has been request for locale {} but this mapping doesn't exist.", label_name, locale_id),
             Self::SerialError => "A serial error happened".into(),
+            Self::NoTokenStored => "There are no tokens stored to call the remote API endpoint".into(),
         };
         write!(f, "{}", reason)
     }

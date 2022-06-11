@@ -7,7 +7,7 @@ use async_std::{
 use clap::{Parser, Subcommand};
 use dotenv::dotenv;
 use error::CliError;
-use ffb_structs::{club, game, league, bookmaker};
+use ffb_structs::{club, game, league, bookmaker, api_token};
 use url::Url;
 
 #[macro_use]
@@ -33,7 +33,10 @@ enum Getter {
         #[clap(default_value = "0")]
         day_diff: i64,
     },
-    Bookmakers
+    Bookmakers,
+    ApiToken {
+        token: String
+    }
 }
 
 #[derive(clap::ArgEnum, Debug, Clone)]
@@ -88,6 +91,7 @@ async fn run_main() -> Result<(), CliError> {
         },
         Getter::Fixtures { day_diff } => fetch_fixtures(day_diff).await?,
         Getter::Bookmakers  => fetch_bookmakers().await?,
+        Getter::ApiToken { token } => api_token::Entity::register(&token)?,
     }
     Ok(())
 }
@@ -186,13 +190,23 @@ async fn fetch_fixtures(day_diff: i64) -> Result<(), CliError> {
 
 async fn call_api_endpoint(endpoint: String) -> Result<serde_json::Value, CliError> {
     let client = reqwest::Client::builder().build()?;
+    let token : String = api_token::Entity::get_token()?;
     info!("Endpoint called : {}", endpoint.as_str());
-    let value: serde_json::Value = client
+    let res = client
         .get(std::env::var("API_PROVIDER")? + endpoint.as_str())
         .header("x-rapidapi-host", "api-football-v1.p.rapidapi.com")
-        .header("x-rapidapi-key", std::env::var("API_TOKEN")?)
+        .header("x-rapidapi-key", &token)
         .send()
-        .await?
+        .await?; 
+
+    if let Some(rem) = res.headers().get("X-RateLimit-requests-Remaining") {
+        let remaining_calls : i32 = rem.to_str().unwrap().parse()?;
+        info!("Number of calls remaining for token {} : {}", token, remaining_calls);
+        api_token::Entity::update_threshold(&token, remaining_calls)?;
+
+    }
+
+    let value : serde_json::Value = res
         .json::<serde_json::Value>()
         .await?;
     info!("Endpoint successfully reached");

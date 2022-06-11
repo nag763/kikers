@@ -7,7 +7,7 @@ use async_std::{
 use clap::{Parser, Subcommand};
 use dotenv::dotenv;
 use error::CliError;
-use ffb_structs::{club, game, league};
+use ffb_structs::{club, game, league, bookmaker};
 use url::Url;
 
 #[macro_use]
@@ -33,6 +33,7 @@ enum Getter {
         #[clap(default_value = "0")]
         day_diff: i64,
     },
+    Bookmakers
 }
 
 #[derive(clap::ArgEnum, Debug, Clone)]
@@ -86,6 +87,7 @@ async fn run_main() -> Result<(), CliError> {
             Indexable::Index => index_clubs().await?,
         },
         Getter::Fixtures { day_diff } => fetch_fixtures(day_diff).await?,
+        Getter::Bookmakers  => fetch_bookmakers().await?,
     }
     Ok(())
 }
@@ -160,6 +162,13 @@ async fn bulk_download_files(files_uri: Vec<String>) -> Result<(), CliError> {
         })
         .await?;
     }
+    Ok(())
+}
+async fn fetch_bookmakers() -> Result<(), CliError> {
+    let res = call_api_endpoint("odds/bookmakers".into()).await?;
+    let response: String = res["response"].to_string();
+    bookmaker::Entity::store(&response).await?;
+    debug!("Games stored");
     Ok(())
 }
 

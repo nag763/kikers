@@ -26,3 +26,4 @@ pub mod transaction_result;
 pub mod user;
 pub(crate) mod translation;
 pub mod translation_manager;
+pub mod bookmaker;

@@ -13,10 +13,9 @@ use serde_json::{json, Value};
 pub struct Model {
     pub id: u32,
     pub name: String,
+    #[serde(rename = "localLogo", skip_serializing_if = "Option::is_none")]    pub local_logo: Option<String>,
     pub country: Option<String>,
     pub logo: String,
-    #[serde(rename = "localLogo", skip_serializing_if = "Option::is_none")]
-    pub local_logo: Option<String>,
     pub flag: Option<String>,
     pub round: Option<String>,
 }
@@ -98,7 +97,7 @@ impl Entity {
                 .collection::<Model>("fixture")
                 .update_many(
                     doc! {"league.id": model.id},
-                    doc! {"$set": {"league.localLogo": &replaced_path}},
+                    doc! {"$set": {"localLeagueLogo": &replaced_path}},
                     None,
                 )
                 .await?;

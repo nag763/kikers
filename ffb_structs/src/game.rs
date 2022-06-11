@@ -12,6 +12,12 @@ pub struct Model {
     pub is_bet: Option<bool>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub has_odds: Option<bool>,
+    #[serde(rename = "localLeagueLogo", skip_serializing_if = "Option::is_none")]
+    pub league_local_logo : Option<String>,
+    #[serde(rename = "localHomeLogo", skip_serializing_if = "Option::is_none")]
+    pub home_local_logo: Option<String>,
+    #[serde(rename = "localAwayLogo", skip_serializing_if = "Option::is_none")]
+    pub away_local_logo: Option<String>,
     pub fixture: Fixture,
     pub league: League,
     pub teams: Teams,
@@ -101,7 +107,7 @@ impl Entity {
         let database = Database::acquire_mongo_connection().await.unwrap();
         let models: Vec<Model> = serde_json::from_str(value)?;
         let update_options = mongodb::options::UpdateOptions::builder()
-            .upsert(true)
+            .upsert(false)
             .build();
         for model in models {
             database

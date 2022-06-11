@@ -99,7 +99,7 @@ impl Entity {
                     .collection::<Model>("fixture")
                     .update_many(
                         doc! {"teams.home.id": model.id},
-                        doc! {"$set": {"teams.home.localLogo": &replaced_path}},
+                        doc! {"$set": {"localHomeLogo": &replaced_path}},
                         None,
                     )
                     .await?;
@@ -107,7 +107,7 @@ impl Entity {
                     .collection::<Model>("fixture")
                     .update_many(
                         doc! {"teams.away.id": model.id},
-                        doc! {"$set": {"teams.away.localLogo": &replaced_path}},
+                        doc! {"$set": {"localAwayLogo": &replaced_path}},
                         None,
                     )
                     .await?;

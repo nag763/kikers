@@ -20,12 +20,16 @@
 		{% when _ %}
 		{% if 2 < diff.num_hours() %}
 		{% if 2 < user_role %}
+		{% if let Some(has_odds) = game.has_odds %}
+		{%if has_odds %}
 		<form action="/games/update/status" method="POST">
 			<input hidden name="id" value="{{game.fixture.id}}"/> 
 			<input hidden name="value" value="true"/> 
 			<input hidden name="date" value="{{fetched_date}}"/> 
 		<button class="rounded-full w-8 h-8 bg-gradient-to-r from-cyan-500 to-blue-500 shadow-lg focus:ring focus:ring-violet-300" title="Add game to bets" type="submit">+</button>
 		</form>
+		{% endif %}
+		{% endif %}
 		{% endif %}
 		{% endif %}
 		{% endmatch %}

@@ -1,7 +1,7 @@
 use crate::bookmaker::Model as Bookmaker;
 use crate::database::Database;
 use crate::error::ApplicationError;
-use crate::game::Model as Game;
+use crate::{game, game::Model as Game};
 use futures::TryStreamExt;
 use mongodb::bson::doc;
 
@@ -52,7 +52,7 @@ impl Entity {
             if let Some(bets) = model.bookmakers[0].bets.clone() {
                 let home_odd: f32 = bets[0].values[0].odd.parse()?;
                 let away_odd: f32 = bets[0].values[1].odd.parse()?;
-                let result = database
+                database
                 .collection::<Game>("fixture")
                 .update_one(
                     doc! {"fixture.id": model.fixture.id},
@@ -62,6 +62,7 @@ impl Entity {
                 .await?;
             }
         }
+        game::Entity::clear_cache()?;
         database
             .collection::<Model>("odd")
             .update_many(doc! {}, doc! {"$set": {"processed": true}}, None)

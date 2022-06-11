@@ -33,6 +33,7 @@ enum Getter {
         #[clap(default_value = "0")]
         day_diff: i64,
     },
+    IndexOdds,
     Odds {
         #[clap(default_value = "0")]
         day_diff: i64,
@@ -97,6 +98,7 @@ async fn run_main() -> Result<(), CliError> {
         Getter::Bookmakers => fetch_bookmakers().await?,
         Getter::ApiToken { token } => api_token::Entity::register(&token)?,
         Getter::Odds { day_diff } => fetch_odds(day_diff).await?,
+        Getter::IndexOdds => odd::Entity::index().await?,
     }
     Ok(())
 }

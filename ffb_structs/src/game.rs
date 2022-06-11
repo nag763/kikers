@@ -119,12 +119,7 @@ impl Entity {
             .arg(date)
             .arg(chrono::Utc::now().to_rfc3339())
             .query(&mut conn)?;
-        let keys_to_del: Vec<String> = redis::cmd("KEYS")
-            .arg(format!(r#"games:{}::*"#, date))
-            .query(&mut conn)?;
-        if !keys_to_del.is_empty() {
-            redis::cmd("DEL").arg(keys_to_del).query(&mut conn)?;
-        }
+        Self::clear_cache_for_date(date)?;
 
         Ok(())
     }
@@ -143,13 +138,7 @@ impl Entity {
                 None,
             )
             .await?;
-        let mut conn = Database::acquire_redis_connection()?;
-        let keys_to_del: Vec<String> = redis::cmd("KEYS")
-            .arg(format!(r#"games:{}::*"#, date))
-            .query(&mut conn)?;
-        if !keys_to_del.is_empty() {
-            redis::cmd("DEL").arg(keys_to_del).query(&mut conn)?;
-        }
+        Self::clear_cache_for_date(date)?;
         Ok(TransactionResult::expect_single_result(
             result.modified_count,
         ))
@@ -164,5 +153,27 @@ impl Entity {
             .arg(date)
             .query(&mut conn)?;
         Ok(result)
+    }
+
+    pub(crate) fn clear_cache() -> Result<(), ApplicationError> {
+        let mut conn = Database::acquire_redis_connection()?;
+        let keys_to_del: Vec<String> = redis::cmd("KEYS").arg(r#"games:*"#).query(&mut conn)?;
+        if !keys_to_del.is_empty() {
+            redis::cmd("DEL").arg(keys_to_del).query(&mut conn)?;
+        }
+
+        Ok(())
+    }
+
+    pub(crate) fn clear_cache_for_date(date: &str) -> Result<(), ApplicationError> {
+        let mut conn = Database::acquire_redis_connection()?;
+        let keys_to_del: Vec<String> = redis::cmd("KEYS")
+            .arg(format!(r#"games:{}::*"#, date))
+            .query(&mut conn)?;
+        if !keys_to_del.is_empty() {
+            redis::cmd("DEL").arg(keys_to_del).query(&mut conn)?;
+        }
+
+        Ok(())
     }
 }

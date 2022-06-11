@@ -17,3 +17,4 @@ ffb_structs = { path = "../ffb_structs" }
 log = "~0.4"
 url = "2.2.2"
 async-std = { version = "1.11.0", features = ["tokio1"]}
+scraper = "0.13.0"

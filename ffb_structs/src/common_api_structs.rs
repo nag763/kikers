@@ -31,7 +31,7 @@ pub struct Team {
     pub logo: String,
     pub winner: Option<bool>,
     pub odd: Option<f32>,
-    #[serde(rename = "localLogo")]
+    #[serde(rename = "localLogo", skip_serializing_if = "Option::is_none")]
     pub local_logo: Option<String>,
 }
 

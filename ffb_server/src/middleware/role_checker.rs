@@ -6,7 +6,12 @@ use crate::error::ApplicationError;
 use crate::ApplicationData;
 use actix_service::{Service, Transform};
 use actix_web::ResponseError;
-use actix_web::{dev::ServiceRequest, dev::ServiceResponse, Error, cookie::{time::Duration, Cookie}};
+use actix_web::{
+    cookie::{time::Duration, Cookie},
+    dev::ServiceRequest,
+    dev::ServiceResponse,
+    Error,
+};
 use ffb_structs::navaccess::Model as Navaccess;
 use futures::future::{ok, Ready};
 use futures::Future;
@@ -50,9 +55,11 @@ where
         let app_data = req
             .app_data::<actix_web::web::Data<ApplicationData>>()
             .unwrap();
-        let (role_id, token, jwt_user) : (u32, Cookie, JwtUser) = match req.cookie(app_data.get_jwt_path()) {
+        let (role_id, token, jwt_user): (u32, Cookie, JwtUser) = match req
+            .cookie(app_data.get_jwt_path())
+        {
             Some(token) => match JwtUser::from_token(token.value()) {
-                Ok(jwt_user) => {
+                Ok(jwt_user) if !jwt_user.has_session_expired() => {
                     if JwtUser::check_token_of_login(token.value(), &jwt_user.login).is_err() {
                         return Box::pin(async move {
                             Ok(req.into_response(ApplicationError::IllegalToken.error_response()))
@@ -88,14 +95,15 @@ where
         Box::pin(async move {
             let mut res = fut.await?;
             if jwt_user.has_to_be_refreshed() {
-                let refreshed_token : String = JwtUser::refresh_token(token.value()).await.unwrap();
+                let refreshed_token: String = JwtUser::refresh_token(token.value()).await.unwrap();
 
-                let new_auth_token : Cookie = Cookie::build(std::env::var("JWT_TOKEN_PATH").unwrap(), &refreshed_token)
-                    .path("/")
-                    .http_only(true)
-                    .secure(true)
-                    .max_age(Duration::days(7))
-                    .finish();
+                let new_auth_token: Cookie =
+                    Cookie::build(std::env::var("JWT_TOKEN_PATH").unwrap(), &refreshed_token)
+                        .path("/")
+                        .http_only(true)
+                        .secure(true)
+                        .max_age(Duration::days(7))
+                        .finish();
                 res.response_mut().add_cookie(&new_auth_token).unwrap();
             }
             Ok(res)

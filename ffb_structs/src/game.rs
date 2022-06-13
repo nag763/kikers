@@ -13,7 +13,7 @@ pub struct Model {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub has_odds: Option<bool>,
     #[serde(rename = "localLeagueLogo", skip_serializing_if = "Option::is_none")]
-    pub league_local_logo : Option<String>,
+    pub league_local_logo: Option<String>,
     #[serde(rename = "localHomeLogo", skip_serializing_if = "Option::is_none")]
     pub home_local_logo: Option<String>,
     #[serde(rename = "localAwayLogo", skip_serializing_if = "Option::is_none")]

@@ -29,6 +29,7 @@ pub struct JwtUser {
     pub locale_id: u32,
     pub emited_on: i64,
     pub refresh_after: i64,
+    pub expiracy_date: i64,
 }
 
 impl JwtUser {
@@ -44,6 +45,7 @@ impl JwtUser {
         let header: Header = Default::default();
         let emited_on = time::OffsetDateTime::now_utc();
         let refresh_after = emited_on + time::Duration::minutes(15);
+        let expiracy_date = emited_on + time::Duration::weeks(1);
         let unsigned_token = Token::new(
             header,
             JwtUser {
@@ -54,8 +56,9 @@ impl JwtUser {
                 is_authorized: user.is_authorized,
                 role: user.role_id,
                 locale_id: user.locale_id,
-                emited_on : emited_on.unix_timestamp(),
+                emited_on: emited_on.unix_timestamp(),
                 refresh_after: refresh_after.unix_timestamp(),
+                expiracy_date: expiracy_date.unix_timestamp(),
             },
         );
         info!("Token for {} has been generated", user.login);
@@ -64,8 +67,13 @@ impl JwtUser {
     }
 
     pub fn has_to_be_refreshed(&self) -> bool {
-        let now : i64 = time::OffsetDateTime::now_utc().unix_timestamp();
+        let now: i64 = time::OffsetDateTime::now_utc().unix_timestamp();
         self.refresh_after < now
+    }
+
+    pub fn has_session_expired(&self) -> bool {
+        let now: i64 = time::OffsetDateTime::now_utc().unix_timestamp();
+        self.expiracy_date < now
     }
 
     pub async fn emit(login: &str, password: &str) -> Result<Option<String>, ApplicationError> {

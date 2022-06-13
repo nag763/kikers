@@ -28,6 +28,7 @@ pub struct JwtUser {
     pub role: u32,
     pub locale_id: u32,
     pub emited_on: i64,
+    pub refresh_after: i64,
 }
 
 impl JwtUser {
@@ -41,6 +42,8 @@ impl JwtUser {
         let key: Hmac<Sha256> = Hmac::new_from_slice(jwt_key.as_bytes())?;
 
         let header: Header = Default::default();
+        let emited_on = time::OffsetDateTime::now_utc();
+        let refresh_after = emited_on + time::Duration::minutes(15);
         let unsigned_token = Token::new(
             header,
             JwtUser {
@@ -51,12 +54,18 @@ impl JwtUser {
                 is_authorized: user.is_authorized,
                 role: user.role_id,
                 locale_id: user.locale_id,
-                emited_on: time::OffsetDateTime::now_utc().unix_timestamp(),
+                emited_on : emited_on.unix_timestamp(),
+                refresh_after: refresh_after.unix_timestamp(),
             },
         );
         info!("Token for {} has been generated", user.login);
         let signed_token = unsigned_token.sign_with_key(&key)?;
         Ok(signed_token.into())
+    }
+
+    pub fn has_to_be_refreshed(&self) -> bool {
+        let now : i64 = time::OffsetDateTime::now_utc().unix_timestamp();
+        self.refresh_after < now
     }
 
     pub async fn emit(login: &str, password: &str) -> Result<Option<String>, ApplicationError> {

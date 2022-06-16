@@ -2,23 +2,23 @@
 {% if let Some(user) = user %}
 <div class="my-8 select-none flex">
 	{% let base_uri = "/games" %}
-	<a href="{{base_uri}}
+	<form>
 		{% if let Some(fetched_date) = fetched_date %}
-		?date={{fetched_date}}
+		<input name="date" value="{{fetched_date}}" hidden>
 		{%endif%}
-		">
-	<button class="py-2 px-4 shadow-md no-underline rounded-full bg-gray-400 text-white font-sans font-semibold text-sm border-gray-400 btn-primary hover:text-white hover:bg-gray-500 focus:outline-none active:shadow-none mr-2">
+	<button class="py-2 px-4 shadow-md no-underline rounded-full bg-gray-400 text-white font-sans font-semibold text-sm border-gray-400 btn-primary hover:text-white hover:bg-gray-500 focus:outline-none active:shadow-none mr-2" type="submit">
 		{{app_data.translate("M10011_FAVORITE", user.locale_id)?}}
 	</button>
-	</a>
-	<a href="{{base_uri}}?all=true
+	</form>
+	<form>
 		{% if let Some(fetched_date) = fetched_date %}
-		&date={{fetched_date}}
+		<input name="date" value="{{fetched_date}}" hidden>
 		{%endif%}
-		">
+		<input name="all" value="true" hidden>
+
 	<button class="py-2 px-4 shadow-md no-underline rounded-full bg-gray-400 text-white font-sans font-semibold text-sm border-gray-400 btn-primary hover:text-white hover:bg-gray-500 focus:outline-none active:shadow-none mr-2">	
 	{{app_data.translate("M10011_ALL", user.locale_id)?}}
 	</button>
-	</a>
+	</form>
 </div>
 {% endif %}

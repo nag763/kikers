@@ -49,9 +49,6 @@
 		</form>
 	{% endif %}
 	{% endif %}
-	{%if 2 < diff.num_minutes() %}
-	<button class="rounded-full w-8 h-8 bg-gradient-to-r from-green-400 to-green-600 shadow-lg focus:ring focus:ring-violet-100" title="Check out game">&#128065;</button>
-	{% endif %}
 	{% endif %}
 	{% endif %}
 	</div>
@@ -61,7 +58,9 @@
 	    {% if let Some(round) = game.league.round %}
 	    <span class="text-sm text-gray-500 dark:text-white">{{round}}</span>
 	    {% endif %}
-        <div class="flex mt-4 space-x-3 lg:mt-6">
+	<table class="mt-3 text-center">
+	<tr>
+	<td class="w-1/3">
 		<img width="48" alt="{{game.teams.home.name}}" src="
 		{%if let Some(local_logo) = game.home_local_logo%}
 		{{local_logo}}
@@ -74,6 +73,11 @@
 		class="ring-offset-2 ring-2 ring-green-500 rounded-xl"
 		{% endif %}
 		{% endif%}/>
+	</td>
+	<td class="w-1/3">
+		-
+	</td>
+	<td class="w-1/3">
 		<img width="48" alt="{{game.teams.away.name}}" src="
 		{%if let Some(local_logo) = game.away_local_logo%}
 		{{local_logo}}
@@ -86,8 +90,28 @@
 		class="ring-offset-2 ring-2 ring-green-500 rounded-xl"
 		{% endif %}
 		{% endif%}/>
-        </div>
-		<div class="flex mt-4 space-x-3 lg:mt-6">
+	</td>
+	</tr>
+	<tr class="h-12">
+	{% if let Some(is_bet) = game.is_bet %}
+	{% if is_bet %}
+	{% if let Some(odds) = game.odds %}
+		<td class="w-1/3">
+				<button class="w-full text-center">{{odds.home}}</button>
+		</td>
+		<td class="w-1/3">
+				<button class="w-full text-center">{{odds.draw}}</button>
+		</td>
+		<td class="w-1/3">
+				<button class="w-full text-center">{{odds.away}}</button>
+		</td>
+	{% endif %}
+	{% endif %}
+	{% endif %}
+	</tr>
+	</tbody>
+	</table>
+		<div class="flex space-x-3">
 			<small> 
 				{{game.fixture.status.long}}
 				{% match game.fixture.status.short.as_str() %}

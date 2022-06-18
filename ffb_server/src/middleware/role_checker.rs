@@ -95,7 +95,13 @@ where
         Box::pin(async move {
             let mut res = fut.await?;
             if jwt_user.has_to_be_refreshed() {
-                let refreshed_token: String = JwtUser::refresh_token(token.value()).await.unwrap();
+                let refreshed_token: String = match JwtUser::refresh_token(token.value()).await {
+                    Ok(v) => v,
+                    Err(e) => {
+                        let response = ApplicationError::from(e).error_response();
+                        return Ok(res.into_response(response));
+                    }
+                };
 
                 let new_auth_token: Cookie =
                     Cookie::build(std::env::var("JWT_TOKEN_PATH").unwrap(), &refreshed_token)

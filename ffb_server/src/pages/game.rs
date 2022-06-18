@@ -8,7 +8,9 @@ use crate::ApplicationData;
 use actix_web::{get, web, HttpRequest, HttpResponse};
 
 use chrono::{DateTime, Utc};
-use ffb_structs::{game::Entity as GameEntity, game::EntityBuilder as GameEntityBuilder, game::Model as Game, user};
+use ffb_structs::{
+    game::Entity as GameEntity, game::EntityBuilder as GameEntityBuilder, game::Model as Game, user,
+};
 
 #[derive(Template)]
 #[template(path = "games/game_row.html")]
@@ -57,19 +59,16 @@ pub async fn games(
 ) -> Result<HttpResponse, ApplicationError> {
     let jwt_user: JwtUser = JwtUser::from_request(req)?;
     let now: DateTime<Utc> = Utc::now();
-    let mut builder : GameEntityBuilder = GameEntityBuilder::build();
+    let mut builder: GameEntityBuilder = GameEntityBuilder::build();
     match context_query.all {
-        Some(v) if v => {},
+        Some(v) if v => {}
         _ => {
             builder.leagues(user::Entity::get_favorite_leagues_id(jwt_user.id).await?);
             builder.clubs(user::Entity::get_favorite_clubs_id(jwt_user.id).await?);
         }
     }
     if let Some(query_date) = &context_query.date {
-        let games: Vec<Game> =
-            builder.date(query_date)
-            .finish()
-                .await?;
+        let games: Vec<Game> = builder.date(query_date).finish().await?;
         let subtemplate: Option<GamesRowTemplate> = match games.is_empty() {
             false => Some(GamesRowTemplate {
                 games,
@@ -110,9 +109,7 @@ pub async fn games(
     tomorow_as_simple_date.truncate(10);
     let now_as_simple_date: String = now_as_simple_date;
 
-    let next_three_games: Vec<Game> = 
-        builder.date(now_as_simple_date.as_str())
-        .finish().await?;
+    let next_three_games: Vec<Game> = builder.date(now_as_simple_date.as_str()).finish().await?;
 
     let next_three_games: Option<GamesRowTemplate> = match next_three_games.is_empty() {
         false => Some(GamesRowTemplate {
@@ -132,8 +129,10 @@ pub async fn games(
         true => None,
     };
 
-    let yesterday_three_games: Vec<Game> = builder.date(yesterday_as_simple_date.as_str()).finish()
-    .await?;
+    let yesterday_three_games: Vec<Game> = builder
+        .date(yesterday_as_simple_date.as_str())
+        .finish()
+        .await?;
 
     let yesterday_three_games: Option<GamesRowTemplate> = match yesterday_three_games.is_empty() {
         false => Some(GamesRowTemplate {
@@ -152,8 +151,10 @@ pub async fn games(
         }),
         _ => None,
     };
-    let tomorow_three_games: Vec<Game> = builder.date(tomorow_as_simple_date.as_str()).finish()
-    .await?;
+    let tomorow_three_games: Vec<Game> = builder
+        .date(tomorow_as_simple_date.as_str())
+        .finish()
+        .await?;
 
     let tomorow_three_games: Option<GamesRowTemplate> = match tomorow_three_games.is_empty() {
         false => Some(GamesRowTemplate {

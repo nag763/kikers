@@ -3,7 +3,7 @@
 {% block body %}
 {% include "./game_picker_pills.html" %}
 {% if let Some(user) = user %}
-<div class="flex flex-col lg:grid lg:grid-cols-3">
+<div class="flex flex-col lg:grid lg:grid-cols-3 divide-y divide-blue-200 lg:divide-y-0 space-y-2 lg:space-y-0">
 	<div class="flex flex-col space-y-4 lg:px-4">
 {% if let Some(next_three_games) = next_three_games %}
 {{next_three_games|safe}}

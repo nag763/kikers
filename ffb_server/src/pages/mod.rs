@@ -1,8 +1,8 @@
 pub mod admin;
+pub mod bets;
 pub mod game;
 pub mod unauth;
 pub mod user;
-pub mod bets;
 
 lazy_static! {
     static ref RE_VALID_DATE: regex::Regex =

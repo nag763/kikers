@@ -281,5 +281,6 @@ async fn call_api_endpoint(endpoint: String) -> Result<serde_json::Value, CliErr
 
     let value: serde_json::Value = res.json::<serde_json::Value>().await?;
     info!("Endpoint successfully reached");
+    trace!("Response : {:#?}", value);
     Ok(value)
 }

@@ -75,3 +75,10 @@ pub struct Bet {
     pub name: String,
     pub values: Vec<Value>,
 }
+
+#[derive(Debug, Clone, serde::Deserialize, serde::Serialize)]
+pub struct Odds {
+    pub home: f32,
+    pub draw: f32,
+    pub away: f32
+}

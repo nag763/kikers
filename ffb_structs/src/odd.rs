@@ -14,7 +14,6 @@ struct SimplifiedFixture {
 struct Model {
     fixture: SimplifiedFixture,
     bookmakers: Vec<Bookmaker>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     processed: Option<bool>,
 }
 
@@ -50,16 +49,19 @@ impl Entity {
             .await?;
         for model in models {
             if let Some(bets) = model.bookmakers[0].bets.clone() {
+                if bets[0].values.len() == 3 {
                 let home_odd: f32 = bets[0].values[0].odd.parse()?;
-                let away_odd: f32 = bets[0].values[1].odd.parse()?;
+                let draw_odd: f32 = bets[0].values[1].odd.parse()?;
+                let away_odd: f32 = bets[0].values[2].odd.parse()?;
                 database
                 .collection::<Game>("fixture")
                 .update_one(
                     doc! {"fixture.id": model.fixture.id},
-                    doc! {"$set": {"teams.home.odd":home_odd, "teams.away.odd":away_odd, "has_odds": true}},
+                    doc! {"$set": {"odds": {"home":home_odd, "draw": draw_odd, "away":away_odd}}},
                     None,
                 )
                 .await?;
+                }
             }
         }
         game::Entity::clear_cache()?;

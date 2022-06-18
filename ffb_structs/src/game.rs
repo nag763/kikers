@@ -1,24 +1,22 @@
-use crate::common_api_structs::{Fixture, Goals, Score, Teams};
+use crate::common_api_structs::{Fixture, Goals, Score, Teams, Odds};
 use crate::database::Database;
 use crate::error::ApplicationError;
 use crate::league::Model as League;
 use crate::transaction_result::TransactionResult;
 use futures::TryStreamExt;
 use mongodb::bson::doc;
-use std::hash::{Hash, Hasher};
 use std::collections::hash_map::DefaultHasher;
+use std::hash::{Hash, Hasher};
 
 #[derive(serde::Deserialize, serde::Serialize, Clone, Debug)]
 pub struct Model {
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub is_bet: Option<bool>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub has_odds: Option<bool>,
-    #[serde(rename = "localLeagueLogo", skip_serializing_if = "Option::is_none")]
+    pub odds: Option<Odds>,
+    #[serde(rename = "localLeagueLogo")]
     pub league_local_logo: Option<String>,
-    #[serde(rename = "localHomeLogo", skip_serializing_if = "Option::is_none")]
+    #[serde(rename = "localHomeLogo")]
     pub home_local_logo: Option<String>,
-    #[serde(rename = "localAwayLogo", skip_serializing_if = "Option::is_none")]
+    #[serde(rename = "localAwayLogo")]
     pub away_local_logo: Option<String>,
     pub fixture: Fixture,
     pub league: League,
@@ -30,12 +28,11 @@ pub struct Model {
 pub struct Entity;
 
 impl Entity {
-
     pub async fn store(date: &str, value: &str) -> Result<(), ApplicationError> {
         let database = Database::acquire_mongo_connection().await.unwrap();
         let models: Vec<Model> = serde_json::from_str(value)?;
         let update_options = mongodb::options::UpdateOptions::builder()
-            .upsert(false)
+            .upsert(true)
             .build();
         for model in models {
             database
@@ -97,7 +94,6 @@ impl Entity {
 
         Ok(())
     }
-
 }
 
 #[derive(Default, Hash)]
@@ -106,14 +102,13 @@ pub struct EntityBuilder {
     leagues: Option<Vec<u32>>,
     clubs: Option<Vec<u32>>,
     bets_only: bool,
-    limit: Option<i64>
+    limit: Option<i64>,
 }
 
 impl EntityBuilder {
-    
     pub fn build() -> EntityBuilder {
         Self::default()
-    }   
+    }
 
     pub fn date<'a>(&'a mut self, date: &str) -> &'a mut Self {
         self.date = Some(date.into());
@@ -143,10 +138,7 @@ impl EntityBuilder {
     pub async fn finish(&self) -> Result<Vec<Model>, ApplicationError> {
         let mut hasher = DefaultHasher::new();
         self.hash(&mut hasher);
-        let redis_key: String = format!(
-            "games::{:x}",
-            hasher.finish()
-        );
+        let redis_key: String = format!("games::{:x}", hasher.finish());
         let mut conn = Database::acquire_redis_connection()?;
         let cached_struct: Option<String> =
             redis::cmd("GET").arg(redis_key.as_str()).query(&mut conn)?;
@@ -168,33 +160,22 @@ impl EntityBuilder {
                 None => None,
             };
             let mut key: bson::Document = bson::Document::new();
+            let mut query_selector: Vec<bson::Document> = vec![];
+            if let Some(leagues) = &self.leagues {
+                query_selector.push(doc! {"league.id": {"$in": leagues}});
+            }
+            if let Some(clubs) = &self.clubs {
+                query_selector.push(doc! {"teams.home.id" : {"$in" : &clubs}});
+                query_selector.push(doc! {"teams.away.id" : {"$in" : &clubs}});
+            }
             if let Some(date) = &self.date {
                 key.insert("fixture.date", doc! {"$regex" : date});
             }
-            match (&self.leagues, &self.clubs) {
-                (Some(leagues), Some(clubs)) => {
-                    key.insert(
-                        "$or",
-                        vec![
-                            doc! {"teams.home.id" : {"$in" : &clubs}},
-                            doc! {"teams.away.id" : {"$in" : &clubs}},
-                            doc! {"league.id": doc! {"$in": leagues}},
-                        ],
-                    );
-                }
-                (None, Some(clubs)) => {
-                    key.insert(
-                        "$or",
-                        vec![
-                            doc! {"teams.home.id" : {"$in" : &clubs}},
-                            doc! {"teams.away.id" : {"$in" : &clubs}},
-                        ],
-                    );
-                }
-                (Some(leagues), None) => {
-                    key.insert("league.id", doc! {"$in": leagues});
-                }
-                (None, None) => {}
+            if !query_selector.is_empty() {
+                key.insert("$or", query_selector);
+            }
+            if self.bets_only {
+                key.insert("has_odds", doc!{"$ne": null});
             }
             let model: Vec<Model> = database
                 .collection::<Model>("fixture")

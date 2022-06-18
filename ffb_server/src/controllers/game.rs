@@ -15,10 +15,9 @@ pub async fn update_game_status(
     req: HttpRequest,
     game_status: actix_web_validator::Form<ChangeGameBetStatus>,
 ) -> Result<HttpResponse, ApplicationError> {
-    let result: bool =
-        game::Entity::change_is_bet_status(game_status.id, game_status.value)
-            .await?
-            .into();
+    let result: bool = game::Entity::change_is_bet_status(game_status.id, game_status.value)
+        .await?
+        .into();
     let referer: &str = req
         .headers()
         .get("referer")

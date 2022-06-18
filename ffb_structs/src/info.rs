@@ -21,9 +21,7 @@ impl Entity {
 
     pub fn get_all() -> Result<Vec<Model>, ApplicationError> {
         let mut conn = Database::acquire_redis_connection()?;
-        let models: String = redis::cmd("GET")
-            .arg("infos")
-            .query(&mut conn)?;
+        let models: String = redis::cmd("GET").arg("infos").query(&mut conn)?;
         Ok(serde_json::from_str(&models)?)
     }
 }

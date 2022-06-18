@@ -31,6 +31,7 @@ use crate::pages::admin::{admin_bookmakers, admin_dashboard};
 use crate::pages::game::games;
 use crate::pages::unauth::{cookies, index, signup};
 use crate::pages::user::{user_club, user_leagues, user_profile};
+use crate::pages::bets::{my_bets};
 use actix_files as fs;
 use actix_web::middleware as actix_middleware;
 use actix_web::middleware::Logger;
@@ -117,7 +118,8 @@ async fn main() -> std::io::Result<()> {
                             .service(user_deletion)
                             .service(user_modification)
                             .service(update_club_status)
-                            .service(c_admin_bookmakers),
+                            .service(c_admin_bookmakers)
+                            .service(my_bets),
                     ),
             )
     })

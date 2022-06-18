@@ -7,7 +7,8 @@ use async_std::{
 use clap::{Parser, Subcommand};
 use dotenv::dotenv;
 use error::CliError;
-use ffb_structs::{api_token, bookmaker, club, game, league, odd};
+use ffb_structs::{api_token, bookmaker, club, game, info, info::Model as Info, league, odd};
+use scraper::{Html, Selector};
 use url::Url;
 
 #[macro_use]
@@ -42,6 +43,7 @@ enum Getter {
     ApiToken {
         token: String,
     },
+    News,
 }
 
 #[derive(clap::ArgEnum, Debug, Clone)]
@@ -99,7 +101,32 @@ async fn run_main() -> Result<(), CliError> {
         Getter::ApiToken { token } => api_token::Entity::register(&token)?,
         Getter::Odds { day_diff } => fetch_odds(day_diff).await?,
         Getter::IndexOdds => odd::Entity::index().await?,
+        Getter::News => fetch_news().await?,
     }
+    Ok(())
+}
+
+async fn fetch_news() -> Result<(), CliError> {
+    let res = reqwest::get("https://old.reddit.com/r/soccer/new/")
+        .await?
+        .text()
+        .await?;
+    let fragment = Html::parse_fragment(&res);
+    let selector = Selector::parse(r#"a.title.may-blank"#).unwrap();
+    let input = fragment.select(&selector);
+    let mut infos: Vec<Info> = Vec::new();
+    for elt in input {
+        if let Some(href) = elt.value().attr("href") {
+            infos.push(Info {
+                title: elt.inner_html(),
+                href: href.to_string(),
+            });
+            if 10 < infos.len() {
+                break;
+            }
+        }
+    }
+    info::Entity::store(infos)?;
     Ok(())
 }
 

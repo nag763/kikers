@@ -6,6 +6,7 @@ use crate::ApplicationData;
 use actix_web::web;
 use actix_web::{get, HttpRequest, HttpResponse};
 use ffb_auth::JwtUser;
+use ffb_structs::{info, info::Model as Info};
 
 #[derive(Template)]
 #[template(path = "index.html")]
@@ -14,6 +15,7 @@ struct Index {
     user: Option<JwtUser>,
     error: Option<String>,
     info: Option<String>,
+    news: Option<Vec<Info>>,
     app_data: web::Data<ApplicationData>,
 }
 
@@ -34,6 +36,7 @@ pub async fn index(
                 user: Some(jwt_user),
                 error: context_query.error.clone(),
                 info: context_query.info.clone(),
+                news: Some(info::Entity::get_all()?),
                 app_data,
             };
         }
@@ -43,6 +46,7 @@ pub async fn index(
                 user: None,
                 error: context_query.error.clone(),
                 info: context_query.info.clone(),
+                news: None,
                 app_data,
             }
         }

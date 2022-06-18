@@ -29,3 +29,4 @@ pub mod transaction_result;
 pub(crate) mod translation;
 pub mod translation_manager;
 pub mod user;
+pub mod info;

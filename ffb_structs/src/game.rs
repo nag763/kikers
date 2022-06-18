@@ -10,13 +10,15 @@ use std::hash::{Hash, Hasher};
 
 #[derive(serde::Deserialize, serde::Serialize, Clone, Debug)]
 pub struct Model {
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub is_bet: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub odds: Option<Odds>,
-    #[serde(rename = "localLeagueLogo")]
+    #[serde(rename = "localLeagueLogo", skip_serializing_if = "Option::is_none")]
     pub league_local_logo: Option<String>,
-    #[serde(rename = "localHomeLogo")]
+    #[serde(rename = "localHomeLogo", skip_serializing_if = "Option::is_none")]
     pub home_local_logo: Option<String>,
-    #[serde(rename = "localAwayLogo")]
+    #[serde(rename = "localAwayLogo", skip_serializing_if = "Option::is_none")]
     pub away_local_logo: Option<String>,
     pub fixture: Fixture,
     pub league: League,

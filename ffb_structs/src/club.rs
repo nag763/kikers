@@ -16,7 +16,7 @@ pub struct Model {
     pub id: u32,
     pub name: String,
     pub logo: Option<String>,
-    #[serde(rename = "localLogo")]
+    #[serde(rename = "localLogo", skip_serializing_if = "Option::is_none")]
     pub local_logo: Option<String>,
 }
 

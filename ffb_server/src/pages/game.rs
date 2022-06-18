@@ -70,9 +70,10 @@ pub async fn games(
                     builder.clubs(user::Entity::get_favorite_clubs_id(jwt_user.id).await?);
                 }
             }
-            if let Some(bets) = context_query.bets {
-                builder.bets(bets);
-            }
+            match context_query.bets {
+                Some(v) if !v => builder.bets(false),
+                _ => builder.bets(true)
+            };
             if let Some(potential_bets) = context_query.potential_bets {
                 builder.potential_bets(potential_bets);
             }

@@ -8,7 +8,7 @@ use crate::ApplicationData;
 use actix_web::{get, web, HttpRequest, HttpResponse};
 
 use chrono::{DateTime, Utc};
-use ffb_structs::{game::Entity as GameEntity, game::Model as Game, user};
+use ffb_structs::{game::Entity as GameEntity, game::EntityBuilder as GameEntityBuilder, game::Model as Game, user};
 
 #[derive(Template)]
 #[template(path = "games/game_row.html")]
@@ -57,16 +57,18 @@ pub async fn games(
 ) -> Result<HttpResponse, ApplicationError> {
     let jwt_user: JwtUser = JwtUser::from_request(req)?;
     let now: DateTime<Utc> = Utc::now();
-    let (fav_leagues, fav_clubs): (Option<Vec<u32>>, Option<Vec<u32>>) = match context_query.all {
-        Some(v) if v => (None, None),
-        _ => (
-            Some(user::Entity::get_favorite_leagues_id(jwt_user.id).await?),
-            Some(user::Entity::get_favorite_clubs_id(jwt_user.id).await?),
-        ),
-    };
+    let mut builder : GameEntityBuilder = GameEntityBuilder::build();
+    match context_query.all {
+        Some(v) if v => {},
+        _ => {
+            builder.leagues(user::Entity::get_favorite_leagues_id(jwt_user.id).await?);
+            builder.clubs(user::Entity::get_favorite_clubs_id(jwt_user.id).await?);
+        }
+    }
     if let Some(query_date) = &context_query.date {
         let games: Vec<Game> =
-            GameEntity::find_all_for_date(query_date.as_str(), fav_leagues, fav_clubs, None)
+            builder.date(query_date)
+            .finish()
                 .await?;
         let subtemplate: Option<GamesRowTemplate> = match games.is_empty() {
             false => Some(GamesRowTemplate {
@@ -99,6 +101,7 @@ pub async fn games(
             .render()?,
         ));
     }
+    builder.limit(3);
     let mut now_as_simple_date: String = now.to_rfc3339();
     now_as_simple_date.truncate(10);
     let mut yesterday_as_simple_date: String = (now - chrono::Duration::days(1)).to_rfc3339();
@@ -107,13 +110,9 @@ pub async fn games(
     tomorow_as_simple_date.truncate(10);
     let now_as_simple_date: String = now_as_simple_date;
 
-    let next_three_games: Vec<Game> = GameEntity::find_all_for_date(
-        now_as_simple_date.as_str(),
-        fav_leagues.clone(),
-        fav_clubs.clone(),
-        Some(3),
-    )
-    .await?;
+    let next_three_games: Vec<Game> = 
+        builder.date(now_as_simple_date.as_str())
+        .finish().await?;
 
     let next_three_games: Option<GamesRowTemplate> = match next_three_games.is_empty() {
         false => Some(GamesRowTemplate {
@@ -133,12 +132,7 @@ pub async fn games(
         true => None,
     };
 
-    let yesterday_three_games: Vec<Game> = GameEntity::find_all_for_date(
-        yesterday_as_simple_date.as_str(),
-        fav_leagues.clone(),
-        fav_clubs.clone(),
-        Some(3),
-    )
+    let yesterday_three_games: Vec<Game> = builder.date(yesterday_as_simple_date.as_str()).finish()
     .await?;
 
     let yesterday_three_games: Option<GamesRowTemplate> = match yesterday_three_games.is_empty() {
@@ -158,12 +152,7 @@ pub async fn games(
         }),
         _ => None,
     };
-    let tomorow_three_games: Vec<Game> = GameEntity::find_all_for_date(
-        tomorow_as_simple_date.as_str(),
-        fav_leagues,
-        fav_clubs,
-        Some(3),
-    )
+    let tomorow_three_games: Vec<Game> = builder.date(tomorow_as_simple_date.as_str()).finish()
     .await?;
 
     let tomorow_three_games: Option<GamesRowTemplate> = match tomorow_three_games.is_empty() {

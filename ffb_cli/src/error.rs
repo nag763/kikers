@@ -1,4 +1,5 @@
 use std::fmt;
+use std::process::{ExitCode, Termination};
 
 #[derive(Debug)]
 pub enum CliError {
@@ -27,6 +28,20 @@ impl fmt::Display for CliError {
                     "No main bookmaker has been set, set one before fetching the odds",
             }
         )
+    }
+}
+
+impl Termination for CliError {
+    fn report(self) -> ExitCode {
+        match self {
+            CliError::VarError(_) => ExitCode::from(10),
+            CliError::RequestError(_) => ExitCode::from(11),
+            CliError::StructError(_) => ExitCode::from(12),
+            CliError::InputOutput(_) => ExitCode::from(13),
+            CliError::UrlError(_) => ExitCode::from(14),
+            CliError::SerdeErr(_) => ExitCode::from(15),
+            CliError::NoMainBookmaker => ExitCode::from(16),
+        }
     }
 }
 

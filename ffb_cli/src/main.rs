@@ -9,6 +9,7 @@ use dotenv::dotenv;
 use error::CliError;
 use ffb_structs::{api_token, bookmaker, club, game, info, info::Model as Info, league, odd};
 use scraper::{Html, Selector};
+use std::process::{ExitCode, Termination};
 use url::Url;
 
 #[macro_use]
@@ -60,23 +61,23 @@ enum Indexable {
 }
 
 #[tokio::main]
-async fn main() {
+async fn main() -> ExitCode {
     let now = std::time::Instant::now();
     env_logger::init();
-    std::process::exit(match run_main().await {
+    match run_main().await {
         Ok(_) => {
             println!(
                 "Process exited in {} seconds with success",
                 now.elapsed().as_secs()
             );
-            0
+            ExitCode::SUCCESS
         }
         Err(err) => {
             eprintln!("An error happened : {}", err);
-            eprintln!("The application finished with return code 1");
-            1
+            eprintln!("The application finished with return code {:?}", err);
+            err.report()
         }
-    });
+    }
 }
 
 async fn run_main() -> Result<(), CliError> {

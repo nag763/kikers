@@ -1,6 +1,6 @@
 {# 10011 #}
 {% if let Some(user) = user %}
-<div class="my-8 select-none flex">
+<div class="my-8 select-none flex overflow-x-auto whitespace-nowrap">
 	<form>
 		{% if let Some(fetched_date) = fetched_date %}
 		<input name="date" value="{{fetched_date}}" hidden>

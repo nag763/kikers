@@ -63,8 +63,19 @@ pub async fn games(
     match context_query.all {
         Some(v) if v => {}
         _ => {
-            builder.leagues(user::Entity::get_favorite_leagues_id(jwt_user.id).await?);
-            builder.clubs(user::Entity::get_favorite_clubs_id(jwt_user.id).await?);
+            match context_query.favs {
+                Some(v) if !v => {}
+                _ => {
+                    builder.leagues(user::Entity::get_favorite_leagues_id(jwt_user.id).await?);
+                    builder.clubs(user::Entity::get_favorite_clubs_id(jwt_user.id).await?);
+                }
+            }
+            if let Some(bets) = context_query.bets {
+                builder.bets(bets);
+            }
+            if let Some(potential_bets) = context_query.potential_bets {
+                builder.potential_bets(potential_bets);
+            }
         }
     }
     if let Some(query_date) = &context_query.date {

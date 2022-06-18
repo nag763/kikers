@@ -5,8 +5,25 @@ use crate::pages::ContextQuery;
 use crate::ApplicationData;
 use actix_web::web;
 use actix_web::{get, HttpRequest, HttpResponse};
+use chrono::{DateTime, Utc};
 use ffb_auth::JwtUser;
-use ffb_structs::{info, info::Model as Info};
+use ffb_structs::{
+    game::Entity as GameEntity, game::EntityBuilder as GameEntityBuilder, game::Model as Game,
+    info, info::Model as Info, user,
+};
+
+#[derive(Template)]
+#[template(path = "games/game_row.html")]
+struct GamesRowTemplate {
+    games: Vec<Game>,
+    user_role: u32,
+    now: DateTime<Utc>,
+    fetched_date: String,
+    title: String,
+    fetched_on: Option<String>,
+    app_data: web::Data<ApplicationData>,
+    user: Option<JwtUser>,
+}
 
 #[derive(Template)]
 #[template(path = "index.html")]
@@ -16,6 +33,7 @@ struct Index {
     error: Option<String>,
     info: Option<String>,
     news: Option<Vec<Info>>,
+    games_going_on: Option<GamesRowTemplate>,
     app_data: web::Data<ApplicationData>,
 }
 
@@ -29,6 +47,34 @@ pub async fn index(
     match req.cookie(app_data.get_jwt_path()) {
         Some(token) => {
             let jwt_user = JwtUser::from_token(token.value())?;
+            let now: DateTime<Utc> = Utc::now();
+            let mut now_as_simple_date: String = now.to_rfc3339();
+            now_as_simple_date.truncate(10);
+            let games: Vec<Game> = GameEntityBuilder::build()
+                .limit(2)
+                .date(&now_as_simple_date)
+                .clubs(user::Entity::get_favorite_clubs_id(jwt_user.id).await?)
+                .leagues(user::Entity::get_favorite_leagues_id(jwt_user.id).await?)
+                .finish()
+                .await?;
+            let games_going_on: Option<GamesRowTemplate> = match games.is_empty() {
+                false => Some(GamesRowTemplate {
+                    title: app_data
+                        .translate("M10001_TODAY_TITLE", &jwt_user.locale_id)?
+                        .into(),
+                    games,
+                    user_role: jwt_user.role,
+                    now,
+                    app_data: app_data.clone(),
+                    fetched_on: GameEntity::get_last_fetched_timestamp_for_date(
+                        &now_as_simple_date,
+                    )?,
+                    fetched_date: now_as_simple_date,
+                    user: Some(jwt_user.clone()),
+                }),
+                true => None,
+            };
+
             index = Index {
                 title: app_data
                     .translate("HOME_WELCOME_BACK", &jwt_user.locale_id)?
@@ -37,6 +83,7 @@ pub async fn index(
                 error: context_query.error.clone(),
                 info: context_query.info.clone(),
                 news: Some(info::Entity::get_all()?),
+                games_going_on: games_going_on,
                 app_data,
             };
         }
@@ -47,6 +94,7 @@ pub async fn index(
                 error: context_query.error.clone(),
                 info: context_query.info.clone(),
                 news: None,
+                games_going_on: None,
                 app_data,
             }
         }

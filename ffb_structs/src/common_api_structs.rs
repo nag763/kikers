@@ -80,5 +80,5 @@ pub struct Bet {
 pub struct Odds {
     pub home: f32,
     pub draw: f32,
-    pub away: f32
+    pub away: f32,
 }

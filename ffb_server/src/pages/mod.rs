@@ -1,5 +1,4 @@
 pub mod admin;
-pub mod bets;
 pub mod game;
 pub mod unauth;
 pub mod user;
@@ -21,4 +20,7 @@ pub struct ContextQuery {
     date: Option<String>,
     per_page: Option<u32>,
     all: Option<bool>,
+    bets: Option<bool>,
+    favs: Option<bool>,
+    potential_bets: Option<bool>,
 }

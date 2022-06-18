@@ -1,4 +1,4 @@
-use crate::common_api_structs::{Fixture, Goals, Score, Teams, Odds};
+use crate::common_api_structs::{Fixture, Goals, Odds, Score, Teams};
 use crate::database::Database;
 use crate::error::ApplicationError;
 use crate::league::Model as League;
@@ -98,12 +98,13 @@ impl Entity {
     }
 }
 
-#[derive(Default, Hash)]
+#[derive(Default, Hash, Debug)]
 pub struct EntityBuilder {
     date: Option<String>,
     leagues: Option<Vec<u32>>,
     clubs: Option<Vec<u32>>,
-    bets_only: bool,
+    bets: bool,
+    potential_bets: bool,
     limit: Option<i64>,
 }
 
@@ -127,8 +128,13 @@ impl EntityBuilder {
         self
     }
 
-    pub fn bets_only<'a>(&'a mut self, bets_only: bool) -> &'a mut Self {
-        self.bets_only = bets_only;
+    pub fn bets<'a>(&'a mut self, bets: bool) -> &'a mut Self {
+        self.bets = bets;
+        self
+    }
+
+    pub fn potential_bets<'a>(&'a mut self, potential_bets: bool) -> &'a mut Self {
+        self.potential_bets = potential_bets;
         self
     }
 
@@ -170,14 +176,17 @@ impl EntityBuilder {
                 query_selector.push(doc! {"teams.home.id" : {"$in" : &clubs}});
                 query_selector.push(doc! {"teams.away.id" : {"$in" : &clubs}});
             }
+            if self.bets {
+                query_selector.push(doc! {"is_bet": true});
+            }
+            if self.potential_bets {
+                query_selector.push(doc! {"odds": {"$ne": null}});
+            }
             if let Some(date) = &self.date {
                 key.insert("fixture.date", doc! {"$regex" : date});
             }
             if !query_selector.is_empty() {
                 key.insert("$or", query_selector);
-            }
-            if self.bets_only {
-                key.insert("has_odds", doc!{"$ne": null});
             }
             let model: Vec<Model> = database
                 .collection::<Model>("fixture")

@@ -28,7 +28,6 @@ use crate::middleware::ddos_limiter::DDosLimiter;
 use crate::middleware::protect_assets::AssetsProtector;
 use crate::middleware::role_checker::RoleChecker;
 use crate::pages::admin::{admin_bookmakers, admin_dashboard};
-use crate::pages::bets::my_bets;
 use crate::pages::game::games;
 use crate::pages::unauth::{cookies, index, signup};
 use crate::pages::user::{user_club, user_leagues, user_profile};
@@ -119,7 +118,6 @@ async fn main() -> std::io::Result<()> {
                             .service(user_modification)
                             .service(update_club_status)
                             .service(c_admin_bookmakers)
-                            .service(my_bets),
                     ),
             )
     })

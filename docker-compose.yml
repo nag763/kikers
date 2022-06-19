@@ -1,7 +1,7 @@
 version: "3.3"
 services:
   redis:
-    image: redis:5.0.14
+    image: redis:7.0.2
     restart: unless-stopped
     volumes: 
       - cache:/data
@@ -18,7 +18,7 @@ services:
       - ./sql_init:/docker-entrypoint-initdb.d
       - db:/var/lib/mysql
   mongodb:
-    image: mongo:4.4.13
+    image: mongo:4.4.14
     volumes: 
       - mongo:/data/db
   elasticsearch:

@@ -89,13 +89,12 @@ impl Entity {
         let mut redis_conn = Database::acquire_redis_connection()?;
         let redis_key: String = format!("users:{}::{}::{}", role, per_page, page);
         let paginated_users_as_string: Option<String> =
-            redis::cmd("GET").arg(&redis_key).query(&mut redis_conn)?;
+            redis::cmd("GETEX").arg(&redis_key)
+            .arg("EX")
+            .arg(250)
+            .query(&mut redis_conn)?;
         if let Some(paginated_users_as_string) = paginated_users_as_string {
             let models: Vec<Model> = serde_json::from_str(paginated_users_as_string.as_str())?;
-            redis::cmd("EXPIRE")
-                .arg(&redis_key)
-                .arg(250)
-                .query(&mut redis_conn)?;
             Ok(models)
         } else {
             let mut conn = Database::acquire_sql_connection().await?;

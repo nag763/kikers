@@ -45,7 +45,7 @@ impl From<sqlx::Error> for ApplicationError {
 
 impl From<redis::RedisError> for ApplicationError {
     fn from(redis_error: redis::RedisError) -> Self {
-        error!("A redis error happened : {}", redis_error);
+        error!("A redis error happened : {:?}", redis_error);
         ApplicationError::RedisError(redis_error.to_string())
     }
 }

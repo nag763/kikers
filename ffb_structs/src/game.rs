@@ -149,13 +149,13 @@ impl EntityBuilder {
         let redis_key: String = format!("games::{:x}", hasher.finish());
         let mut conn = Database::acquire_redis_connection()?;
         let cached_struct: Option<String> =
-            redis::cmd("GET").arg(redis_key.as_str()).query(&mut conn)?;
-        if let Some(cached_struct) = cached_struct {
-            let deserialized_struct: Vec<Model> = serde_json::from_str(cached_struct.as_str())?;
-            redis::cmd("EXPIRE")
+            redis::cmd("GETEX")
                 .arg(redis_key.as_str())
+                .arg("EX")
                 .arg(200)
                 .query(&mut conn)?;
+        if let Some(cached_struct) = cached_struct {
+            let deserialized_struct: Vec<Model> = serde_json::from_str(cached_struct.as_str())?;
             return Ok(deserialized_struct);
         } else {
             let database = Database::acquire_mongo_connection().await?;
@@ -197,9 +197,7 @@ impl EntityBuilder {
             redis::cmd("SET")
                 .arg(redis_key.as_str())
                 .arg(serde_json::to_string(&model)?)
-                .query(&mut conn)?;
-            redis::cmd("EXPIRE")
-                .arg(redis_key.as_str())
+                .arg("EX")
                 .arg(100)
                 .query(&mut conn)?;
             Ok(model)

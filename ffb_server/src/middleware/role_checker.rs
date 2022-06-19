@@ -79,7 +79,6 @@ where
                 });
             }
         };
-
         let navaccess: Vec<Navaccess> = app_data.get_navaccess_for_role(&role_id);
         let req_path: &str = req.path();
         if !req_path.contains(app_data.get_assets_base_path())

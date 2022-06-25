@@ -2,5 +2,6 @@
 /ffb_server/styles/*
 **/migration/target
 **/log
+**/logs
 **/.env
 **/assets/img/protected/*

@@ -88,8 +88,8 @@ impl Entity {
     ) -> Result<Vec<Model>, ApplicationError> {
         let mut redis_conn = Database::acquire_redis_connection()?;
         let redis_key: String = format!("users:{}::{}::{}", role, per_page, page);
-        let paginated_users_as_string: Option<String> =
-            redis::cmd("GETEX").arg(&redis_key)
+        let paginated_users_as_string: Option<String> = redis::cmd("GETEX")
+            .arg(&redis_key)
             .arg("EX")
             .arg(250)
             .query(&mut redis_conn)?;

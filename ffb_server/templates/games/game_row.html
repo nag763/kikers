@@ -97,13 +97,31 @@
 	{% if is_bet %}
 	{% if let Some(odds) = game.odds %}
 		<td class="w-1/3">
-				<button class="w-full text-center">{{odds.home}}</button>
+				<form method="post" action="/games/bet">
+					<input name="user_id" value="{{user.id}}" hidden/>
+					<input name="fixture_id" value="{{game.fixture.id}}" hidden/>
+					<input name="bet" value="Win" hidden/>
+					<input name="stake" value="{{odds.home}}" hidden/>
+					<button class="w-full text-center">{{odds.home}}</button>
+				</form>
 		</td>
 		<td class="w-1/3">
+				<form method="post" action="/games/bet">
+					<input name="user_id" value="{{user.id}}" hidden/>
+					<input name="fixture_id" value="{{game.fixture.id}}" hidden/>
+					<input name="bet" value="Draw" hidden/>
+					<input name="stake" value="{{odds.draw}}" hidden//>
 				<button class="w-full text-center">{{odds.draw}}</button>
+				</form>
 		</td>
 		<td class="w-1/3">
+				<form method="post" action="/games/bet">
+					<input name="user_id" value="{{user.id}}" hidden/>
+					<input name="fixture_id" value="{{game.fixture.id}}" hidden/>
+					<input name="bet" value="Loss" hidden/>
+					<input name="stake" value="{{odds.away}}" hidden/>
 				<button class="w-full text-center">{{odds.away}}</button>
+				</form>
 		</td>
 	{% endif %}
 	{% endif %}

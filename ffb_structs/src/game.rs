@@ -148,12 +148,11 @@ impl EntityBuilder {
         self.hash(&mut hasher);
         let redis_key: String = format!("games::{:x}", hasher.finish());
         let mut conn = Database::acquire_redis_connection()?;
-        let cached_struct: Option<String> =
-            redis::cmd("GETEX")
-                .arg(redis_key.as_str())
-                .arg("EX")
-                .arg(200)
-                .query(&mut conn)?;
+        let cached_struct: Option<String> = redis::cmd("GETEX")
+            .arg(redis_key.as_str())
+            .arg("EX")
+            .arg(200)
+            .query(&mut conn)?;
         if let Some(cached_struct) = cached_struct {
             let deserialized_struct: Vec<Model> = serde_json::from_str(cached_struct.as_str())?;
             return Ok(deserialized_struct);

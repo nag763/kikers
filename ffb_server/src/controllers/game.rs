@@ -2,7 +2,7 @@ use crate::error::ApplicationError;
 use crate::uri_builder::{MessageType, UriBuilder};
 use actix_web::http::Uri;
 use actix_web::{post, HttpRequest, HttpResponse};
-use ffb_structs::game;
+use ffb_structs::{game, bet, bet::Bet};
 
 #[derive(serde::Deserialize, validator::Validate)]
 pub struct ChangeGameBetStatus {
@@ -33,6 +33,32 @@ pub async fn update_game_status(
     } else {
         uri_builder.append_msg(MessageType::ERROR,"The game couldn't have been added to the bets, please retry or contact the administrator");
     }
+    Ok(HttpResponse::Found()
+        .append_header(("Location", uri_builder.build()))
+        .finish())
+}
+
+#[derive(serde::Deserialize, validator::Validate)]
+pub struct BetOnGameForm {
+    user_id: u32,
+    fixture_id: u32,
+    bet: Bet,
+    stake: f32,
+}
+
+#[post("/games/bet")]
+pub async fn bet_on_game(
+    req: HttpRequest,
+    bet_form: actix_web_validator::Form<BetOnGameForm>,
+) -> Result<HttpResponse, ApplicationError> {
+    bet::Entity::upsert_bet(bet_form.user_id, bet_form.fixture_id, bet_form.bet, bet_form.stake).await?;
+    let referer: &str = req
+        .headers()
+        .get("referer")
+        .ok_or(ApplicationError::InternalError)?
+        .to_str()?;
+    let mut uri_builder: UriBuilder = UriBuilder::from_existing_uri(referer.parse::<Uri>()?);
+    uri_builder.append_msg(MessageType::INFO, "Your bet has been successfully saved");
     Ok(HttpResponse::Found()
         .append_header(("Location", uri_builder.build()))
         .finish())

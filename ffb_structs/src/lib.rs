@@ -12,6 +12,7 @@ lazy_static! {
 }
 
 pub mod api_token;
+pub mod bet;
 pub mod bookmaker;
 pub mod club;
 pub(crate) mod common_api_structs;

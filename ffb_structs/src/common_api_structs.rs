@@ -76,7 +76,7 @@ pub struct Bet {
     pub values: Vec<Value>,
 }
 
-#[derive(Debug, Clone, serde::Deserialize, serde::Serialize)]
+#[derive(Debug, Clone, serde::Deserialize, serde::Serialize, Hash, PartialEq, Eq)]
 pub struct Better {
     pub user_id: u32,
     pub game_result: crate::bet::GameResult

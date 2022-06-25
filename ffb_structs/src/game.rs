@@ -1,11 +1,12 @@
 use crate::common_api_structs::{Fixture, Goals, Odds, Score, Teams, Better};
+use crate::bet::GameResult;
 use crate::database::Database;
 use crate::error::ApplicationError;
 use crate::league::Model as League;
 use crate::transaction_result::TransactionResult;
 use futures::TryStreamExt;
 use mongodb::bson::doc;
-use std::collections::hash_map::DefaultHasher;
+use std::collections::{HashSet, hash_map::DefaultHasher};
 use std::hash::{Hash, Hasher};
 
 #[derive(serde::Deserialize, serde::Serialize, Clone, Debug)]
@@ -15,7 +16,7 @@ pub struct Model {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub odds: Option<Odds>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub betters: Option<Vec<Better>>,
+    pub betters: Option<HashSet<Better>>,
     #[serde(rename = "localLeagueLogo", skip_serializing_if = "Option::is_none")]
     pub league_local_logo: Option<String>,
     #[serde(rename = "localHomeLogo", skip_serializing_if = "Option::is_none")]
@@ -27,6 +28,23 @@ pub struct Model {
     pub teams: Teams,
     pub goals: Goals,
     pub score: Score,
+}
+
+impl Model {
+
+    pub fn get_bet_for_user(&self, user_id: &u32) -> Option<GameResult> {
+        if let Some(betters) = &self.betters {
+            let filtered_bets : Vec<GameResult> = betters.iter().filter(|bet| &bet.user_id == user_id).map(|bet| bet.game_result).collect();
+            if let Some(game_result) = filtered_bets.get(0) {
+                Some(*game_result)
+            } else {
+                None
+            }
+        } else {
+            None
+        }
+    }
+
 }
 
 pub struct Entity;

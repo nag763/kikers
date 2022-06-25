@@ -9,7 +9,7 @@ use actix_web::{get, web, HttpRequest, HttpResponse};
 
 use chrono::{DateTime, Utc};
 use ffb_structs::{
-    game::Entity as GameEntity, game::EntityBuilder as GameEntityBuilder, game::Model as Game, user,
+    game::Entity as GameEntity, game::EntityBuilder as GameEntityBuilder, game::Model as Game, user
 };
 
 #[derive(Template)]

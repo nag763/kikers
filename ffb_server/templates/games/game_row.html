@@ -96,13 +96,20 @@
 	{% if let Some(is_bet) = game.is_bet %}
 	{% if is_bet %}
 	{% if let Some(odds) = game.odds %}
+	{% let user_bet = game.get_bet_for_user(user.id) %}
 		<td class="w-1/3">
 				<form method="post" action="/games/bet">
 					<input name="user_id" value="{{user.id}}" hidden/>
 					<input name="fixture_id" value="{{game.fixture.id}}" hidden/>
 					<input name="bet" value="Win" hidden/>
 					<input name="stake" value="{{odds.home}}" hidden/>
-					<button class="w-full text-center">{{odds.home}}</button>
+					<button class="w-full text-center
+					{% if let Some(user_bet) = user_bet %}
+					{% if ffb_structs::bet::GameResult::Win.eq(user_bet) %}
+					underline
+					{% endif %}
+					{% endif %}
+						">{{odds.home}}</button>
 				</form>
 		</td>
 		<td class="w-1/3">
@@ -111,7 +118,13 @@
 					<input name="fixture_id" value="{{game.fixture.id}}" hidden/>
 					<input name="bet" value="Draw" hidden/>
 					<input name="stake" value="{{odds.draw}}" hidden//>
-				<button class="w-full text-center">{{odds.draw}}</button>
+				<button class="w-full
+					{% if let Some(user_bet) = user_bet %}
+					{% if ffb_structs::bet::GameResult::Draw.eq(user_bet) %}
+					underline
+					{% endif %}
+					{% endif %}
+					text-center">{{odds.draw}}</button>
 				</form>
 		</td>
 		<td class="w-1/3">
@@ -120,7 +133,13 @@
 					<input name="fixture_id" value="{{game.fixture.id}}" hidden/>
 					<input name="bet" value="Loss" hidden/>
 					<input name="stake" value="{{odds.away}}" hidden/>
-				<button class="w-full text-center">{{odds.away}}</button>
+				<button class="w-full 
+					{% if let Some(user_bet) = user_bet %}
+					{% if ffb_structs::bet::GameResult::Loss.eq(user_bet) %}
+					underline
+					{% endif %}
+					{% endif %}
+					text-center">{{odds.away}}</button>
 				</form>
 		</td>
 	{% endif %}

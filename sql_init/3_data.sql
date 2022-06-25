@@ -31,7 +31,7 @@ UNLOCK TABLES;
 
 LOCK TABLES `NAVACCESS` WRITE;
 /*!40000 ALTER TABLE `NAVACCESS` DISABLE KEYS */;
-INSERT INTO `NAVACCESS` VALUES (1,'M00010_LEADERBOARD','M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z','/leaderboard',0),(2,'M00010_BETS','M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z','/mybets',NULL),(3,'M00010_ADMIN','M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z','/admin/users',2),(4,'Activation of users',NULL,'/user/activation',NULL),(5,'Deletion of users',NULL,'/user/deletion',NULL),(6,'User modification',NULL,'/user/modification',NULL),(7,'User search',NULL,'/user/search',NULL),(8,'M00010_GAMES','M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z','/games',1),(10,'See profile',NULL,'/profile/edit',NULL),(11,'Favorite user\'s leagues',NULL,'/profile/leagues',NULL),(12,'Favorite clubs',NULL,'/profile/clubs',NULL),(13,'Games status update',NULL,'/games/update/status',NULL),(14,'Clubs search',NULL,'/clubs/search',NULL),(15,'Bookmakers',NULL,'/admin/bookmakers',NULL);
+INSERT INTO `NAVACCESS` VALUES (1,'M00010_LEADERBOARD','M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z','/leaderboard',0),(2,'M00010_BETS','M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z','/mybets',NULL),(3,'M00010_ADMIN','M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z','/admin/users',2),(4,'Activation of users',NULL,'/user/activation',NULL),(5,'Deletion of users',NULL,'/user/deletion',NULL),(6,'User modification',NULL,'/user/modification',NULL),(7,'User search',NULL,'/user/search',NULL),(8,'M00010_GAMES','M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z','/games',1),(10,'See profile',NULL,'/profile/edit',NULL),(11,'Favorite user\'s leagues',NULL,'/profile/leagues',NULL),(12,'Favorite clubs',NULL,'/profile/clubs',NULL),(13,'Games status update',NULL,'/games/update/status',NULL),(14,'Clubs search',NULL,'/clubs/search',NULL),(15,'Bookmakers',NULL,'/admin/bookmakers',NULL),(16,'Bets on game',NULL,'/games/bet',NULL);
 /*!40000 ALTER TABLE `NAVACCESS` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -41,7 +41,7 @@ UNLOCK TABLES;
 
 LOCK TABLES `ROLE_NAVACCESS` WRITE;
 /*!40000 ALTER TABLE `ROLE_NAVACCESS` DISABLE KEYS */;
-INSERT INTO `ROLE_NAVACCESS` VALUES (1,1,1),(3,2,1),(5,3,1),(4,2,2),(6,3,2),(7,3,3),(8,3,4),(9,3,5),(10,3,6),(11,3,7),(12,1,8),(13,2,8),(14,3,8),(18,1,10),(19,2,10),(20,3,10),(21,1,11),(22,2,11),(23,3,11),(24,3,12),(25,2,12),(26,1,12),(27,2,13),(28,3,13),(29,1,14),(30,2,14),(31,3,14),(32,3,15);
+INSERT INTO `ROLE_NAVACCESS` VALUES (1,1,1),(3,2,1),(5,3,1),(4,2,2),(6,3,2),(7,3,3),(8,3,4),(9,3,5),(10,3,6),(11,3,7),(12,1,8),(13,2,8),(14,3,8),(18,1,10),(19,2,10),(20,3,10),(21,1,11),(22,2,11),(23,3,11),(24,3,12),(25,2,12),(26,1,12),(27,2,13),(28,3,13),(29,1,14),(30,2,14),(31,3,14),(32,3,15),(33,1,16),(34,2,16),(35,3,16);
 /*!40000 ALTER TABLE `ROLE_NAVACCESS` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -84,6 +84,16 @@ LOCK TABLES `TRANSLATION` WRITE;
 INSERT INTO `TRANSLATION` VALUES (3,1,2,'Bon retour'),(4,2,2,'Bon retour parmis nous'),(5,3,2,'Identifiant'),(6,4,2,'Mot de passe'),(7,5,2,'Nom'),(8,6,2,'Langage'),(9,7,2,'Role'),(10,8,2,'Peut accèder à l’application'),(11,9,2,'Sauvegarder'),(12,10,2,'Supprimer'),(13,11,2,'Editer'),(14,12,2,'Activation'),(15,13,2,'Activer'),(16,14,2,'Désactivation'),(17,15,2,'Suppression'),(18,16,2,'Suivant'),(19,17,2,'Précèdent'),(20,18,2,'Rechercher un nom d’utilisateur'),(21,19,2,'Vos informations'),(22,20,2,'Vos ligues favorites'),(23,21,2,'Vos informations'),(24,22,2,'Vos ligues favorites'),(25,23,2,'Vos clubs favoris'),(26,24,2,'Résultat de la recherche'),(27,25,2,'Trouvez ci-dessous les résultats de la recherche, cliquez sur retour si vous souhaitez retournez à l’écran précèdent'),(28,26,2,'Aucun résultat n’a été trouvé pour votre recherche, réessayez avec une autre formulation'),(29,27,2,'Vos ligues favorites'),(30,28,2,'Trouvez ci-dessous vos ligues favorites'),(31,29,2,'Vous n’avez pas de ligues dans vos favoris pour le moment, vous pouvez en ajoutez en utilisant la barre de recherche à droite'),(32,30,2,'Rechercher une ligue'),(33,31,2,'Si vous souhaitez ajouter ou supprimer une ligue de vos favoris, utilisez la barre de recherche ci-dessous'),(34,32,2,'Résultat de la recherche'),(35,33,2,'Aucun résultat n’a été trouvé pour votre recherche, réessayez avec une autre formulation'),(36,34,2,'Vos clubs favoris'),(37,35,2,'Trouvez ci-dessous vos clubs favoris'),(38,36,2,'Vous n’avez pas de clubs dans vos favoris pour le moment, vous pouvez en ajoutez en utilisant la barre de recherche à droite'),(39,37,2,'Rechercher un club'),(40,38,2,'Tapez le nom du club que vous souhaitez rechercher'),(41,47,2,'Vos clubs favoris'),(42,49,2,'Vos informations'),(43,50,2,'après temps additionnel'),(44,51,2,'sur pénalties'),(45,52,2,'Commence dans'),(46,53,2,'minutes'),(47,54,2,'heures'),(48,55,2,'et'),(49,56,2,'Résultat non connu pour ce match'),(50,57,2,'Pas de matchs disponibles pour ce jour'),(51,58,2,'Les matchs d’hier ne sont pas disponibles'),(52,59,2,'Les matchs de demain ne sont pas disponibles'),(53,60,2,'Pas de matchs trouvés pour ce jour selon les critères que vous avez choisi'),(54,61,2,'Ajoutez des clubs ou des ligues dans vos favoris pour potentiellement voir plus de résultats de recherche'),(55,62,2,'Seulement les favoris'),(56,63,2,'Tous les matchs'),(57,64,2,'Matchs de demain'),(58,65,2,'Matchs d’hier'),(59,66,2,'Matchs d’aujourd’hui'),(60,67,2,'Matchs'),(61,68,2,'Matchs du jour'),(62,69,2,'Tableau des scores'),(63,70,2,'Mes paris'),(64,71,2,'Administration'),(65,72,2,'Matchs'),(66,73,2,'Gestion des utilisateurs'),(67,74,2,'Retour en arrière'),(68,75,2,'voir plus'),(69,76,2,'Dernière mise à jour le'),(70,77,2,'Rechercher une ligue'),(71,78,2,'Chercher un club'),(72,80,2,'Utilisez le champ ci-dessous pour choisir un bookmaker pour l\'application :'),(73,81,2,'Sur le fil'),(74,83,2,'Seulement les paris'),(75,82,2,'Favoris et paris'),(76,84,2,'Seulement les paris potentiels');
 /*!40000 ALTER TABLE `TRANSLATION` ENABLE KEYS */;
 UNLOCK TABLES;
+
+--
+-- Dumping data for table `RESULT`
+--
+
+LOCK TABLES `RESULT` WRITE;
+/*!40000 ALTER TABLE `RESULT` DISABLE KEYS */;
+INSERT INTO `RESULT` VALUES (1,'Win'),(2,'Draw'),(3,'Loss');
+/*!40000 ALTER TABLE `RESULT` ENABLE KEYS */;
+UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
@@ -94,4 +104,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2022-06-18 23:15:01
+-- Dump completed on 2022-06-25 17:35:26

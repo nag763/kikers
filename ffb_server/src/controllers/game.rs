@@ -2,10 +2,10 @@ use crate::error::ApplicationError;
 use crate::uri_builder::{MessageType, UriBuilder};
 use actix_web::http::Uri;
 use actix_web::{post, HttpRequest, HttpResponse};
-use ffb_structs::{game, bet, bet::Bet};
+use ffb_structs::{game, bet, bet::GameResult};
 
 #[derive(serde::Deserialize, validator::Validate)]
-pub struct ChangeGameBetStatus {
+pub struct ChangeGameGameResultStatus {
     id: u32,
     value: bool,
 }
@@ -13,7 +13,7 @@ pub struct ChangeGameBetStatus {
 #[post("/games/update/status")]
 pub async fn update_game_status(
     req: HttpRequest,
-    game_status: actix_web_validator::Form<ChangeGameBetStatus>,
+    game_status: actix_web_validator::Form<ChangeGameGameResultStatus>,
 ) -> Result<HttpResponse, ApplicationError> {
     let result: bool = game::Entity::change_is_bet_status(game_status.id, game_status.value)
         .await?
@@ -39,17 +39,17 @@ pub async fn update_game_status(
 }
 
 #[derive(serde::Deserialize, validator::Validate)]
-pub struct BetOnGameForm {
+pub struct GameResultOnGameForm {
     user_id: u32,
     fixture_id: u32,
-    bet: Bet,
+    bet: GameResult,
     stake: f32,
 }
 
 #[post("/games/bet")]
 pub async fn bet_on_game(
     req: HttpRequest,
-    bet_form: actix_web_validator::Form<BetOnGameForm>,
+    bet_form: actix_web_validator::Form<GameResultOnGameForm>,
 ) -> Result<HttpResponse, ApplicationError> {
     bet::Entity::upsert_bet(bet_form.user_id, bet_form.fixture_id, bet_form.bet, bet_form.stake).await?;
     let referer: &str = req

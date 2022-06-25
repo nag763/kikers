@@ -77,6 +77,12 @@ pub struct Bet {
 }
 
 #[derive(Debug, Clone, serde::Deserialize, serde::Serialize)]
+pub struct Better {
+    pub user_id: u32,
+    pub game_result: crate::bet::GameResult
+}
+
+#[derive(Debug, Clone, serde::Deserialize, serde::Serialize)]
 pub struct Odds {
     pub home: f32,
     pub draw: f32,

@@ -1,4 +1,4 @@
-use crate::common_api_structs::{Fixture, Goals, Odds, Score, Teams};
+use crate::common_api_structs::{Fixture, Goals, Odds, Score, Teams, Better};
 use crate::database::Database;
 use crate::error::ApplicationError;
 use crate::league::Model as League;
@@ -14,6 +14,8 @@ pub struct Model {
     pub is_bet: Option<bool>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub odds: Option<Odds>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub betters: Option<Vec<Better>>,
     #[serde(rename = "localLeagueLogo", skip_serializing_if = "Option::is_none")]
     pub league_local_logo: Option<String>,
     #[serde(rename = "localHomeLogo", skip_serializing_if = "Option::is_none")]
@@ -31,7 +33,7 @@ pub struct Entity;
 
 impl Entity {
     pub async fn store(date: &str, value: &str) -> Result<(), ApplicationError> {
-        let database = Database::acquire_mongo_connection().await.unwrap();
+        let database = Database::acquire_mongo_connection().await?;
         let models: Vec<Model> = serde_json::from_str(value)?;
         let update_options = mongodb::options::UpdateOptions::builder()
             .upsert(true)

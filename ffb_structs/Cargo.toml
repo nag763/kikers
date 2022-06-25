@@ -7,7 +7,7 @@ edition = "2021"
 
 [dependencies]
 serde = { version = "1.0.136", features = ["derive"] }
-sqlx = { version = "^0.5", features = [ "runtime-async-std-native-tls" , "mysql"] }
+sqlx = { version = "0.6", features = [ "runtime-async-std-native-tls" , "mysql"] }
 lazy_static = "1.4.0"
 dotenv = "0.15.0"
 redis = "0.21.5"

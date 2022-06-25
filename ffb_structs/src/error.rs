@@ -10,6 +10,7 @@ pub enum ApplicationError {
     SerialError,
     NoTokenStored,
     ParseError(String),
+    FormOutdated,
 }
 
 impl fmt::Display for ApplicationError {
@@ -23,7 +24,8 @@ impl fmt::Display for ApplicationError {
             Self::TranslationError(label_name, locale_id) => format!("A translatione error happened : the label {} has been request for locale {} but this mapping doesn't exist.", label_name, locale_id),
             Self::SerialError => "A serial error happened".into(),
             Self::NoTokenStored => "There are no tokens stored to call the remote API endpoint".into(),
-            Self::ParseError(err)=> format!("A parse error happened : {}", err)
+            Self::ParseError(err)=> format!("A parse error happened : {}", err),
+            Self::FormOutdated => "The request that has been submitted is most likely using expired parameters and is thus not valid, please refresh your browser".into()
         };
         write!(f, "{}", reason)
     }

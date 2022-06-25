@@ -109,6 +109,9 @@
 					underline
 					{% endif %}
 					{% endif %}
+					{% if diff.num_seconds() < 0 %}
+					disabled	
+					{% endif %}
 						">{{odds.home}}</button>
 				</form>
 		</td>
@@ -124,6 +127,9 @@
 					underline
 					{% endif %}
 					{% endif %}
+					{% if diff.num_seconds() < 0 %}
+					disabled	
+					{% endif %}
 					text-center">{{odds.draw}}</button>
 				</form>
 		</td>
@@ -138,6 +144,9 @@
 					{% if ffb_structs::bet::GameResult::Loss.eq(user_bet) %}
 					underline
 					{% endif %}
+					{% endif %}
+					{% if diff.num_seconds() < 0 %}
+					disabled	
 					{% endif %}
 					text-center">{{odds.away}}</button>
 				</form>

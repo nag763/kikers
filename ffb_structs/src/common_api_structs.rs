@@ -19,6 +19,7 @@ pub struct Fixture {
     pub id: u32,
     pub referee: Option<String>,
     pub timezone: String,
+    pub timestamp: f64,
     pub date: DateTime<Utc>,
     pub venue: Venue,
     pub status: Status,

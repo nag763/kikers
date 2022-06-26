@@ -7,7 +7,7 @@ use async_std::{
 use clap::{Parser, Subcommand};
 use dotenv::dotenv;
 use error::CliError;
-use ffb_structs::{api_token, bookmaker, club, game, info, info::Model as Info, league, odd, bet};
+use ffb_structs::{api_token, bet, bookmaker, club, game, info, info::Model as Info, league, odd};
 use scraper::{Html, Selector};
 use std::process::{ExitCode, Termination};
 use url::Url;
@@ -104,7 +104,7 @@ async fn run_main() -> Result<(), CliError> {
         Getter::Odds { day_diff } => fetch_odds(day_diff).await?,
         Getter::IndexOdds => odd::Entity::index().await?,
         Getter::News => fetch_news().await?,
-        Getter::ValidateBets => bet::Entity::validate_bets().await?
+        Getter::ValidateBets => bet::Entity::validate_bets().await?,
     }
     Ok(())
 }

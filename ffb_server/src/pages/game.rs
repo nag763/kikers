@@ -9,7 +9,7 @@ use actix_web::{get, web, HttpRequest, HttpResponse};
 
 use chrono::{DateTime, Utc};
 use ffb_structs::{
-    game::Entity as GameEntity, game::EntityBuilder as GameEntityBuilder, game::Model as Game, user
+    game::Entity as GameEntity, game::EntityBuilder as GameEntityBuilder, game::Model as Game, user,
 };
 
 #[derive(Template)]
@@ -72,7 +72,7 @@ pub async fn games(
             }
             match context_query.bets {
                 Some(v) if !v => builder.bets(false),
-                _ => builder.bets(true)
+                _ => builder.bets(true),
             };
             if let Some(potential_bets) = context_query.potential_bets {
                 builder.potential_bets(potential_bets);

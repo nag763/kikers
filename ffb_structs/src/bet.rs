@@ -1,13 +1,12 @@
 use crate::database::Database;
 use crate::error::ApplicationError;
-use crate::transaction_result::TransactionResult;
-use crate::game::Model as Game;
 use crate::game;
-use serde::{Deserialize, Serialize};
-use mongodb::bson::doc;
-use chrono::{Utc, DateTime};
+use crate::game::Model as Game;
+use crate::transaction_result::TransactionResult;
+use chrono::{DateTime, Utc};
 use futures::TryStreamExt;
-
+use mongodb::bson::doc;
+use serde::{Deserialize, Serialize};
 
 #[derive(Copy, Clone, Debug, PartialEq, Serialize, Deserialize, Eq, Hash, sqlx::Type)]
 #[repr(u32)]
@@ -29,7 +28,6 @@ pub struct Model {
 pub struct Entity;
 
 impl Entity {
-
     pub async fn validate_bets() -> Result<(), ApplicationError> {
         let database = Database::acquire_mongo_connection().await?;
         let mut conn = Database::acquire_sql_connection().await?;
@@ -46,7 +44,7 @@ impl Entity {
                     let result: GameResult = match home - away {
                         v if 0 < v => GameResult::Win,
                         v if v < 0 => GameResult::Loss,
-                        _ => GameResult::Draw
+                        _ => GameResult::Draw,
                     };
                     sqlx::query("UPDATE USER_BET SET outcome=IF(result_id=?, stake*100, 0) WHERE fixture_id=?")
                         .bind(result)
@@ -55,8 +53,12 @@ impl Entity {
                         .await?;
                     database
                         .collection::<Game>("fixture")
-                        .update_one(doc!{"_id": game_id}, doc!{"$set": {"processed_as": bson::to_bson(&result)?}},None).await?;
-
+                        .update_one(
+                            doc! {"_id": game_id},
+                            doc! {"$set": {"processed_as": bson::to_bson(&result)?}},
+                            None,
+                        )
+                        .await?;
                 }
             }
         }

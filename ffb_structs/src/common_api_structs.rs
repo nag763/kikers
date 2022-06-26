@@ -11,10 +11,10 @@ pub struct Venue {
 pub enum ShortStatus {
     TBD,
     NS,
-    #[serde(rename = "1H")] 
+    #[serde(rename = "1H")]
     FH,
     HT,
-    #[serde(rename = "2H")] 
+    #[serde(rename = "2H")]
     SH,
     ET,
     P,
@@ -29,7 +29,7 @@ pub enum ShortStatus {
     ABD,
     AWD,
     WO,
-    LIVE
+    LIVE,
 }
 
 #[derive(Debug, Clone, serde::Deserialize, serde::Serialize)]
@@ -101,7 +101,7 @@ pub struct Bet {
 #[derive(Debug, Clone, serde::Deserialize, serde::Serialize, Hash, PartialEq, Eq)]
 pub struct Better {
     pub user_id: u32,
-    pub game_result: crate::bet::GameResult
+    pub game_result: crate::bet::GameResult,
 }
 
 #[derive(Debug, Clone, serde::Deserialize, serde::Serialize)]

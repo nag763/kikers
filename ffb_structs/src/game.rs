@@ -1,5 +1,5 @@
-use crate::common_api_structs::{Fixture, Goals, Odds, Score, Teams, Better, ShortStatus};
 use crate::bet::GameResult;
+use crate::common_api_structs::{Better, Fixture, Goals, Odds, Score, ShortStatus, Teams};
 use crate::database::Database;
 use crate::error::ApplicationError;
 use crate::league::Model as League;
@@ -7,7 +7,7 @@ use crate::transaction_result::TransactionResult;
 use bson::oid::ObjectId;
 use futures::TryStreamExt;
 use mongodb::bson::doc;
-use std::collections::{HashSet, hash_map::DefaultHasher};
+use std::collections::{hash_map::DefaultHasher, HashSet};
 use std::hash::{Hash, Hasher};
 
 #[derive(serde::Deserialize, serde::Serialize, Clone, Debug)]
@@ -28,8 +28,8 @@ pub struct Model {
     pub away_local_logo: Option<String>,
     #[serde(rename = "localAwayLogo", skip_serializing_if = "Option::is_none")]
     pub result: Option<GameResult>,
-    #[serde(rename="_id")]
-    pub id : ObjectId,
+    #[serde(rename = "_id")]
+    pub id: ObjectId,
     pub fixture: Fixture,
     pub league: League,
     pub teams: Teams,
@@ -38,25 +38,27 @@ pub struct Model {
 }
 
 impl Model {
-
     pub fn is_started(&self) -> bool {
         match self.fixture.status.short {
             ShortStatus::NS | ShortStatus::TBD => false,
-            _ => true
+            _ => true,
         }
     }
 
     pub fn is_finished(&self) -> bool {
         match self.fixture.status.short {
             ShortStatus::FT | ShortStatus::AET | ShortStatus::PEN => true,
-            _ => false
+            _ => false,
         }
     }
 
-
     pub fn get_bet_for_user(&self, user_id: &u32) -> Option<GameResult> {
         if let Some(betters) = &self.betters {
-            let filtered_bets : Vec<GameResult> = betters.iter().filter(|bet| &bet.user_id == user_id).map(|bet| bet.game_result).collect();
+            let filtered_bets: Vec<GameResult> = betters
+                .iter()
+                .filter(|bet| &bet.user_id == user_id)
+                .map(|bet| bet.game_result)
+                .collect();
             if let Some(game_result) = filtered_bets.get(0) {
                 Some(*game_result)
             } else {
@@ -66,7 +68,6 @@ impl Model {
             None
         }
     }
-
 }
 
 pub struct Entity;

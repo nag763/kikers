@@ -17,7 +17,7 @@ use crate::controllers::admin::admin_bookmakers as c_admin_bookmakers;
 use crate::controllers::auth::{login, logout, register_user};
 use crate::controllers::club::update_club_status;
 use crate::controllers::cookies::cookies_approved;
-use crate::controllers::game::{update_game_status, bet_on_game};
+use crate::controllers::game::{bet_on_game, update_game_status};
 use crate::controllers::user::{
     user_activation, user_change_leagues, user_deletion, user_modification, user_search,
     user_self_modification,

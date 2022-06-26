@@ -47,6 +47,18 @@
 	{% endif %}
 	{% endif %}
 	{% endif %}
+
+	{% if let Some(processed_as) = game.processed_as %}
+	{% if let Some(user_bet) = game.get_bet_for_user(user.id) %} 
+	<span>
+	{% if processed_as == user_bet %}
+	&#9989;
+	{% else %}
+	&#10060;
+	{%endif%}
+	</span>
+	{% endif %}
+	{% endif %}
 	</div>
     </div>
     <div class="flex flex-col items-center pb-5">

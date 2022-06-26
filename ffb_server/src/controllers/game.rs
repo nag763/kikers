@@ -2,7 +2,7 @@ use crate::error::ApplicationError;
 use crate::uri_builder::{MessageType, UriBuilder};
 use actix_web::http::Uri;
 use actix_web::{post, HttpRequest, HttpResponse};
-use ffb_structs::{game, bet, bet::GameResult};
+use ffb_structs::{bet, bet::GameResult, game};
 
 #[derive(serde::Deserialize, validator::Validate)]
 pub struct ChangeGameGameResultStatus {
@@ -51,7 +51,13 @@ pub async fn bet_on_game(
     req: HttpRequest,
     bet_form: actix_web_validator::Form<GameResultOnGameForm>,
 ) -> Result<HttpResponse, ApplicationError> {
-    bet::Entity::upsert_bet(bet_form.user_id, bet_form.fixture_id, bet_form.bet, bet_form.stake).await?;
+    bet::Entity::upsert_bet(
+        bet_form.user_id,
+        bet_form.fixture_id,
+        bet_form.bet,
+        bet_form.stake,
+    )
+    .await?;
     let referer: &str = req
         .headers()
         .get("referer")

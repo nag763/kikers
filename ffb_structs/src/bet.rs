@@ -38,9 +38,8 @@ impl Entity {
             .try_collect()
             .await?;
         for game in games {
-            if let Some(score) = game.score.fulltime {
+            if let (Some(game_id), Some(score)) = (game.id, game.score.fulltime) {
                 if let (Some(home), Some(away)) = (score.home, score.away) {
-                    let game_id = game.id;
                     let result: GameResult = match home - away {
                         v if 0 < v => GameResult::Win,
                         v if v < 0 => GameResult::Loss,

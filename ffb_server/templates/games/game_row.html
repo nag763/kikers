@@ -108,11 +108,11 @@
 					{% if ffb_structs::bet::GameResult::Win.eq(user_bet) %}
 					underline
 					{% endif %}
-					{% endif %}
+					{% endif %}"
 					{% if diff.num_seconds() < 0 %}
 					disabled	
 					{% endif %}
-						">{{odds.home}}</button>
+					>{{odds.home}}</button>
 				</form>
 		</td>
 		<td class="w-1/3">
@@ -127,10 +127,11 @@
 					underline
 					{% endif %}
 					{% endif %}
+					text-center"
 					{% if diff.num_seconds() < 0 %}
 					disabled	
 					{% endif %}
-					text-center">{{odds.draw}}</button>
+					>{{odds.draw}}</button>
 				</form>
 		</td>
 		<td class="w-1/3">
@@ -145,10 +146,11 @@
 					underline
 					{% endif %}
 					{% endif %}
+					text-center"
 					{% if diff.num_seconds() < 0 %}
 					disabled	
 					{% endif %}
-					text-center">{{odds.away}}</button>
+					>{{odds.away}}</button>
 				</form>
 		</td>
 	{% endif %}

@@ -50,7 +50,7 @@
 
 	{% if let Some(processed_as) = game.processed_as %}
 	{% if let Some(user_bet) = game.get_bet_for_user(user.id) %} 
-	<span>
+	<span title="{{game.fixture.id}}">
 	{% if processed_as == user_bet %}
 	&#9989;
 	{% else %}

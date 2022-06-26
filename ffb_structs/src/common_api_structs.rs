@@ -7,10 +7,35 @@ pub struct Venue {
     pub city: Option<String>,
 }
 
+#[derive(Debug, Clone, serde::Deserialize, serde::Serialize, Display)]
+pub enum ShortStatus {
+    TBD,
+    NS,
+    #[serde(rename = "1H")] 
+    FH,
+    HT,
+    #[serde(rename = "2H")] 
+    SH,
+    ET,
+    P,
+    FT,
+    AET,
+    PEN,
+    BT,
+    SUSP,
+    INT,
+    PST,
+    CANC,
+    ABD,
+    AWD,
+    WO,
+    LIVE
+}
+
 #[derive(Debug, Clone, serde::Deserialize, serde::Serialize)]
 pub struct Status {
     pub long: String,
-    pub short: String,
+    pub short: ShortStatus,
     pub elapsed: Option<u32>,
 }
 
@@ -42,19 +67,15 @@ pub struct Teams {
 
 #[derive(Debug, Clone, serde::Deserialize, serde::Serialize)]
 pub struct Goals {
-    pub home: Option<u8>,
-    pub away: Option<u8>,
-}
-
-#[derive(Debug, Clone, serde::Deserialize, serde::Serialize)]
-pub struct Penalty {
-    pub home: Option<u8>,
-    pub away: Option<u8>,
+    pub home: Option<i16>,
+    pub away: Option<i16>,
 }
 
 #[derive(Debug, Clone, serde::Deserialize, serde::Serialize)]
 pub struct Score {
-    pub penalty: Option<Penalty>,
+    pub fulltime: Option<Goals>,
+    pub extratime: Option<Goals>,
+    pub penalty: Option<Goals>,
 }
 
 #[derive(Debug, Clone, serde::Deserialize, serde::Serialize)]

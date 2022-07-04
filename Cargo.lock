@@ -1222,6 +1222,7 @@ name = "ffb_structs"
 version = "0.1.0"
 dependencies = [
  "bson",
+ "cfg-if",
  "chrono",
  "derive_more",
  "dotenv",

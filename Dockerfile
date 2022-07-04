@@ -1,4 +1,5 @@
-FROM rust:1.61
+ARG FEATURES=default
+FROM rust:1.62
 
 EXPOSE 8080
 
@@ -14,6 +15,6 @@ WORKDIR /usr/src/friendly-football-bets/ffb_server
 
 RUN bash install_styles.sh
 
-RUN cargo b --release
+RUN cargo b --release --features $FEATURES
 
 CMD cargo r --bin ffb_server --release

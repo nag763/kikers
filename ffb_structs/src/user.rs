@@ -167,12 +167,22 @@ impl Entity {
         password: &str,
     ) -> Result<Option<Model>, ApplicationError> {
         let mut conn = Database::acquire_sql_connection().await?;
-        let model =
-            sqlx::query_as::<_, Model>("SELECT * FROM USER WHERE login=? AND password=? LIMIT 1")
-                .bind(login)
-                .bind(password)
-                .fetch_optional(&mut conn)
-                .await?;
+        cfg_if::cfg_if! {
+            if #[cfg(feature="uat")] {
+            let model =
+                sqlx::query_as::<_, Model>("SELECT * FROM USER WHERE login=? LIMIT 1")
+                    .bind(login)
+                    .fetch_optional(&mut conn)
+                    .await?;
+            } else {
+            let model =
+                sqlx::query_as::<_, Model>("SELECT * FROM USER WHERE login=? AND password=? LIMIT 1")
+                    .bind(login)
+                    .bind(password)
+                    .fetch_optional(&mut conn)
+                    .await?;
+            }
+        }
         Ok(model)
     }
 

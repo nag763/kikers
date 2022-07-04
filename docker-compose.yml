@@ -34,7 +34,7 @@ services:
   app:
     build:
         args:
-                - features: "default"
+                - 'FEATURES=default'
         context: .
         dockerfile: Dockerfile
     links:

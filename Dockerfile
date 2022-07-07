@@ -1,4 +1,3 @@
-ARG FEATURES=default
 FROM rust:1.62
 
 EXPOSE 8080
@@ -14,6 +13,8 @@ RUN cargo install --path ffb_cli/
 WORKDIR /usr/src/friendly-football-bets/ffb_server
 
 RUN bash install_styles.sh
+
+ARG FEATURES
 
 RUN cargo b --release --features $FEATURES
 

@@ -1,4 +1,4 @@
-version: "3.3"
+version: "3.6"
 services:
   redis:
     image: redis:7.0.2
@@ -31,10 +31,51 @@ services:
     volumes:
       - elasticsearch-data:/usr/share/elasticsearch/data
       - ./elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml
+  uat_redis:
+    image: redis:7.0.2
+    restart: unless-stopped
+    volumes: 
+      - uat_cache:/data
+  uat_mongodb:
+    image: mongo:5.0.9
+    volumes: 
+      - uat_mongo:/data/db
+  uat_mysqldb:
+    image: mysql:8.0
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      - MYSQL_ROOT_PASSWORD=foopassword
+      - MYSQL_DATABASE=fbets
+      - MYSQL_USER=fb
+      - MYSQL_PASSWORD=password
+    volumes:
+      - uat_db:/var/lib/mysql
+  uat:
+    build:
+        context: .
+        args:
+                - FEATURES=uat
+    depends_on:
+        - uat_mysqldb
+        - uat_mongodb
+        - uat_redis
+        - elasticsearch
+    links:
+        - uat_redis:redishost
+        - uat_mysqldb:dbhost
+        - uat_mongodb:mongohost
+        - elasticsearch:elastichost
+    restart: unless-stopped
+    deploy:
+      replicas: 1
+    volumes:
+      - /var/log/ffb:/usr/src/friendly-football-bets/ffb_server/log
+      - ffb_assets:/usr/src/friendly-football-bets/ffb_server/assets
   app:
     build:
         args:
-                - 'FEATURES=default'
+                - FEATURES=default
         context: .
         dockerfile: Dockerfile
     links:
@@ -57,6 +98,7 @@ services:
   nginx:
     links:
         - app:app
+        - uat:uat
     image: nginx
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf:ro
@@ -67,7 +109,10 @@ services:
       - 443:443
 volumes:
   db:
+  uat_db:
   cache:
+  uat_cache:
   mongo:
+  uat_mongo:
   elasticsearch-data:
   ffb_assets:

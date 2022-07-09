@@ -26,6 +26,7 @@ pub mod locale;
 pub mod navaccess;
 pub mod odd;
 pub mod role;
+pub mod season;
 pub mod token;
 pub mod transaction_result;
 pub(crate) mod translation;

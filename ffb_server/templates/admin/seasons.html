@@ -1,0 +1,50 @@
+{# 30003 #}
+
+{% extends "admin/admin.html" %}
+{%block rcontent %}
+{% if let Some(user) = user %}
+<div class="grid grid-rows-2 lg:grid-rows-none lg:grid-cols-2 gap-2 lg:gap-4 divide-y lg:divide-y-0">
+	<div>
+	<h2 class="text-gray-800 text-xl font-semibold mb-15 dark:text-white">{{app_data.translate("M30003_HEADER_1", user.locale_id)?}}</h2>
+		<p>{{app_data.translate("M30003_ADD_SZN_INFO", user.locale_id)?}}</p>
+		<form method="post" class="mt-3" action="/admin/season/add">
+      		<label for="name">
+			{{app_data.translate("FORM_NAME", user.locale_id)?}}
+      		</label>
+		<input name="name" placeholder="{{app_data.translate("M30003_ADD_LEAGUE_PH", user.locale_id)?}}" minlength="3">
+    <div class="mt-5 flex flex-row-reverse">
+	    <button class="h-10 px-5 m-2 text-white transition-colors duration-150 bg-blue-700 rounded-lg focus:shadow-outline hover:bg-blue-800" type="submit">
+			{{app_data.translate("FORM_SAVE", user.locale_id)?}}
+	    </button>
+	</div>
+		</form>
+	</div>
+	<div>
+		<h2 class="text-gray-800 text-xl font-semibold mb-15 dark:text-white">{{app_data.translate("M30003_HEADER_2", user.locale_id)?}}</h2>
+			<p>{{app_data.translate("M30003_PICK_A_SZN", user.locale_id)?}}</p>
+			<p class="mb-3">{{app_data.translate("M30003_INFO", user.locale_id)?}}</p>
+<form method="post" class="mt-3" action="/admin/season/set_main">
+<select name="id">
+{% for season in data %}
+<option class="line-through" value="{{season.id}}"
+	{% if season.is_main %}
+	selected>* 
+	{%else%}
+	>
+	{%endif%}
+	{{season.name}}</option>
+{% endfor %}
+</select>
+    <div class="mt-5 flex flex-row-reverse">
+	    <button class="h-10 px-5 m-2 text-white transition-colors duration-150 bg-blue-700 rounded-lg focus:shadow-outline hover:bg-blue-800" type="submit">
+			{{app_data.translate("M30003_SET_AS_MAIN", user.locale_id)?}}
+	    </button>
+	    <button class="h-10 px-5 m-2 text-white transition-colors duration-150 bg-red-700 rounded-lg focus:shadow-outline hover:bg-red-800" type="submit" formaction="/admin/season/close">
+			{{app_data.translate("FORM_CLOSE", user.locale_id)?}}
+	    </button>
+    </div>
+</form>
+	</div>
+</div>
+{% endif %}
+{% endblock %}

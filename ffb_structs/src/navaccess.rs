@@ -19,24 +19,25 @@ pub struct Entity;
 impl Entity {
     pub async fn get_navaccess_for_role_id(id: u32) -> Result<Vec<Model>, ApplicationError> {
         let mut conn = Database::acquire_sql_connection().await?;
-        let models : Vec<Model> = sqlx::query_as("SELECT * FROM NAVACCESS na INNER JOIN ROLE_NAVACCESS rna ON na.id = rna.navaccess_id WHERE rna.role_id=? ORDER BY na.position")
-            .bind(&id)
-            .fetch_all(&mut conn)
-            .await?;
+        let query: &str;
+        cfg_if::cfg_if! {
+            if #[cfg(feature="uat")] {
+                query = "SELECT na.id, na.label, na.logo, CONCAT('/uat', na.href) as 'href', na.position FROM NAVACCESS na INNER JOIN ROLE_NAVACCESS rna ON na.id = rna.navaccess_id WHERE rna.role_id=? ORDER BY na.position";
+            } else {
+                query = "SELECT * FROM NAVACCESS na INNER JOIN ROLE_NAVACCESS rna ON na.id = rna.navaccess_id WHERE rna.role_id=? ORDER BY na.position"
+            }
+        }
+        let models: Vec<Model> = sqlx::query_as(query).bind(&id).fetch_all(&mut conn).await?;
         Ok(models)
     }
 
     pub async fn get_role_navaccess_mapping() -> Result<HashMap<Role, Vec<Model>>, ApplicationError>
     {
         let roles: Vec<Role> = role::Entity::get_roles().await?;
-        let mut conn = Database::acquire_sql_connection().await?;
         let mut role_navaccess = HashMap::new();
 
         for role in roles {
-            let models : Vec<Model> = sqlx::query_as("SELECT * FROM NAVACCESS na INNER JOIN ROLE_NAVACCESS rna ON na.id = rna.navaccess_id WHERE rna.role_id=? ORDER BY na.position")
-                .bind(&role.id)
-                .fetch_all(&mut conn)
-                .await?;
+            let models = Self::get_navaccess_for_role_id(role.id).await?;
             role_navaccess.insert(role, models);
         }
         Ok(role_navaccess)

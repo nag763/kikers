@@ -13,7 +13,10 @@ mod pages;
 mod uri_builder;
 
 use crate::application_data::ApplicationData;
-use crate::controllers::admin::admin_bookmakers as c_admin_bookmakers;
+use crate::controllers::admin::{
+    admin_bookmakers as c_admin_bookmakers, admin_season_add, admin_season_close,
+    admin_season_set_main,
+};
 use crate::controllers::auth::{login, logout, register_user};
 use crate::controllers::club::update_club_status;
 use crate::controllers::cookies::cookies_approved;
@@ -27,7 +30,7 @@ use crate::middleware::cookie_approval::CookieChecker;
 use crate::middleware::ddos_limiter::DDosLimiter;
 use crate::middleware::protect_assets::AssetsProtector;
 use crate::middleware::role_checker::RoleChecker;
-use crate::pages::admin::{admin_bookmakers, admin_dashboard};
+use crate::pages::admin::{admin_bookmakers, admin_dashboard, admin_seasons};
 use crate::pages::game::games;
 use crate::pages::unauth::{cookies, index, signup};
 use crate::pages::user::{user_club, user_leagues, user_profile};
@@ -112,12 +115,16 @@ async fn main() -> std::io::Result<()> {
                             .service(user_self_modification)
                             .service(admin_dashboard)
                             .service(admin_bookmakers)
+                            .service(admin_seasons)
                             .service(user_search)
                             .service(user_activation)
                             .service(user_deletion)
                             .service(user_modification)
                             .service(update_club_status)
                             .service(c_admin_bookmakers)
+                            .service(admin_season_add)
+                            .service(admin_season_set_main)
+                            .service(admin_season_close)
                             .service(bet_on_game)
                     ),
             )

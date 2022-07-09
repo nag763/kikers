@@ -8,7 +8,10 @@ use crate::ApplicationData;
 use actix_web::web;
 use actix_web::{get, HttpRequest, HttpResponse};
 
-use ffb_structs::{bookmaker, bookmaker::Model as Bookmaker, user, user::Model as User};
+use ffb_structs::{
+    bookmaker, bookmaker::Model as Bookmaker, season, season::Model as Season, user,
+    user::Model as User,
+};
 
 #[derive(Template)]
 #[template(path = "admin/users.html")]
@@ -82,6 +85,38 @@ pub async fn admin_bookmakers(
         error: context_query.error.clone(),
         info: context_query.info.clone(),
         data: bookmakers,
+        app_data,
+    };
+    Ok(HttpResponse::Ok().body(index.render()?))
+}
+
+#[derive(Template)]
+#[template(path = "admin/seasons.html")]
+struct AdminSeasons {
+    title: String,
+    user: Option<JwtUser>,
+    error: Option<String>,
+    info: Option<String>,
+    data: Vec<Season>,
+    app_data: web::Data<ApplicationData>,
+}
+
+#[get("/admin/seasons")]
+pub async fn admin_seasons(
+    req: HttpRequest,
+    context_query: web::Query<ContextQuery>,
+    app_data: web::Data<ApplicationData>,
+) -> Result<HttpResponse, ApplicationError> {
+    let jwt_user: JwtUser = JwtUser::from_request(req)?;
+    let seasons: Vec<Season> = season::Entity::get_all_open().await?;
+    let index = AdminSeasons {
+        title: app_data
+            .translate("M30003_TITLE", &jwt_user.locale_id)?
+            .into(),
+        user: Some(jwt_user),
+        error: context_query.error.clone(),
+        info: context_query.info.clone(),
+        data: seasons,
         app_data,
     };
     Ok(HttpResponse::Ok().body(index.render()?))

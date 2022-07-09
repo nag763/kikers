@@ -5,7 +5,7 @@ edition = "2021"
 
 
 [features]
-default = []
+release = []
 uat = ["ffb_structs/uat"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html

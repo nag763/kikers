@@ -21,6 +21,7 @@ pub struct Model {
     pub user_id: u32,
     pub fixture_id: u32,
     pub result_id: GameResult,
+    pub season_id: u32,
     pub stake: f32,
     pub outcome: Option<u32>,
 }
@@ -33,7 +34,7 @@ impl Entity {
         let mut conn = Database::acquire_sql_connection().await?;
         let games: Vec<Game> = database
             .collection::<Game>("fixture")
-            .find(doc!{"processed_as" : null, "is_bet": true, "fixture.status.short" : {"$in": ["FT", "PEN", "AET"]}}, None)
+            .find(doc!{"processed_as" : null, "season_id": {"$ne": null}, "fixture.status.short" : {"$in": ["FT", "PEN", "AET"]}}, None)
             .await?
             .try_collect()
             .await?;
@@ -67,6 +68,7 @@ impl Entity {
     pub async fn upsert_bet(
         user_id: u32,
         fixture_id: u32,
+        season_id: u32,
         game_result: GameResult,
         stake: f32,
     ) -> Result<TransactionResult, ApplicationError> {
@@ -93,11 +95,12 @@ impl Entity {
         }
         let mut conn = Database::acquire_sql_connection().await?;
         let result = sqlx::query(
-            "INSERT INTO USER_BET(user_id, fixture_id, result_id, stake) VALUES(?,?,?,?) ON DUPLICATE KEY UPDATE result_id=?, stake=?",
+            "INSERT INTO USER_BET(user_id, fixture_id, result_id, season_id, stake) VALUES(?,?,?,?,?) ON DUPLICATE KEY UPDATE result_id=?, stake=?",
         )
         .bind(user_id)
         .bind(fixture_id)
         .bind(&game_result)
+        .bind(season_id)
         .bind(stake)
         .bind(&game_result)
         .bind(stake)

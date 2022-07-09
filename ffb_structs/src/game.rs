@@ -15,7 +15,7 @@ pub struct Model {
     #[serde(rename = "_id", skip_serializing_if = "Option::is_none")]
     pub id: Option<ObjectId>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub is_bet: Option<bool>,
+    pub season_id: Option<u32>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub processed_as: Option<GameResult>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -102,14 +102,14 @@ impl Entity {
 
     pub async fn change_is_bet_status(
         id: u32,
-        value: bool,
+        value: Option<u32>,
     ) -> Result<TransactionResult, ApplicationError> {
         let database = Database::acquire_mongo_connection().await.unwrap();
         let result = database
             .collection::<Model>("fixture")
             .update_one(
                 doc! {"fixture.id": id},
-                doc! {"$set":{"is_bet":value}},
+                doc! {"$set":{"season_id":value}},
                 None,
             )
             .await?;
@@ -219,7 +219,7 @@ impl EntityBuilder {
                 query_selector.push(doc! {"teams.away.id" : {"$in" : &clubs}});
             }
             if self.bets {
-                query_selector.push(doc! {"is_bet": true});
+                query_selector.push(doc! {"season_id": {"$ne": null}});
             }
             if self.potential_bets {
                 query_selector.push(doc! {"odds": {"$ne": null}});

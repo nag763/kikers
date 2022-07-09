@@ -7,7 +7,7 @@ use ffb_structs::{bet, bet::GameResult, game};
 #[derive(serde::Deserialize, validator::Validate)]
 pub struct ChangeGameGameResultStatus {
     id: u32,
-    value: bool,
+    value: Option<u32>,
 }
 
 #[post("/games/update/status")]
@@ -26,8 +26,8 @@ pub async fn update_game_status(
     let mut uri_builder: UriBuilder = UriBuilder::from_existing_uri(referer.parse::<Uri>()?);
     if result {
         let message = match game_status.value {
-            true => "The game has been added to the bets",
-            false => "The game has been dropped from the bets",
+            Some(_) => "The game has been added to the bets",
+            None => "The game has been dropped from the bets",
         };
         uri_builder.append_msg(MessageType::INFO, message);
     } else {
@@ -42,6 +42,7 @@ pub async fn update_game_status(
 pub struct GameResultOnGameForm {
     user_id: u32,
     fixture_id: u32,
+    season_id: u32,
     bet: GameResult,
     stake: f32,
 }
@@ -54,6 +55,7 @@ pub async fn bet_on_game(
     bet::Entity::upsert_bet(
         bet_form.user_id,
         bet_form.fixture_id,
+        bet_form.season_id,
         bet_form.bet,
         bet_form.stake,
     )

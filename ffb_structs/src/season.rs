@@ -31,6 +31,39 @@ impl Entity {
         Ok(models)
     }
 
+    pub async fn get_current_season_id() -> Result<u32, ApplicationError> {
+        let mut redis_conn = Database::acquire_redis_connection()?;
+        let cache_result: Option<u32> = redis::cmd("GETEX")
+            .arg("current_season_id")
+            .arg("EX")
+            .arg("300")
+            .query(&mut redis_conn)?;
+        if let Some(cache_result) = cache_result {
+            Ok(cache_result)
+        } else {
+            let mut conn = Database::acquire_sql_connection().await?;
+            let row: (u32,) =
+                sqlx::query_as("SELECT id FROM SEASON WHERE is_closed=0 AND is_main=1 LIMIT 1")
+                    .fetch_one(&mut conn)
+                    .await?;
+            redis::cmd("SET")
+                .arg("current_season_id")
+                .arg(row.0)
+                .arg("EX")
+                .arg("300")
+                .query(&mut redis_conn)?;
+            Ok(row.0)
+        }
+    }
+
+    fn clear_cache() -> Result<(), ApplicationError> {
+        let mut conn = Database::acquire_redis_connection()?;
+        redis::cmd("DEL")
+            .arg("current_season_id")
+            .query(&mut conn)?;
+        Ok(())
+    }
+
     pub async fn add_new(name: &str) -> Result<TransactionResult, ApplicationError> {
         let mut conn = Database::acquire_sql_connection().await?;
         let result = sqlx::query("INSERT INTO SEASON(name) VALUES (?)")
@@ -59,6 +92,7 @@ impl Entity {
             .bind(&id)
             .execute(&mut conn)
             .await?;
+        Self::clear_cache()?;
         Ok(())
     }
 }

@@ -28,7 +28,7 @@ CREATE TABLE `LABEL` (
   `default_translation` varchar(256) NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `name` (`name`)
-) ENGINE=InnoDB AUTO_INCREMENT=85 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=95 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -78,8 +78,9 @@ CREATE TABLE `NAVACCESS` (
   `href` varchar(32) NOT NULL,
   `position` int unsigned DEFAULT NULL,
   PRIMARY KEY (`id`),
+  UNIQUE KEY `href` (`href`),
   UNIQUE KEY `position` (`position`)
-) ENGINE=InnoDB AUTO_INCREMENT=17 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=21 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -128,7 +129,24 @@ CREATE TABLE `ROLE_NAVACCESS` (
   KEY `role_id` (`role_id`),
   CONSTRAINT `ROLE_NAVACCESS_ibfk_1` FOREIGN KEY (`navaccess_id`) REFERENCES `NAVACCESS` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `ROLE_NAVACCESS_ibfk_2` FOREIGN KEY (`role_id`) REFERENCES `ROLE` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=37 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=42 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `SEASON`
+--
+
+DROP TABLE IF EXISTS `SEASON`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `SEASON` (
+  `id` int unsigned NOT NULL AUTO_INCREMENT,
+  `name` varchar(32) NOT NULL,
+  `is_main` tinyint(1) NOT NULL DEFAULT '0',
+  `is_closed` tinyint(1) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `name` (`name`)
+) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -148,7 +166,7 @@ CREATE TABLE `TRANSLATION` (
   KEY `locale_id` (`locale_id`),
   CONSTRAINT `TRANSLATION_ibfk_1` FOREIGN KEY (`label_id`) REFERENCES `LABEL` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `TRANSLATION_ibfk_2` FOREIGN KEY (`locale_id`) REFERENCES `LOCALE` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=77 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=78 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -189,6 +207,7 @@ CREATE TABLE `USER_BET` (
   `user_id` int unsigned NOT NULL,
   `fixture_id` int unsigned NOT NULL,
   `result_id` int unsigned NOT NULL,
+  `season_id` int unsigned NOT NULL,
   `stake` float unsigned NOT NULL,
   `outcome` int unsigned DEFAULT NULL,
   `datetime` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -243,4 +262,4 @@ CREATE TABLE `USER_LEAGUE` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2022-06-25 20:45:33
+-- Dump completed on 2022-07-09 19:15:12

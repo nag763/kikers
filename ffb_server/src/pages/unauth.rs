@@ -9,7 +9,7 @@ use chrono::{DateTime, Utc};
 use ffb_auth::JwtUser;
 use ffb_structs::{
     game::Entity as GameEntity, game::EntityBuilder as GameEntityBuilder, game::Model as Game,
-    info, info::Model as Info, user,
+    info, info::Model as Info, season, user,
 };
 
 #[derive(Template)]
@@ -17,6 +17,7 @@ use ffb_structs::{
 struct GamesRowTemplate {
     games: Vec<Game>,
     user_role: u32,
+    current_season_id: u32,
     now: DateTime<Utc>,
     fetched_date: String,
     title: String,
@@ -44,6 +45,7 @@ pub async fn index(
     app_data: web::Data<ApplicationData>,
 ) -> Result<HttpResponse, ApplicationError> {
     let index: Index;
+    let current_season_id: u32 = season::Entity::get_current_season_id().await?;
     match req.cookie(app_data.get_jwt_path()) {
         Some(token) => {
             let jwt_user = JwtUser::from_token(token.value())?;
@@ -65,6 +67,7 @@ pub async fn index(
                     games,
                     user_role: jwt_user.role,
                     now,
+                    current_season_id,
                     app_data: app_data.clone(),
                     fetched_on: GameEntity::get_last_fetched_timestamp_for_date(
                         &now_as_simple_date,

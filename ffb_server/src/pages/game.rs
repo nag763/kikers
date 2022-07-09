@@ -9,7 +9,8 @@ use actix_web::{get, web, HttpRequest, HttpResponse};
 
 use chrono::{DateTime, Utc};
 use ffb_structs::{
-    game::Entity as GameEntity, game::EntityBuilder as GameEntityBuilder, game::Model as Game, user,
+    game::Entity as GameEntity, game::EntityBuilder as GameEntityBuilder, game::Model as Game,
+    season, user,
 };
 
 #[derive(Template)]
@@ -21,6 +22,7 @@ struct GamesRowTemplate {
     fetched_date: String,
     title: String,
     fetched_on: Option<String>,
+    current_season_id: u32,
     app_data: web::Data<ApplicationData>,
     user: Option<JwtUser>,
 }
@@ -59,6 +61,7 @@ pub async fn games(
 ) -> Result<HttpResponse, ApplicationError> {
     let jwt_user: JwtUser = JwtUser::from_request(req)?;
     let now: DateTime<Utc> = Utc::now();
+    let current_season_id: u32 = season::Entity::get_current_season_id().await?;
     let mut builder: GameEntityBuilder = GameEntityBuilder::build();
     match context_query.all {
         Some(v) if v => {}
@@ -91,6 +94,7 @@ pub async fn games(
                 title: app_data
                     .translate("M10001_GAME_OF_DAY", &jwt_user.locale_id)?
                     .into(),
+                current_season_id,
                 app_data: app_data.clone(),
                 user: Some(jwt_user.clone()),
             }),
@@ -130,6 +134,7 @@ pub async fn games(
                 now_as_simple_date.as_str(),
             )?,
             now,
+            current_season_id,
             fetched_date: now_as_simple_date,
             title: app_data
                 .translate("M10001_TODAY_TITLE", &jwt_user.locale_id)?
@@ -151,6 +156,7 @@ pub async fn games(
             games: yesterday_three_games,
             now,
             fetched_date: yesterday_as_simple_date.clone(),
+            current_season_id,
             title: app_data
                 .translate("M10001_YESTERDAY_TITLE", &jwt_user.locale_id)?
                 .into(),
@@ -181,6 +187,7 @@ pub async fn games(
             )?,
             user_role: jwt_user.role,
             app_data: app_data.clone(),
+            current_season_id,
             user: Some(jwt_user.clone()),
         }),
         true => None,

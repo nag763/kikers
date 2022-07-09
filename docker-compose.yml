@@ -104,6 +104,7 @@ services:
       - ./nginx.conf:/etc/nginx/nginx.conf:ro
       - /var/log/nginx:/var/log/nginx
       - /etc/letsencrypt:/etc/letsencrypt:ro
+      - ./uat_certs:/etc/letsencrypt/uat_certs:ro
     ports:
       - 80:80
       - 443:443

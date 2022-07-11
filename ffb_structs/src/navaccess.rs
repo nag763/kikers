@@ -19,15 +19,7 @@ pub struct Entity;
 impl Entity {
     pub async fn get_navaccess_for_role_id(id: u32) -> Result<Vec<Model>, ApplicationError> {
         let mut conn = Database::acquire_sql_connection().await?;
-        let query: &str;
-        cfg_if::cfg_if! {
-            if #[cfg(feature="uat")] {
-                query = "SELECT na.id, na.label, na.logo, CONCAT('/uat', na.href) as 'href', na.position FROM NAVACCESS na INNER JOIN ROLE_NAVACCESS rna ON na.id = rna.navaccess_id WHERE rna.role_id=? ORDER BY na.position";
-            } else {
-                query = "SELECT * FROM NAVACCESS na INNER JOIN ROLE_NAVACCESS rna ON na.id = rna.navaccess_id WHERE rna.role_id=? ORDER BY na.position"
-            }
-        }
-        let models: Vec<Model> = sqlx::query_as(query).bind(&id).fetch_all(&mut conn).await?;
+        let models: Vec<Model> = sqlx::query_as("SELECT * FROM NAVACCESS na INNER JOIN ROLE_NAVACCESS rna ON na.id = rna.navaccess_id WHERE rna.role_id=? ORDER BY na.position").bind(&id).fetch_all(&mut conn).await?;
         Ok(models)
     }
 

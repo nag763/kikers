@@ -4,10 +4,6 @@ version = "0.1.0"
 edition = "2021"
 
 
-[features]
-release = []
-uat = ["ffb_structs/uat"]
-
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
@@ -25,7 +21,7 @@ chrono = "0.4.19"
 validator = { version = "0.14.0", features = ["derive"] }
 actix-web-validator = "~3"
 regex = "1.5.5"
-ffb_structs = { path = "../ffb_structs", default-features = false }
+ffb_structs = { path = "../ffb_structs" }
 ffb_auth = { path = "../ffb_auth" }
 lazy_static = "1.4.0"
 tokio = "1.17.0"

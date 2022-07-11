@@ -3,9 +3,6 @@ name = "ffb_structs"
 version = "0.1.0"
 edition = "2021"
 
-[features]
-release = []
-uat = []
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
@@ -25,4 +22,3 @@ bson = "2.2.0"
 futures = "^0.3"
 regex = "1.5.5"
 elasticsearch = "7.14.0-alpha.1"
-cfg-if = "1.0.0"

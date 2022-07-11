@@ -33,8 +33,6 @@ services:
       - ./elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml
   app:
     build:
-        args:
-                - 'FEATURES=default'
         context: .
         dockerfile: Dockerfile
     links:

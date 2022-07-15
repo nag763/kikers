@@ -2,6 +2,7 @@ use crate::database::Database;
 use crate::error::ApplicationError;
 use crate::game;
 use crate::game::Model as Game;
+use crate::scoreboard;
 use crate::transaction_result::TransactionResult;
 use chrono::{DateTime, Utc};
 use futures::TryStreamExt;
@@ -62,6 +63,7 @@ impl Entity {
                 }
             }
         }
+        scoreboard::Entity::clear_cache()?;
         Ok(())
     }
 

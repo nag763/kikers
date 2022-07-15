@@ -32,6 +32,7 @@ use crate::middleware::protect_assets::AssetsProtector;
 use crate::middleware::role_checker::RoleChecker;
 use crate::pages::admin::{admin_bookmakers, admin_dashboard, admin_seasons};
 use crate::pages::game::games;
+use crate::pages::leaderboard::leaderboard;
 use crate::pages::unauth::{cookies, index, signup};
 use crate::pages::user::{user_club, user_leagues, user_profile};
 use actix_files as fs;
@@ -125,6 +126,7 @@ async fn main() -> std::io::Result<()> {
                             .service(admin_season_add)
                             .service(admin_season_set_main)
                             .service(admin_season_close)
+                            .service(leaderboard)
                             .service(bet_on_game)
                     ),
             )

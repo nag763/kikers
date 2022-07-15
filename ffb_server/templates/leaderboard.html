@@ -1,0 +1,12 @@
+{# 30002 #}
+
+{% extends "base.html" %}
+{%block body %}
+{% if let Some(user) = user %}
+<ul>
+{% for (i, entry) in data.iter().enumerate() %}
+<li>{{i+1}}-- {{entry.user_name}} ({{entry.points}})</li>
+{%endfor%}
+</ul>
+{% endif %}
+{% endblock %}

@@ -1,15 +1,14 @@
 use crate::database::Database;
 use crate::error::ApplicationError;
-use crate::season;
+use crate::{season, season::Model as Season, scoreboard_entry::Model as ScoreEntry};
 use serde::{Deserialize, Serialize};
 use std::collections::hash_map::DefaultHasher;
 use std::hash::{Hash, Hasher};
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize, sqlx::FromRow)]
 pub struct Model {
-    pub user_id: u32,
-    pub user_name: String,
-    pub points: bigdecimal::BigDecimal,
+    pub season: Option<Season>,
+    pub score_entries: Vec<ScoreEntry>,
 }
 
 pub(crate) struct Entity;
@@ -50,7 +49,7 @@ impl EntityBuilder {
         self
     }
 
-    pub async fn finish(&self) -> Result<Vec<Model>, ApplicationError> {
+    pub async fn finish(&self) -> Result<Model, ApplicationError> {
         let mut redis_conn = Database::acquire_redis_connection()?;
         let mut hasher = DefaultHasher::new();
         self.hash(&mut hasher);
@@ -70,24 +69,30 @@ impl EntityBuilder {
                 _ => Some(season::Entity::get_current_season_id().await?),
             };
             let statement = match season_id {
-                Some(v) => sqlx::query_as("SELECT ub.user_id, usr.name as `user_name`, IF(SUM(outcome) IS NULL, 0, SUM(outcome)) AS `points` 
+                Some(v) => sqlx::query_as("SELECT ub.user_id, usr.name as `user_name`, IF(SUM(outcome) IS NULL, 0, SUM(outcome)) AS `points`, COUNT(*) AS `bets_made`, TRUNCATE(IF(SUM(OUTCOME) IS NULL, 0, SUM(OUTCOME))/COUNT(*),2) as `ppb`
 FROM `USER_BET`ub INNER JOIN USER usr ON ub.user_id = usr.id 
 WHERE season_id=?                                
 GROUP BY user_id 
 ORDER BY points DESC;").bind(v),
-                None => sqlx::query_as("SELECT ub.user_id, usr.name AS `user_name`, IF(SUM(outcome) IS NULL, 0, SUM(outcome)) AS `points`
+                None => sqlx::query_as("SELECT ub.user_id, usr.name AS `user_name`, IF(SUM(outcome) IS NULL, 0, SUM(outcome)) AS `points`, COUNT(*) AS `bets_made`, TRUNCATE(IF(SUM(OUTCOME) IS NULL, 0, SUM(OUTCOME))/COUNT(*),2) as `ppb`
 FROM `USER_BET`ub INNER JOIN USER usr ON ub.user_id = usr.id 
 GROUP BY user_id 
 ORDER BY points DESC;")
             };
-            let models: Vec<Model> = statement.fetch_all(&mut conn).await?;
+            let score_entries: Vec<ScoreEntry> = statement.fetch_all(&mut conn).await?;
+            let season = match season_id {
+                Some(v) => season::Entity::find_by_id(v).await?,
+                None => None
+            };
+            let model : Model = Model { season, score_entries }; 
+
             redis::cmd("SET")
                 .arg(&redis_key)
-                .arg(serde_json::to_string(&models)?)
+                .arg(serde_json::to_string(&model)?)
                 .arg("EX")
                 .arg("300")
                 .query(&mut redis_conn)?;
-            Ok(models)
+            Ok(model)
         }
     }
 }

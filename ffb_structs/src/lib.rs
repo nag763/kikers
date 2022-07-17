@@ -27,6 +27,7 @@ pub mod navaccess;
 pub mod odd;
 pub mod role;
 pub mod scoreboard;
+pub mod scoreboard_entry;
 pub mod season;
 pub mod token;
 pub mod transaction_result;

@@ -106,6 +106,41 @@ digraph doteur {
 	</TABLE> >]
 
 
+    "LOG" [label=<
+        <TABLE BGCOLOR="grey95" BORDER="1" CELLBORDER="0" CELLSPACING="0">
+
+        <TR><TD COLSPAN="2" CELLPADDING="5" ALIGN="CENTER" BGCOLOR="indigo">
+        <FONT FACE="Roboto" COLOR="white" POINT-SIZE="12">
+        <B>LOG</B>
+        </FONT></TD></TR>
+
+        <TR><TD ALIGN="LEFT" BORDER="0">
+        <FONT COLOR="black" FACE="Roboto"><B>id 🔑</B></FONT>
+        </TD><TD ALIGN="LEFT">
+        <FONT FACE="Roboto" COLOR="black">int NOT NULL AUTO_INCREMENT</FONT>
+        </TD></TR>
+
+        <TR><TD ALIGN="LEFT" BORDER="0">
+        <FONT COLOR="black" FACE="Roboto"><B>table_name</B></FONT>
+        </TD><TD ALIGN="LEFT">
+        <FONT COLOR="black" FACE="Roboto">varchar(16) NOT NULL</FONT>
+        </TD></TR>
+
+        <TR><TD ALIGN="LEFT" BORDER="0">
+        <FONT COLOR="black" FACE="Roboto"><B>text</B></FONT>
+        </TD><TD ALIGN="LEFT">
+        <FONT COLOR="black" FACE="Roboto">varchar(256) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL</FONT>
+        </TD></TR>
+
+        <TR><TD ALIGN="LEFT" BORDER="0">
+        <FONT COLOR="black" FACE="Roboto"><B>date</B></FONT>
+        </TD><TD ALIGN="LEFT">
+        <FONT COLOR="black" FACE="Roboto">datetime NOT NULL DEFAULT CURRENT_TIMESTAMP</FONT>
+        </TD></TR>
+
+	</TABLE> >]
+
+
     "NAVACCESS" [label=<
         <TABLE BGCOLOR="grey95" BORDER="1" CELLBORDER="0" CELLSPACING="0">
 
@@ -142,6 +177,29 @@ digraph doteur {
         <FONT COLOR="black" FACE="Roboto"><B>position</B></FONT>
         </TD><TD ALIGN="LEFT">
         <FONT COLOR="black" FACE="Roboto">int unsigned DEFAULT NULL</FONT>
+        </TD></TR>
+
+	</TABLE> >]
+
+
+    "RESULT" [label=<
+        <TABLE BGCOLOR="grey95" BORDER="1" CELLBORDER="0" CELLSPACING="0">
+
+        <TR><TD COLSPAN="2" CELLPADDING="5" ALIGN="CENTER" BGCOLOR="indigo">
+        <FONT FACE="Roboto" COLOR="white" POINT-SIZE="12">
+        <B>RESULT</B>
+        </FONT></TD></TR>
+
+        <TR><TD ALIGN="LEFT" BORDER="0">
+        <FONT COLOR="black" FACE="Roboto"><B>id 🔑</B></FONT>
+        </TD><TD ALIGN="LEFT">
+        <FONT FACE="Roboto" COLOR="black">int unsigned NOT NULL DEFAULT '0'</FONT>
+        </TD></TR>
+
+        <TR><TD ALIGN="LEFT" BORDER="0">
+        <FONT COLOR="black" FACE="Roboto"><B>label</B></FONT>
+        </TD><TD ALIGN="LEFT">
+        <FONT COLOR="black" FACE="Roboto">varchar(16) NOT NULL</FONT>
         </TD></TR>
 
 	</TABLE> >]
@@ -194,6 +252,41 @@ digraph doteur {
         <FONT COLOR="black" FACE="Roboto"><B>navaccess_id 🔑🗝️</B></FONT>
         </TD><TD ALIGN="LEFT">
         <FONT FACE="Roboto" COLOR="black">Refers to <I>NAVACCESS[id]</I></FONT>
+        </TD></TR>
+
+	</TABLE> >]
+
+
+    "SEASON" [label=<
+        <TABLE BGCOLOR="grey95" BORDER="1" CELLBORDER="0" CELLSPACING="0">
+
+        <TR><TD COLSPAN="2" CELLPADDING="5" ALIGN="CENTER" BGCOLOR="indigo">
+        <FONT FACE="Roboto" COLOR="white" POINT-SIZE="12">
+        <B>SEASON</B>
+        </FONT></TD></TR>
+
+        <TR><TD ALIGN="LEFT" BORDER="0">
+        <FONT COLOR="black" FACE="Roboto"><B>id 🔑</B></FONT>
+        </TD><TD ALIGN="LEFT">
+        <FONT FACE="Roboto" COLOR="black">int unsigned NOT NULL AUTO_INCREMENT</FONT>
+        </TD></TR>
+
+        <TR><TD ALIGN="LEFT" BORDER="0">
+        <FONT COLOR="black" FACE="Roboto"><B>name</B></FONT>
+        </TD><TD ALIGN="LEFT">
+        <FONT COLOR="black" FACE="Roboto">varchar(32) NOT NULL</FONT>
+        </TD></TR>
+
+        <TR><TD ALIGN="LEFT" BORDER="0">
+        <FONT COLOR="black" FACE="Roboto"><B>is_main</B></FONT>
+        </TD><TD ALIGN="LEFT">
+        <FONT COLOR="black" FACE="Roboto">tinyint(1) NOT NULL DEFAULT '0'</FONT>
+        </TD></TR>
+
+        <TR><TD ALIGN="LEFT" BORDER="0">
+        <FONT COLOR="black" FACE="Roboto"><B>is_closed</B></FONT>
+        </TD><TD ALIGN="LEFT">
+        <FONT COLOR="black" FACE="Roboto">tinyint(1) NOT NULL DEFAULT '0'</FONT>
         </TD></TR>
 
 	</TABLE> >]
@@ -299,6 +392,59 @@ digraph doteur {
 	</TABLE> >]
 
 
+    "USER_BET" [label=<
+        <TABLE BGCOLOR="grey95" BORDER="1" CELLBORDER="0" CELLSPACING="0">
+
+        <TR><TD COLSPAN="2" CELLPADDING="5" ALIGN="CENTER" BGCOLOR="indigo">
+        <FONT FACE="Roboto" COLOR="white" POINT-SIZE="12">
+        <B>USER_BET</B>
+        </FONT></TD></TR>
+
+        <TR><TD ALIGN="LEFT" BORDER="0">
+        <FONT COLOR="black" FACE="Roboto"><B>user_id 🔑🗝️</B></FONT>
+        </TD><TD ALIGN="LEFT">
+        <FONT FACE="Roboto" COLOR="black">Refers to <I>USER[id]</I></FONT>
+        </TD></TR>
+
+        <TR><TD ALIGN="LEFT" BORDER="0">
+        <FONT COLOR="black" FACE="Roboto"><B>fixture_id 🔑</B></FONT>
+        </TD><TD ALIGN="LEFT">
+        <FONT FACE="Roboto" COLOR="black">int unsigned NOT NULL</FONT>
+        </TD></TR>
+
+        <TR><TD ALIGN="LEFT" BORDER="0">
+        <FONT COLOR="black" FACE="Roboto"><B>result_id 🗝️</B></FONT>
+        </TD><TD ALIGN="LEFT">
+        <FONT FACE="Roboto" COLOR="black">Refers to <I>RESULT[id]</I></FONT>
+        </TD></TR>
+
+        <TR><TD ALIGN="LEFT" BORDER="0">
+        <FONT COLOR="black" FACE="Roboto"><B>season_id 🗝️</B></FONT>
+        </TD><TD ALIGN="LEFT">
+        <FONT FACE="Roboto" COLOR="black">Refers to <I>SEASON[id]</I></FONT>
+        </TD></TR>
+
+        <TR><TD ALIGN="LEFT" BORDER="0">
+        <FONT COLOR="black" FACE="Roboto"><B>stake</B></FONT>
+        </TD><TD ALIGN="LEFT">
+        <FONT COLOR="black" FACE="Roboto">float unsigned NOT NULL</FONT>
+        </TD></TR>
+
+        <TR><TD ALIGN="LEFT" BORDER="0">
+        <FONT COLOR="black" FACE="Roboto"><B>outcome</B></FONT>
+        </TD><TD ALIGN="LEFT">
+        <FONT COLOR="black" FACE="Roboto">int unsigned DEFAULT NULL</FONT>
+        </TD></TR>
+
+        <TR><TD ALIGN="LEFT" BORDER="0">
+        <FONT COLOR="black" FACE="Roboto"><B>datetime</B></FONT>
+        </TD><TD ALIGN="LEFT">
+        <FONT COLOR="black" FACE="Roboto">timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP</FONT>
+        </TD></TR>
+
+	</TABLE> >]
+
+
     "USER_CLUB" [label=<
         <TABLE BGCOLOR="grey95" BORDER="1" CELLBORDER="0" CELLSPACING="0">
 
@@ -363,6 +509,9 @@ digraph doteur {
 	TRANSLATION -> LOCALE [label=<<I>locale_id ➡ id</I>>, arrowhead = "dot", fontsize="12.0", ]
 	USER -> ROLE [label=<<I>role_id ➡ id</I>>, arrowhead = "normal", fontsize="12.0", ]
 	USER -> LOCALE [label=<<I>locale_id ➡ id</I>>, arrowhead = "normal", fontsize="12.0", ]
+	USER_BET -> USER [label=<<I>user_id ➡ id</I>>, arrowhead = "dot", fontsize="12.0", ]
+	USER_BET -> RESULT [label=<<I>result_id ➡ id</I>>, arrowhead = "normal", fontsize="12.0", ]
+	USER_BET -> SEASON [label=<<I>season_id ➡ id</I>>, arrowhead = "dot", fontsize="12.0", ]
 	USER_CLUB -> USER [label=<<I>user_id ➡ id</I>>, arrowhead = "dot", fontsize="12.0", ]
 	USER_LEAGUE -> USER [label=<<I>user_id ➡ id</I>>, arrowhead = "dot", fontsize="12.0", ]
 

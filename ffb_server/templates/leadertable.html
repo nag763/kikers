@@ -1,0 +1,20 @@
+{% for (i, entry) in entries.into_iter().enumerate() %}
+<tr>
+{% let ranking = i+1 %}
+	<td>
+     {% match ranking %}
+     {% when 1 %}
+     &#129351;
+     {% when 2 %}
+     &#129352;
+     {% when 3 %}
+     &#129353;
+     {% when _ %}
+     {{ranking}}
+     {% endmatch %}</td>
+	<td>{{entry.user_name}}</td>
+	<td>{{entry.points}}</td>
+	<td>{{entry.bets_made}}</td>
+	<td>{{entry.ppb}}</td>
+</tr>
+{%endfor%}

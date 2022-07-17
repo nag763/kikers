@@ -1,12 +1,50 @@
-{# 30002 #}
+{# 40001 #}
 
 {% extends "base.html" %}
-{%block body %}
+{% block body %}
 {% if let Some(user) = user %}
-<ul>
-{% for (i, entry) in data.iter().enumerate() %}
-<li>{{i+1}}-- {{entry.user_name}} ({{entry.points}})</li>
-{%endfor%}
-</ul>
+<div class="my-8 select-none flex overflow-x-auto whitespace-nowrap">
+	<form>
+		<input name="all" value="true" hidden>
+		<button class="py-2 px-4 shadow-md no-underline rounded-full bg-gray-400 text-white font-sans font-semibold text-sm border-gray-400 btn-primary hover:text-white hover:bg-gray-500 focus:outline-none active:shadow-none mr-2">	
+			{{app_data.translate("M40001_ALL_SEASONS", user.locale_id)?}}
+		</button>
+	</form>
+	{% for season in seasons %}
+	<form>
+		<input name="id" value="{{season.id}}" hidden>
+		<button class="py-2 px-4 shadow-md no-underline rounded-full bg-gray-400 text-white font-sans font-semibold text-sm border-gray-400 btn-primary hover:text-white hover:bg-gray-500 focus:outline-none active:shadow-none mr-2">	
+			{{season.name}}
+		</button>
+	</form>
+
+	{% endfor%}
+</div>
+	<p class="text-xl mb-3">
+	{% if let Some(season) = data.season %}
+	{{app_data.translate("M40001_SEASON", user.locale_id)?}} : {{season.name}}
+	{% else %}
+	{{app_data.translate("M40001_ALL_TIME_RESULT", user.locale_id)?}}
+	{% endif %}
+	</p>
+{% let entries = data.score_entries.clone() %}
+{% if !entries.is_empty() %}
+<div class="overflow-x-auto">
+<table class="border-separate border-spacing-4 whitespace-nowrap">
+	<thead>
+		<th>{{app_data.translate("M40001_RANKING", user.locale_id)?}}</th>
+		<th>{{app_data.translate("M40001_PLAYER", user.locale_id)?}}</th>
+		<th>{{app_data.translate("M40001_POINTS", user.locale_id)?}}</th>	
+		<th>{{app_data.translate("M40001_NUMBER_OF_BETS", user.locale_id)?}}</th>	
+		<th>{{app_data.translate("M40001_PPB", user.locale_id)?}}</th>	
+	</thead>
+	<tbody>
+		{% include "leadertable.html" %}
+	</tbody>
+</table>
+</div>
+{% else %}
+<p>{{app_data.translate("M40001_NO_RESULT", user.locale_id)?}}</p>
 {% endif %}
+{%endif%}
 {% endblock %}

@@ -8,6 +8,7 @@ use crate::ApplicationData;
 use actix_web::web;
 use actix_web::{get, HttpRequest, HttpResponse};
 use ffb_structs::scoreboard::{EntityBuilder as ScoreboardBuilder, Model as Scoreboard};
+use ffb_structs::season::{EntityBuilder as SeasonBuilder, Model as Season};
 
 #[derive(Template)]
 #[template(path = "leaderboard.html")]
@@ -16,7 +17,8 @@ struct Leaderboard {
     user: Option<JwtUser>,
     error: Option<String>,
     info: Option<String>,
-    data: Vec<Scoreboard>,
+    data: Scoreboard,
+    seasons: Vec<Season>,
     app_data: web::Data<ApplicationData>,
 }
 
@@ -33,6 +35,7 @@ pub async fn leaderboard(
     } else if let Some(all_time) = context_query.all {
         scoreboard_builder.all_time(all_time);
     }
+    let seasons : Vec<Season> = SeasonBuilder::build().finish().await?;
     let index = Leaderboard {
         title: app_data
             .translate("M40001_TITLE", &jwt_user.locale_id)?
@@ -41,6 +44,7 @@ pub async fn leaderboard(
         error: context_query.error.clone(),
         info: context_query.info.clone(),
         data: scoreboard_builder.finish().await?,
+        seasons,
         app_data,
     };
     Ok(HttpResponse::Ok().body(index.render()?))

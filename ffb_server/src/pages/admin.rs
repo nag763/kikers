@@ -108,7 +108,7 @@ pub async fn admin_seasons(
     app_data: web::Data<ApplicationData>,
 ) -> Result<HttpResponse, ApplicationError> {
     let jwt_user: JwtUser = JwtUser::from_request(req)?;
-    let seasons: Vec<Season> = season::Entity::get_all_open().await?;
+    let seasons: Vec<Season> = season::EntityBuilder::build().open_only(true).finish().await?;
     let index = AdminSeasons {
         title: app_data
             .translate("M30003_TITLE", &jwt_user.locale_id)?

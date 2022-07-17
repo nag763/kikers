@@ -1,6 +1,6 @@
 use crate::database::Database;
 use crate::error::ApplicationError;
-use crate::{season, season::Model as Season, scoreboard_entry::Model as ScoreEntry};
+use crate::{scoreboard_entry::Model as ScoreEntry, season, season::Model as Season};
 use serde::{Deserialize, Serialize};
 use std::collections::hash_map::DefaultHasher;
 use std::hash::{Hash, Hasher};
@@ -82,9 +82,12 @@ ORDER BY points DESC;")
             let score_entries: Vec<ScoreEntry> = statement.fetch_all(&mut conn).await?;
             let season = match season_id {
                 Some(v) => season::Entity::find_by_id(v).await?,
-                None => None
+                None => None,
             };
-            let model : Model = Model { season, score_entries }; 
+            let model: Model = Model {
+                season,
+                score_entries,
+            };
 
             redis::cmd("SET")
                 .arg(&redis_key)

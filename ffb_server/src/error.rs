@@ -35,9 +35,9 @@ pub enum ApplicationError {
     )]
     PeerBanned(String),
     #[display(fmt = "{}", _0)]
-    StructError(String),
+    StructError(StructApplicationError),
     #[display(fmt = "{}", _0)]
-    AuthError(String),
+    AuthError(AuthApplicationError),
 }
 
 #[derive(Template, Debug)]
@@ -75,16 +75,23 @@ impl actix_web::error::ResponseError for ApplicationError {
     }
 
     fn status_code(&self) -> StatusCode {
-        match *self {
-            ApplicationError::InternalError
-            | ApplicationError::TemplateError
-            | ApplicationError::StructError(_)
-            | ApplicationError::AuthError(_) => StatusCode::INTERNAL_SERVER_ERROR,
+        match &*self {
+            ApplicationError::InternalError | ApplicationError::TemplateError => {
+                StatusCode::INTERNAL_SERVER_ERROR
+            }
             ApplicationError::IllegalToken
             | ApplicationError::CookiesUnapproved
             | ApplicationError::BadRequest => StatusCode::BAD_REQUEST,
             ApplicationError::NotFound => StatusCode::NOT_FOUND,
             ApplicationError::PeerBanned(_) => StatusCode::FORBIDDEN,
+            ApplicationError::StructError(struct_err) => {
+                StatusCode::from_u16(struct_err.http_error_code())
+                    .unwrap_or(StatusCode::INTERNAL_SERVER_ERROR)
+            }
+            ApplicationError::AuthError(auth_err) => {
+                StatusCode::from_u16(auth_err.http_error_code())
+                    .unwrap_or(StatusCode::INTERNAL_SERVER_ERROR)
+            }
         }
     }
 }
@@ -105,13 +112,15 @@ impl From<std::env::VarError> for ApplicationError {
 
 impl From<StructApplicationError> for ApplicationError {
     fn from(struct_error: StructApplicationError) -> Self {
-        Self::StructError(struct_error.to_string())
+        error!("A struct error happened : {}", struct_error);
+        Self::StructError(struct_error)
     }
 }
 
 impl From<AuthApplicationError> for ApplicationError {
     fn from(auth_error: AuthApplicationError) -> Self {
-        Self::AuthError(auth_error.to_string())
+        error!("An authentication error happened : {}", auth_error);
+        Self::AuthError(auth_error)
     }
 }
 

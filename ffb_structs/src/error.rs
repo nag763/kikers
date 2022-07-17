@@ -13,6 +13,17 @@ pub enum ApplicationError {
     FormOutdated,
 }
 
+impl ApplicationError {
+    /**
+     * Returns an http error code for the given enum.
+     */
+    pub fn http_error_code(&self) -> u16 {
+        match *self {
+            _ => 500,
+        }
+    }
+}
+
 impl fmt::Display for ApplicationError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let reason : String = match &*self {

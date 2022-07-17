@@ -1,14 +1,15 @@
 use crate::error::ApplicationError;
-use crate::magic_crypt::MagicCryptTrait;
 use actix_web::HttpRequest;
-use ffb_structs::token;
-use ffb_structs::user;
-use ffb_structs::user::Model as User;
+use ffb_structs::{token, user, user::Model as User};
 use hmac::{Hmac, Mac};
 use jwt::{Header, SignWithKey, Token, VerifyWithKey};
+use magic_crypt::{MagicCrypt256, MagicCryptTrait};
 use serde::{Deserialize, Serialize};
 use sha2::Sha256;
+use time::{Duration, OffsetDateTime};
 
+/// Module to handles the common errors that can
+/// be thrown by this crate.
 pub mod error;
 
 #[macro_use]
@@ -18,34 +19,67 @@ extern crate magic_crypt;
 #[macro_use]
 extern crate log;
 
-#[derive(Debug, Default, Deserialize, Serialize, Clone)]
+/**
+ * A jwt user is a user from the base whose
+ * informations have been stored within a secure
+ * token.
+ */
+#[derive(Debug, Default, Deserialize, Serialize, Clone, Display)]
+#[display(fmt = "{login} ({name}) with id {id} and role {role}\n
+        Emitted on {emited_on}, tbr on {refresh_after}, expires on {expiracy_date}")]
 pub struct JwtUser {
+    /// Id in base of the user
     pub id: u32,
+    /// UUID used for more delicate operations
     pub uuid: String,
+    /// His login
     pub login: String,
+    /// The username, up to his choice
     pub name: String,
+    /// Whether the user is authorized or not
     pub is_authorized: bool,
+    /// The user role, admin, simple user, or manager
     pub role: u32,
+    /// His locale, used to display the translated application
     pub locale_id: u32,
+    /// When the jwt_token has been emited
     pub emited_on: i64,
+    /// When the jwt token will have to be refreshed
     pub refresh_after: i64,
+    /// The expiracy date of the jwt, it shouldn't be usable following this
+    /// date
     pub expiracy_date: i64,
 }
 
 impl JwtUser {
+    /**
+     * Encrypts a key with the secret
+     *
+     * * Arguments :
+     *
+     * - key : The key to encrypt
+     */
     pub fn encrypt_key(key: &str) -> Result<String, ApplicationError> {
-        let mc = new_magic_crypt!(std::env::var("ENCRYPT_KEY")?, 256);
-        Ok(mc.encrypt_str_to_base64(key))
+        let mc: MagicCrypt256 = new_magic_crypt!(std::env::var("ENCRYPT_KEY")?, 256);
+        let encrypted_key: String = mc.encrypt_str_to_base64(key);
+        Ok(encrypted_key)
     }
 
+    /**
+     * Generates a token
+     *
+     * * Arguments :
+     * - user : The base user that we want to tokenize
+     */
     async fn gen_token(user: User) -> Result<String, ApplicationError> {
         let jwt_key: String = std::env::var("JWT_KEY")?;
         let key: Hmac<Sha256> = Hmac::new_from_slice(jwt_key.as_bytes())?;
-
         let header: Header = Default::default();
-        let emited_on = time::OffsetDateTime::now_utc();
-        let refresh_after = emited_on + time::Duration::minutes(15);
-        let expiracy_date = emited_on + time::Duration::weeks(1);
+        let emited_on: OffsetDateTime = OffsetDateTime::now_utc();
+        // The token has to be refreshed every 15 minutes
+        let refresh_after: OffsetDateTime = emited_on + Duration::minutes(15);
+        // The token expires after one week
+        let expiracy_date: OffsetDateTime = emited_on + Duration::weeks(1);
         let unsigned_token = Token::new(
             header,
             JwtUser {
@@ -66,22 +100,44 @@ impl JwtUser {
         Ok(signed_token.into())
     }
 
+    /**
+     * Method to know if the jwt has to be refreshed.
+     */
     pub fn has_to_be_refreshed(&self) -> bool {
-        let now: i64 = time::OffsetDateTime::now_utc().unix_timestamp();
+        let now: i64 = OffsetDateTime::now_utc().unix_timestamp();
         self.refresh_after < now
     }
 
+    /**
+     * Whether the session is still valid or not.
+     */
     pub fn has_session_expired(&self) -> bool {
-        let now: i64 = time::OffsetDateTime::now_utc().unix_timestamp();
+        let now: i64 = OffsetDateTime::now_utc().unix_timestamp();
         self.expiracy_date < now
     }
 
+    /**
+     * Emit a new token.
+     *
+     * The pair login, password is verified beforehand to check
+     * that the user is indeed an existing user besides of being authorized.
+     *
+     * None is returned when the user doesn't exist in the database. An error is thrown when the
+     * user isn't authorized and thus a token can't be emitted.
+     *
+     * * Arguments :
+     *
+     * - login : User's login
+     * - Password : Associed password in base. Be aware that the raw password should be passed to
+     * this method and not the hashed one
+     */
     pub async fn emit(login: &str, password: &str) -> Result<Option<String>, ApplicationError> {
         let encrypted_password: String = Self::encrypt_key(password)?;
         let user: Option<User> =
             user::Entity::get_user_by_credentials(login, &encrypted_password).await?;
 
         match user {
+            // If the user exists, we check whether he is authorized or not
             Some(user) => match user.is_authorized {
                 true => {
                     let token = Self::gen_token(user).await?;
@@ -97,10 +153,19 @@ impl JwtUser {
                     Err(ApplicationError::UserNotAuthorized(login.to_string()))
                 }
             },
+            // If he doesn't exist, None is returned
             None => Ok(None),
         }
     }
 
+    /**
+     * Check whether the token is valid for the given login.
+     *
+     * # Arguments
+     *
+     * - token : The token to verify
+     * - login : The login to verify
+     */
     pub fn check_token_of_login(token: &str, login: &str) -> Result<(), ApplicationError> {
         if !token::Entity::verify(login, token)? {
             warn!("Token for {} has been considered as invalid", &login);
@@ -111,6 +176,13 @@ impl JwtUser {
         }
     }
 
+    /**
+     * Returns the JWT User structure from an existing JWT.
+     *
+     * # Arguments :
+     *
+     * - token : The token to get the user from.
+     */
     pub fn from_token(token: &str) -> Result<JwtUser, ApplicationError> {
         let jwt_key: String = std::env::var("JWT_KEY")?;
         let key: Hmac<Sha256> = Hmac::new_from_slice(jwt_key.as_bytes())?;
@@ -119,6 +191,13 @@ impl JwtUser {
         Ok(jwt_user)
     }
 
+    /**
+     * Refresh an existing token and invalidate the previous one.
+     *
+     * # Argument :
+     *
+     * - token : The token to refresh
+     */
     pub async fn refresh_token(token: &str) -> Result<String, ApplicationError> {
         let jwt_user = JwtUser::from_token(token)?;
         let user: User = user::Entity::find_by_id(jwt_user.id)
@@ -133,18 +212,40 @@ impl JwtUser {
         Ok(new_token)
     }
 
+    /**
+     * Revoke completely one session (or token).
+     *
+     * # Arguments :
+     *
+     * - login : the login associed with the token.
+     * - token : the token to revoke.
+     */
     pub fn revoke_session(login: &str, token: &str) -> Result<(), ApplicationError> {
         token::Entity::revoke_token(login, token)?;
         info!("Token for {} has been revoked", login);
         Ok(())
     }
 
+    /**
+     * Revoke completely every user session
+     *
+     * # Arguments :
+     *
+     * - login : the login associed with the token.
+     */
     pub fn revoke_all_session(login: &str) -> Result<(), ApplicationError> {
         token::Entity::revoke_all(login)?;
         info!("Sessions of {} have been discarded", login);
         Ok(())
     }
 
+    /**
+     * Gets the jwt user directly from the HTTP request
+     *
+     * # Arguments :
+     *
+     * - req : The HTTP request
+     */
     pub fn from_request(req: HttpRequest) -> Result<JwtUser, ApplicationError> {
         match req.cookie(std::env::var("JWT_TOKEN_PATH")?.as_str()) {
             Some(token) => Ok(JwtUser::from_token(token.value())?),

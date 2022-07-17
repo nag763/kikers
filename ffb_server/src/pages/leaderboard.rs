@@ -35,7 +35,7 @@ pub async fn leaderboard(
     } else if let Some(all_time) = context_query.all {
         scoreboard_builder.all_time(all_time);
     }
-    let seasons : Vec<Season> = SeasonBuilder::build().finish().await?;
+    let seasons: Vec<Season> = SeasonBuilder::build().finish().await?;
     let index = Leaderboard {
         title: app_data
             .translate("M40001_TITLE", &jwt_user.locale_id)?

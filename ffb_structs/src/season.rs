@@ -2,9 +2,8 @@ use crate::database::Database;
 use crate::error::ApplicationError;
 use crate::transaction_result::TransactionResult;
 use serde::{Deserialize, Serialize};
-use std::hash::{Hash, Hasher};
 use std::collections::hash_map::DefaultHasher;
-
+use std::hash::{Hash, Hasher};
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize, sqlx::FromRow, Eq, Hash)]
 pub struct Model {
@@ -17,17 +16,14 @@ pub struct Model {
 pub struct Entity;
 
 impl Entity {
-
     pub async fn find_by_id(id: u32) -> Result<Option<Model>, ApplicationError> {
         let mut conn = Database::acquire_sql_connection().await?;
-        let model: Option<Model> =
-            sqlx::query_as("SELECT * FROM SEASON WHERE id=?")
-                .bind(id)
-                .fetch_optional(&mut conn)
-                .await?;
+        let model: Option<Model> = sqlx::query_as("SELECT * FROM SEASON WHERE id=?")
+            .bind(id)
+            .fetch_optional(&mut conn)
+            .await?;
         Ok(model)
     }
-
 
     pub async fn get_current_season_id() -> Result<u32, ApplicationError> {
         let mut redis_conn = Database::acquire_redis_connection()?;
@@ -138,7 +134,9 @@ impl EntityBuilder {
         } else {
             let mut conn = Database::acquire_sql_connection().await?;
             let statement = if self.open_only {
-                sqlx::query_as("SELECT * FROM SEASON WHERE is_closed=0 ORDER BY is_main DESC, name DESC")
+                sqlx::query_as(
+                    "SELECT * FROM SEASON WHERE is_closed=0 ORDER BY is_main DESC, name DESC",
+                )
             } else {
                 sqlx::query_as("SELECT * FROM SEASON ORDER BY is_main DESC, name DESC")
             };

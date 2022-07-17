@@ -1,22 +1,43 @@
 use ffb_structs::error::ApplicationError as StructError;
 
+/**
+ * The common errors that can be thrown while generating a token.
+ */
 #[derive(Debug, Display)]
 pub enum ApplicationError {
     #[display(
         fmt = "Your authentication token is not correct, please reconnect in order to regenarate it"
     )]
+    /// The token is illegal or became illegal
     IllegalToken,
     #[display(fmt = "{}", _0)]
+    /// A structure error
     StructError(String),
     #[display(fmt = "The user hasn't been found")]
+    /// User not found
     NotFound,
     #[display(
         fmt = "The user : {}'s access has either been revoked or not granted",
         _0
     )]
+    /// The user hasn't been authorized
     UserNotAuthorized(String),
     #[display(fmt = "An internal error happened")]
+    /// Internal error
     InternalError,
+}
+
+impl ApplicationError {
+    /**
+     * Returns an http error code for the given enum.
+     */
+    pub fn http_error_code(&self) -> u16 {
+        match *self {
+            ApplicationError::UserNotAuthorized(_) => 403,
+            ApplicationError::NotFound => 404,
+            _ => 500,
+        }
+    }
 }
 
 impl From<jwt::Error> for ApplicationError {

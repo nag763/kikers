@@ -4,6 +4,7 @@ use crate::{scoreboard_entry::Model as ScoreEntry, season, season::Model as Seas
 use serde::{Deserialize, Serialize};
 use std::collections::hash_map::DefaultHasher;
 use std::hash::{Hash, Hasher};
+use sqlx::{QueryBuilder, FromRow, mysql::MySqlRow};
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize, sqlx::FromRow)]
 pub struct Model {
@@ -30,6 +31,7 @@ impl Entity {
 pub struct EntityBuilder {
     season_id: Option<u32>,
     all_time: bool,
+    limit : Option<u32>,
 }
 
 impl EntityBuilder {
@@ -46,6 +48,11 @@ impl EntityBuilder {
     pub fn all_time<'a>(&'a mut self, all_time: bool) -> &'a mut Self {
         self.all_time = all_time;
         self.season_id = None;
+        self
+    }
+
+    pub fn limit<'a>(&'a mut self, limit: Option<u32>) -> &'a mut Self {
+        self.limit = limit;
         self
     }
 
@@ -68,18 +75,24 @@ impl EntityBuilder {
                 (None, true) => None,
                 _ => Some(season::Entity::get_current_season_id().await?),
             };
-            let statement = match season_id {
-                Some(v) => sqlx::query_as("SELECT ub.user_id, usr.name as `user_name`, IF(SUM(outcome) IS NULL, 0, SUM(outcome)) AS `points`, COUNT(*) AS `bets_made`, TRUNCATE(IF(SUM(OUTCOME) IS NULL, 0, SUM(OUTCOME))/COUNT(*),2) as `ppb`
-FROM `USER_BET`ub INNER JOIN USER usr ON ub.user_id = usr.id 
-WHERE season_id=?                                
-GROUP BY user_id 
-ORDER BY points DESC;").bind(v),
-                None => sqlx::query_as("SELECT ub.user_id, usr.name AS `user_name`, IF(SUM(outcome) IS NULL, 0, SUM(outcome)) AS `points`, COUNT(*) AS `bets_made`, TRUNCATE(IF(SUM(OUTCOME) IS NULL, 0, SUM(OUTCOME))/COUNT(*),2) as `ppb`
-FROM `USER_BET`ub INNER JOIN USER usr ON ub.user_id = usr.id 
-GROUP BY user_id 
-ORDER BY points DESC;")
-            };
-            let score_entries: Vec<ScoreEntry> = statement.fetch_all(&mut conn).await?;
+            let mut query_builder = QueryBuilder::new("SELECT ub.user_id, usr.name as `user_name`, IF(SUM(outcome) IS NULL, 0, SUM(outcome)) AS `points`, COUNT(*) AS `bets_made`, TRUNCATE(IF(SUM(OUTCOME) IS NULL, 0, SUM(OUTCOME))/COUNT(*),2) as `ppb`");
+            query_builder.push("\nFROM `USER_BET`ub INNER JOIN USER usr ON ub.user_id = usr.id");
+            if let Some(season_id) = season_id {
+                query_builder
+                    .push("\nWHERE season_id=")
+                    .push_bind(season_id);
+            }
+            query_builder.push("\nGROUP BY user_id");
+            query_builder.push("\nORDER BY points DESC");
+            if let Some(limit) = self.limit {
+                query_builder.push("\nLIMIT ")
+                    .push_bind(limit);
+            }
+            let rows : Vec<MySqlRow> = query_builder.build().fetch_all(&mut conn).await?;
+            let mut score_entries : Vec<ScoreEntry> = Vec::with_capacity(rows.len());
+            for row in rows {
+                score_entries.push(ScoreEntry::from_row(&row)?);
+            }
             let season = match season_id {
                 Some(v) => season::Entity::find_by_id(v).await?,
                 None => None,

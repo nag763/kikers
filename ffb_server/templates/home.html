@@ -21,7 +21,44 @@
 <p>{{app_data.translate("M10001_TODAY_NO", user.locale_id)?}}</p>
 {% endif %}
 </div>
-<div>
-</div>
+<div class="overflow-x-auto hidden lg:block">
+{% if let Some(leaderboard) = leaderboard %}
+<h4 class="text-xl mb-4 font-semibold">{{app_data.translate("HOME_TOP3", user.locale_id)?}}</h4>
+{% let entries = leaderboard.score_entries.clone() %}
+	{% if let Some(season) = leaderboard.season %}
+	<p>{{app_data.translate("M40001_SEASON", user.locale_id)?}} : {{season.name}}</p>
+	{% endif %}
+{% if !entries.is_empty() %}
+<table class="border-separate border-spacing-4 whitespace-nowrap">
+	<thead>
+		<th>{{app_data.translate("M40001_RANKING", user.locale_id)?}}</th>
+		<th>{{app_data.translate("M40001_PLAYER", user.locale_id)?}}</th>
+		<th>{{app_data.translate("M40001_POINTS", user.locale_id)?}}</th>	
+	</thead>
+	<tbody>
+	{% for (i, entry) in entries.into_iter().enumerate() %}
+	<tr>
+	{% let ranking = i+1 %}
+		<td>
+	     {% match ranking %}
+	     {% when 1 %}
+	     &#129351;
+	     {% when 2 %}
+	     &#129352;
+	     {% when 3 %}
+	     &#129353;
+	     {% when _ %}
+	     {{ranking}}
+	     {% endmatch %}</td>
+		<td>{{entry.user_name}}</td>
+		<td>{{entry.points}}</td>
+	</tr>
+	{%endfor%}
+	</tbody>
+</table>
+{% else %}
+<p>{{app_data.translate("M40001_NO_RESULT", user.locale_id)?}}</p>
+{% endif %}
+{% endif %}
 </div>
 {% endif %}

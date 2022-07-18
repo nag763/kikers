@@ -9,7 +9,7 @@ use chrono::{DateTime, Utc};
 use ffb_auth::JwtUser;
 use ffb_structs::{
     game::Entity as GameEntity, game::EntityBuilder as GameEntityBuilder, game::Model as Game,
-    info, info::Model as Info, season, user,
+    info, info::Model as Info, season, user, scoreboard::EntityBuilder as ScoreboardBuilder, scoreboard::Model as Scoreboard
 };
 
 #[derive(Template)]
@@ -34,6 +34,7 @@ struct Index {
     error: Option<String>,
     info: Option<String>,
     news: Option<Vec<Info>>,
+    leaderboard: Option<Scoreboard>,
     games_going_on: Option<GamesRowTemplate>,
     app_data: web::Data<ApplicationData>,
 }
@@ -77,6 +78,9 @@ pub async fn index(
                 }),
                 true => None,
             };
+            let leaderboard : Scoreboard = ScoreboardBuilder::build()
+                .limit(Some(3))
+                .finish().await?;
 
             index = Index {
                 title: app_data
@@ -86,7 +90,8 @@ pub async fn index(
                 error: context_query.error.clone(),
                 info: context_query.info.clone(),
                 news: Some(info::Entity::get_all()?),
-                games_going_on: games_going_on,
+                games_going_on,
+                leaderboard: Some(leaderboard),
                 app_data,
             };
         }
@@ -98,6 +103,7 @@ pub async fn index(
                 info: context_query.info.clone(),
                 news: None,
                 games_going_on: None,
+                leaderboard: None,
                 app_data,
             }
         }

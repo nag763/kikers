@@ -2,9 +2,9 @@ use crate::database::Database;
 use crate::error::ApplicationError;
 use crate::{scoreboard_entry::Model as ScoreEntry, season, season::Model as Season};
 use serde::{Deserialize, Serialize};
+use sqlx::{mysql::MySqlRow, FromRow, QueryBuilder};
 use std::collections::hash_map::DefaultHasher;
 use std::hash::{Hash, Hasher};
-use sqlx::{QueryBuilder, FromRow, mysql::MySqlRow};
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize, sqlx::FromRow)]
 pub struct Model {
@@ -31,7 +31,7 @@ impl Entity {
 pub struct EntityBuilder {
     season_id: Option<u32>,
     all_time: bool,
-    limit : Option<u32>,
+    limit: Option<u32>,
 }
 
 impl EntityBuilder {
@@ -85,11 +85,10 @@ impl EntityBuilder {
             query_builder.push("\nGROUP BY user_id");
             query_builder.push("\nORDER BY points DESC");
             if let Some(limit) = self.limit {
-                query_builder.push("\nLIMIT ")
-                    .push_bind(limit);
+                query_builder.push("\nLIMIT ").push_bind(limit);
             }
-            let rows : Vec<MySqlRow> = query_builder.build().fetch_all(&mut conn).await?;
-            let mut score_entries : Vec<ScoreEntry> = Vec::with_capacity(rows.len());
+            let rows: Vec<MySqlRow> = query_builder.build().fetch_all(&mut conn).await?;
+            let mut score_entries: Vec<ScoreEntry> = Vec::with_capacity(rows.len());
             for row in rows {
                 score_entries.push(ScoreEntry::from_row(&row)?);
             }

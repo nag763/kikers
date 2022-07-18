@@ -1,7 +1,7 @@
 use crate::database::Database;
 use crate::error::ApplicationError;
 
-const ONE_WEEK_IN_SECONDS : u32 = 604_800;
+const ONE_WEEK_IN_SECONDS: u32 = 604_800;
 
 pub struct Entity;
 
@@ -28,7 +28,7 @@ impl Entity {
 
     pub fn revoke_all(login: &str) -> Result<(), ApplicationError> {
         let mut conn = Database::acquire_redis_connection()?;
-        let keys : String = format!(r#"token::{}:*"#, login);
+        let keys: String = format!(r#"token::{}:*"#, login);
         let keys_to_del: Vec<String> = redis::cmd("KEYS").arg(&keys).query(&mut conn)?;
         if !keys_to_del.is_empty() {
             redis::cmd("DEL").arg(keys_to_del).query(&mut conn)?;

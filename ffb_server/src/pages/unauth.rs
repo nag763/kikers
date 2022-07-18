@@ -9,7 +9,8 @@ use chrono::{DateTime, Utc};
 use ffb_auth::JwtUser;
 use ffb_structs::{
     game::Entity as GameEntity, game::EntityBuilder as GameEntityBuilder, game::Model as Game,
-    info, info::Model as Info, season, user, scoreboard::EntityBuilder as ScoreboardBuilder, scoreboard::Model as Scoreboard
+    info, info::Model as Info, scoreboard::EntityBuilder as ScoreboardBuilder,
+    scoreboard::Model as Scoreboard, season, user,
 };
 
 #[derive(Template)]
@@ -78,9 +79,8 @@ pub async fn index(
                 }),
                 true => None,
             };
-            let leaderboard : Scoreboard = ScoreboardBuilder::build()
-                .limit(Some(3))
-                .finish().await?;
+            let leaderboard: Scoreboard =
+                ScoreboardBuilder::build().limit(Some(3)).finish().await?;
 
             index = Index {
                 title: app_data

@@ -114,7 +114,7 @@ impl EntityBuilder {
         Self::default()
     }
 
-    pub fn open_only<'a>(&'a mut self, open_only: bool) -> &'a mut Self {
+    pub fn open_only(&mut self, open_only: bool) -> &mut Self {
         self.open_only = open_only;
         self
     }

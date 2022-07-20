@@ -22,7 +22,7 @@ impl Model {
                 label_name: label_name.to_string(),
                 locale_id,
             })
-            .ok_or(ApplicationError::TranslationError(
+            .ok_or_else(|| ApplicationError::TranslationError(
                 label_name.into(),
                 locale_id,
             ))?;

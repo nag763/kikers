@@ -171,7 +171,7 @@ impl Entity {
         for object in
             response_body["hits"]["hits"]
                 .as_array()
-                .ok_or(ApplicationError::ElasticError(
+                .ok_or_else(|| ApplicationError::ElasticError(
                     "Elasticsearch result is in bad format".into(),
                 ))?
         {

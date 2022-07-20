@@ -22,10 +22,10 @@ pub async fn admin_bookmakers(
     let mut uri_builder: UriBuilder = UriBuilder::from_existing_uri(referer.parse::<Uri>()?);
     let result = bookmaker::Entity::set_main_bookmaker(bookmarker_update_form.id).await?;
     if result.into() {
-        uri_builder.append_msg(MessageType::INFO, "The default bookmaker has been updated");
+        uri_builder.append_msg(MessageType::Info, "The default bookmaker has been updated");
     } else {
         uri_builder.append_msg(
-            MessageType::ERROR,
+            MessageType::Error,
             "An error happened during the update, the bookmaker hasn't been updated",
         );
     }
@@ -53,12 +53,12 @@ pub async fn admin_season_add(
     let result = season::Entity::add_new(&add_season.name).await?;
     if result.into() {
         uri_builder.append_msg(
-            MessageType::INFO,
+            MessageType::Info,
             "The season has been added to the list with success",
         );
     } else {
         uri_builder.append_msg(
-            MessageType::ERROR,
+            MessageType::Error,
             "An error happened during the update, the bookmaker hasn't been updated",
         );
     }
@@ -84,7 +84,7 @@ pub async fn admin_season_set_main(
         .to_str()?;
     let mut uri_builder: UriBuilder = UriBuilder::from_existing_uri(referer.parse::<Uri>()?);
     season::Entity::set_main(season_set_main.id).await?;
-    uri_builder.append_msg(MessageType::INFO, "The current season has been updated");
+    uri_builder.append_msg(MessageType::Info, "The current season has been updated");
     Ok(HttpResponse::Found()
         .append_header(("Location", uri_builder.build()))
         .finish())
@@ -103,10 +103,10 @@ pub async fn admin_season_close(
     let mut uri_builder: UriBuilder = UriBuilder::from_existing_uri(referer.parse::<Uri>()?);
     let result = season::Entity::close(season_set_main.id).await?;
     if result.into() {
-        uri_builder.append_msg(MessageType::INFO, "The season has been closed");
+        uri_builder.append_msg(MessageType::Info, "The season has been closed");
     } else {
         uri_builder.append_msg(
-            MessageType::ERROR,
+            MessageType::Error,
             "An error happened during the update, ensure first that the season isn't the current one, then try again",
         );
     }

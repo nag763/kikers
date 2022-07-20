@@ -1,5 +1,6 @@
 use actix_web::http::Uri;
 use std::collections::HashMap;
+use std::fmt::Write;
 
 lazy_static! {
     static ref RE_QUERY_PARAMS: regex::Regex =
@@ -14,8 +15,8 @@ pub struct UriBuilder {
 }
 
 pub enum MessageType {
-    INFO,
-    ERROR,
+    Info,
+    Error,
 }
 
 impl Default for UriBuilder {
@@ -30,25 +31,16 @@ impl Default for UriBuilder {
 }
 
 impl UriBuilder {
-    pub fn new() -> Self {
-        Self::default()
-    }
-
     pub fn from_existing_uri(uri: Uri) -> Self {
         Self::from(uri)
-    }
-
-    pub fn append<'a>(&'a mut self, key: &str, value: &str) -> &'a mut Self {
-        self.query.insert(key.into(), value.into());
-        self
     }
 
     pub fn append_msg<'a>(&'a mut self, level: MessageType, msg: &str) -> &'a mut Self {
         self.query.remove("info");
         self.query.remove("error");
         match level {
-            MessageType::INFO => self.query.insert("info".into(), msg.to_string()),
-            MessageType::ERROR => self.query.insert("error".into(), msg.to_string()),
+            MessageType::Info => self.query.insert("info".into(), msg.to_string()),
+            MessageType::Error => self.query.insert("error".into(), msg.to_string()),
         };
         self
     }
@@ -59,9 +51,10 @@ impl UriBuilder {
         } else {
             let mut query_as_string: String = String::new();
             for (i, kv) in self.query.iter().enumerate() {
-                match i {
-                    0 => query_as_string.push_str(&format!("?{}={}", kv.0, kv.1)),
-                    _ => query_as_string.push_str(&format!("&{}={}", kv.0, kv.1)),
+                if i == 0 {
+                    let _ = write!(query_as_string, "?{}={}", kv.0, kv.1);
+                } else {
+                    let _ = write!(query_as_string, "&{}={}", kv.0, kv.1);
                 }
             }
             query_as_string

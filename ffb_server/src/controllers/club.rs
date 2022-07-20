@@ -36,13 +36,13 @@ pub async fn update_club_status(
                     .into();
             if result {
                 uri_builder.append_msg(
-                    MessageType::INFO,
+                    MessageType::Info,
                     &format!("Club {} has been added to favorites", &club_status.name),
                 );
             } else {
                 uri_builder.append_msg(
-                    MessageType::ERROR,
-                    &"An error happened while updating the club status".to_string(),
+                    MessageType::Error,
+                    "An error happened while updating the club status",
                 );
             }
         }
@@ -54,13 +54,13 @@ pub async fn update_club_status(
 
             if result {
                 uri_builder.append_msg(
-                    MessageType::INFO,
+                    MessageType::Info,
                     &format!("Club {} has been removed from favorites", &club_status.name),
                 );
             } else {
                 uri_builder.append_msg(
-                    MessageType::ERROR,
-                    &"An error happened while updating the club status".to_string(),
+                    MessageType::Error,
+                    "An error happened while updating the club status",
                 );
             }
         }

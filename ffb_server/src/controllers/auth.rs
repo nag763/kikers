@@ -119,7 +119,7 @@ pub async fn register_user(
             );
             format!("/?info=User {} has been created, you will need to wait for approval before being able to use this site's functionnalities.", sign_up_form.login)
         }
-        false => format!("/signup/?error=An error happened while trying to create your user"),
+        false =>"/signup/?error=An error happened while trying to create your user".to_string(),
     };
     Ok(HttpResponse::Found()
         .append_header(("Location", response))

@@ -39,19 +39,19 @@ impl EntityBuilder {
         Self::default()
     }
 
-    pub fn season_id<'a>(&'a mut self, season_id: u32) -> &'a mut Self {
+    pub fn season_id(&mut self, season_id: u32) -> &mut Self {
         self.season_id = Some(season_id);
         self.all_time = false;
         self
     }
 
-    pub fn all_time<'a>(&'a mut self, all_time: bool) -> &'a mut Self {
+    pub fn all_time(&mut self, all_time: bool) -> &mut Self {
         self.all_time = all_time;
         self.season_id = None;
         self
     }
 
-    pub fn limit<'a>(&'a mut self, limit: Option<u32>) -> &'a mut Self {
+    pub fn limit(&mut self, limit: Option<u32>) -> &mut Self {
         self.limit = limit;
         self
     }

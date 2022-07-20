@@ -29,9 +29,9 @@ pub async fn update_game_status(
             Some(_) => "The game has been added to the bets",
             None => "The game has been dropped from the bets",
         };
-        uri_builder.append_msg(MessageType::INFO, message);
+        uri_builder.append_msg(MessageType::Info, message);
     } else {
-        uri_builder.append_msg(MessageType::ERROR,"The game couldn't have been added to the bets, please retry or contact the administrator");
+        uri_builder.append_msg(MessageType::Error,"The game couldn't have been added to the bets, please retry or contact the administrator");
     }
     Ok(HttpResponse::Found()
         .append_header(("Location", uri_builder.build()))
@@ -66,7 +66,7 @@ pub async fn bet_on_game(
         .ok_or(ApplicationError::InternalError)?
         .to_str()?;
     let mut uri_builder: UriBuilder = UriBuilder::from_existing_uri(referer.parse::<Uri>()?);
-    uri_builder.append_msg(MessageType::INFO, "Your bet has been successfully saved");
+    uri_builder.append_msg(MessageType::Info, "Your bet has been successfully saved");
     Ok(HttpResponse::Found()
         .append_header(("Location", uri_builder.build()))
         .finish())

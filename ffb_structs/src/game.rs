@@ -39,18 +39,12 @@ pub struct Model {
 
 impl Model {
     pub fn is_started(&self) -> bool {
-        match self.fixture.status.short {
-            ShortStatus::NS | ShortStatus::TBD => false,
-            _ => true,
-        }
+        !matches!(self.fixture.status.short, ShortStatus::Ns | ShortStatus::Tbd)
     }
 
     pub fn is_finished(&self) -> bool {
-        match self.fixture.status.short {
-            ShortStatus::FT | ShortStatus::AET | ShortStatus::PEN => true,
-            _ => false,
+        matches!(self.fixture.status.short, ShortStatus::Ft | ShortStatus::Aet | ShortStatus::Pen)
         }
-    }
 
     pub fn get_bet_for_user(&self, user_id: &u32) -> Option<GameResult> {
         if let Some(betters) = &self.betters {
@@ -59,11 +53,7 @@ impl Model {
                 .filter(|bet| &bet.user_id == user_id)
                 .map(|bet| bet.game_result)
                 .collect();
-            if let Some(game_result) = filtered_bets.get(0) {
-                Some(*game_result)
-            } else {
-                None
-            }
+            filtered_bets.get(0).copied()
         } else {
             None
         }
@@ -156,32 +146,32 @@ impl EntityBuilder {
         Self::default()
     }
 
-    pub fn date<'a>(&'a mut self, date: &str) -> &'a mut Self {
+    pub fn date(&mut self, date: &str) -> &mut Self {
         self.date = Some(date.into());
         self
     }
 
-    pub fn leagues<'a>(&'a mut self, leagues: Vec<u32>) -> &'a mut Self {
+    pub fn leagues(&mut self, leagues: Vec<u32>) -> &mut Self {
         self.leagues = Some(leagues);
         self
     }
 
-    pub fn clubs<'a>(&'a mut self, clubs: Vec<u32>) -> &'a mut Self {
+    pub fn clubs(&mut self, clubs: Vec<u32>) -> &mut Self {
         self.clubs = Some(clubs);
         self
     }
 
-    pub fn bets<'a>(&'a mut self, bets: bool) -> &'a mut Self {
+    pub fn bets(&mut self, bets: bool) -> &mut Self {
         self.bets = bets;
         self
     }
 
-    pub fn potential_bets<'a>(&'a mut self, potential_bets: bool) -> &'a mut Self {
+    pub fn potential_bets(&mut self, potential_bets: bool) -> &mut Self {
         self.potential_bets = potential_bets;
         self
     }
 
-    pub fn limit<'a>(&'a mut self, limit: i64) -> &'a mut Self {
+    pub fn limit(&mut self, limit: i64) -> &mut Self {
         self.limit = Some(limit);
         self
     }
@@ -198,17 +188,13 @@ impl EntityBuilder {
             .query(&mut conn)?;
         if let Some(cached_struct) = cached_struct {
             let deserialized_struct: Vec<Model> = serde_json::from_str(cached_struct.as_str())?;
-            return Ok(deserialized_struct);
+            Ok(deserialized_struct)
         } else {
             let database = Database::acquire_mongo_connection().await?;
-            let options: Option<mongodb::options::FindOptions> = match self.limit {
-                Some(v) => Some(
-                    mongodb::options::FindOptions::builder()
+            let options: Option<mongodb::options::FindOptions> = self.limit.map(|v| mongodb::options::FindOptions::builder()
                         .limit(Some(v))
-                        .build(),
-                ),
-                None => None,
-            };
+                        .build()
+                );
             let mut key: bson::Document = bson::Document::new();
             let mut query_selector: Vec<bson::Document> = vec![];
             if let Some(leagues) = &self.leagues {

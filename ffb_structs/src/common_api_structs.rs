@@ -8,28 +8,29 @@ pub struct Venue {
 }
 
 #[derive(Debug, Clone, serde::Deserialize, serde::Serialize, Display)]
+#[serde(rename_all = "UPPERCASE")]
 pub enum ShortStatus {
-    TBD,
-    NS,
+    Tbd,
+    Ns,
     #[serde(rename = "1H")]
-    FH,
-    HT,
+    Fh,
+    Ht,
     #[serde(rename = "2H")]
-    SH,
-    ET,
+    Sh,
+    Et,
     P,
-    FT,
-    AET,
-    PEN,
-    BT,
-    SUSP,
-    INT,
-    PST,
-    CANC,
-    ABD,
-    AWD,
-    WO,
-    LIVE,
+    Ft,
+    Aet,
+    Pen,
+    Bt,
+    Susp,
+    Int,
+    Pst,
+    Canc,
+    Abd,
+    Awd,
+    Wo,
+    Live,
 }
 
 #[derive(Debug, Clone, serde::Deserialize, serde::Serialize)]

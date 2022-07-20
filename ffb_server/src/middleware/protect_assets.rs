@@ -53,13 +53,10 @@ where
         let req_path: &str = req.path();
         if req_path.contains(app_data.get_assets_base_path()) {
             match req.cookie(app_data.get_jwt_path()) {
-                Some(token) => match JwtUser::from_token(token.value()) {
-                    Err(_) => {
+                Some(token) => if JwtUser::from_token(token.value()).is_err() {
                         return Box::pin(async move {
                             Ok(req.into_response(ApplicationError::IllegalToken.error_response()))
                         });
-                    }
-                    _ => (),
                 },
                 None => match req.headers().get("Referer") {
                     Some(v) => {

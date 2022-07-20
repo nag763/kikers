@@ -204,7 +204,7 @@ impl JwtUser {
             .await?
             .ok_or(ApplicationError::NotFound)?;
         let new_token = Self::gen_token(user).await?;
-        token::Entity::revoke_token(&jwt_user.login, &token)?;
+        token::Entity::revoke_token(&jwt_user.login, token)?;
         debug!("Token for {} has been refreshed", &jwt_user.login);
         token::Entity::register(&jwt_user.login, &new_token)?;
         debug!("Token for {} has been registered", &jwt_user.login);

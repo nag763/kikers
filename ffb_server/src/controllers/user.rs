@@ -185,7 +185,7 @@ pub async fn user_self_modification(
     user.name = user_modification_form.name.clone();
     if let Some(password) = &user_modification_form.password {
         if !password.is_empty() {
-            user.password = JwtUser::encrypt_key(&password)?
+            user.password = JwtUser::encrypt_key(password)?
         }
     }
     user.locale_id = user_modification_form.locale_id;
@@ -231,14 +231,14 @@ pub async fn user_change_leagues(
             .into();
             match result {
                 true => uri_builder.append_msg(
-                    MessageType::INFO,
+                    MessageType::Info,
                     &format!(
                         "{} has been added as favorite",
                         user_change_league_form.name
                     ),
                 ),
                 false => uri_builder.append_msg(
-                    MessageType::ERROR,
+                    MessageType::Error,
                     "An error happened while adding the league to your profile",
                 ),
             }
@@ -253,14 +253,14 @@ pub async fn user_change_leagues(
 
             match result {
                 true => uri_builder.append_msg(
-                    MessageType::INFO,
+                    MessageType::Info,
                     &format!(
                         "{} has been removed from your favorites",
                         user_change_league_form.name
                     ),
                 ),
                 false => uri_builder.append_msg(
-                    MessageType::ERROR,
+                    MessageType::Error,
                     "An error happened while removing the league from your profile",
                 ),
             }

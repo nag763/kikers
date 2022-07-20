@@ -19,6 +19,7 @@ impl ApplicationError {
      */
     pub fn http_error_code(&self) -> u16 {
         match *self {
+            Self::FormOutdated => 205,
             _ => 500,
         }
     }

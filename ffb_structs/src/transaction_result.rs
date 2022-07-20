@@ -28,11 +28,9 @@ impl TransactionResult {
     }
 }
 
+#[allow(clippy::from_over_into)]
 impl Into<bool> for TransactionResult {
     fn into(self) -> bool {
-        match self {
-            TransactionResult::Success => true,
-            _ => false,
-        }
+        matches!(self, TransactionResult::Success)
     }
 }

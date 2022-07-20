@@ -26,11 +26,11 @@ impl ApplicationData {
             cookie_approval_path: std::env::var("COOKIE_APPROVAL_PATH")?,
             assets_base_path: std::env::var("ASSETS_BASE_PATH")?,
             trusted_hosts: std::env::var("TRUSTED_HOSTS")?
-                .split(",")
+                .split(',')
                 .map(|host| host.to_string())
                 .collect(),
             bypassed_pathes: std::env::var("BYPASSED_PATHES")?
-                .split(",")
+                .split(',')
                 .map(|host| host.to_string())
                 .collect(),
             locales: locale::Entity::get_locales().await?,

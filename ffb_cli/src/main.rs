@@ -137,7 +137,7 @@ async fn fetch_leagues() -> Result<(), CliError> {
     debug!("Fetch leagues called");
     let res = call_api_endpoint("leagues".into()).await?;
     let mut storable: Vec<serde_json::Value> = Vec::new();
-    for elt in res["response"].as_array().ok_or(CliError::RequestError(
+    for elt in res["response"].as_array().ok_or_else(|| CliError::RequestError(
         "Data received in the wrong format for the server".into(),
     ))? {
         storable.push(elt["league"].clone());
@@ -232,7 +232,6 @@ async fn fetch_odds(day_diff: i64) -> Result<(), CliError> {
                 "odds?date={}&bookmaker={}&bet=1&page={}",
                 date_to_fetch, main_bookmaker_id, page
             )
-            .into(),
         )
         .await?;
         let response: String = res["response"].to_string();

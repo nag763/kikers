@@ -168,13 +168,9 @@ impl Entity {
             .await?;
         let response_body = response.json::<Value>().await?;
         let mut models: Vec<Model> = Vec::with_capacity(10);
-        for object in
-            response_body["hits"]["hits"]
-                .as_array()
-                .ok_or_else(|| ApplicationError::ElasticError(
-                    "Elasticsearch result is in bad format".into(),
-                ))?
-        {
+        for object in response_body["hits"]["hits"].as_array().ok_or_else(|| {
+            ApplicationError::ElasticError("Elasticsearch result is in bad format".into())
+        })? {
             models.push(serde_json::from_value(object["_source"].clone())?);
         }
         Ok(models)

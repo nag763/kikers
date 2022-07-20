@@ -39,12 +39,18 @@ pub struct Model {
 
 impl Model {
     pub fn is_started(&self) -> bool {
-        !matches!(self.fixture.status.short, ShortStatus::Ns | ShortStatus::Tbd)
+        !matches!(
+            self.fixture.status.short,
+            ShortStatus::Ns | ShortStatus::Tbd
+        )
     }
 
     pub fn is_finished(&self) -> bool {
-        matches!(self.fixture.status.short, ShortStatus::Ft | ShortStatus::Aet | ShortStatus::Pen)
-        }
+        matches!(
+            self.fixture.status.short,
+            ShortStatus::Ft | ShortStatus::Aet | ShortStatus::Pen
+        )
+    }
 
     pub fn get_bet_for_user(&self, user_id: &u32) -> Option<GameResult> {
         if let Some(betters) = &self.betters {
@@ -191,10 +197,11 @@ impl EntityBuilder {
             Ok(deserialized_struct)
         } else {
             let database = Database::acquire_mongo_connection().await?;
-            let options: Option<mongodb::options::FindOptions> = self.limit.map(|v| mongodb::options::FindOptions::builder()
-                        .limit(Some(v))
-                        .build()
-                );
+            let options: Option<mongodb::options::FindOptions> = self.limit.map(|v| {
+                mongodb::options::FindOptions::builder()
+                    .limit(Some(v))
+                    .build()
+            });
             let mut key: bson::Document = bson::Document::new();
             let mut query_selector: Vec<bson::Document> = vec![];
             if let Some(leagues) = &self.leagues {

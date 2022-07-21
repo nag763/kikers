@@ -1,34 +1,31 @@
-use std::fmt;
 use std::process::{ExitCode, Termination};
 
-#[derive(Debug)]
+/// The common CLI Errors
+///
+/// These errors can be thrown while using the CLI and fetching remote data.
+#[derive(Debug, Display)]
 pub enum CliError {
+    /// When a VAR isn't set on the .env file.
+    #[display(fmt = "{}", _0)]
     VarError(String),
+    /// When an error is thrown during the call to crate [reqwest]
+    #[display(fmt = "{}", _0)]
     RequestError(String),
+    /// An error that is due to the crate [ffb_structs].
+    #[display(fmt = "{}", _0)]
     StructError(String),
+    /// An error linked to the writing of a local file.
+    #[display(fmt = "{}", _0)]
     InputOutput(String),
+    /// An URL error.
+    #[display(fmt = "{}", _0)]
     UrlError(String),
+    /// A [serde_json] error.
+    #[display(fmt = "{}", _0)]
     SerdeErr(String),
+    /// When no main bookmaker is set
+    #[display(fmt = "No main bookmaker has been set, set one before fetching the odds")]
     NoMainBookmaker,
-}
-
-impl fmt::Display for CliError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(
-            f,
-            "{}",
-            match &*self {
-                CliError::VarError(reason) => reason,
-                CliError::RequestError(reason) => reason,
-                CliError::StructError(reason) => reason,
-                CliError::InputOutput(reason) => reason,
-                CliError::UrlError(reason) => reason,
-                CliError::SerdeErr(reason) => reason,
-                CliError::NoMainBookmaker =>
-                    "No main bookmaker has been set, set one before fetching the odds",
-            }
-        )
-    }
 }
 
 impl Termination for CliError {

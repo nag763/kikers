@@ -1183,6 +1183,7 @@ dependencies = [
  "async-std",
  "chrono",
  "clap",
+ "derive_more",
  "dotenv",
  "env_logger",
  "ffb_structs",

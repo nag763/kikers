@@ -8,22 +8,22 @@ pub enum ApplicationError {
     #[display(
         fmt = "Your authentication token is not correct, please reconnect in order to regenarate it"
     )]
-    /// The token is illegal or became illegal
+    /// The token is illegal or became illegal.
     IllegalToken,
     #[display(fmt = "{}", _0)]
-    /// A structure error
+    /// A structure error.
     StructError(String),
     #[display(fmt = "The user hasn't been found")]
-    /// User not found
+    /// User not found.
     NotFound,
     #[display(
         fmt = "The user : {}'s access has either been revoked or not granted",
         _0
     )]
-    /// The user hasn't been authorized
+    /// The user hasn't been authorized.
     UserNotAuthorized(String),
     #[display(fmt = "An internal error happened")]
-    /// Internal error
+    /// Internal error.
     InternalError,
 }
 

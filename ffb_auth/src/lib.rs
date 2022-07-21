@@ -1,3 +1,8 @@
+//! A crate used to authenticate the user.
+//!
+//! All the user data is stored into a secured JWT that is then deserialized
+//! by the different controllers for the time the application is used.
+
 use crate::error::ApplicationError;
 use actix_web::HttpRequest;
 use ffb_structs::{token, user, user::Model as User};
@@ -28,36 +33,36 @@ extern crate log;
 #[display(fmt = "{login} ({name}) with id {id} and role {role}\n
         Emitted on {emited_on}, tbr on {refresh_after}, expires on {expiracy_date}")]
 pub struct JwtUser {
-    /// Id in base of the user
+    /// Id in base of the user.
     pub id: u32,
-    /// UUID used for more delicate operations
+    /// UUID used for more delicate operations.
     pub uuid: String,
-    /// His login
+    /// His login.
     pub login: String,
-    /// The username, up to his choice
+    /// The username, up to his choice.
     pub name: String,
-    /// Whether the user is authorized or not
+    /// Whether the user is authorized or not.
     pub is_authorized: bool,
-    /// The user role, admin, simple user, or manager
+    /// The user role, admin, simple user, or manager.
     pub role: u32,
-    /// His locale, used to display the translated application
+    /// His locale, used to display the translated application.
     pub locale_id: u32,
-    /// When the jwt_token has been emited
+    /// When the jwt_token has been emited.
     pub emited_on: i64,
-    /// When the jwt token will have to be refreshed
+    /// When the jwt token will have to be refreshed.
     pub refresh_after: i64,
     /// The expiracy date of the jwt, it shouldn't be usable following this
-    /// date
+    /// date.
     pub expiracy_date: i64,
 }
 
 impl JwtUser {
     /**
-     * Encrypts a key with the secret
+     * Encrypts a key with the secret.
      *
-     * * Arguments :
+     * # Arguments :
      *
-     * - key : The key to encrypt
+     * - key : The key to encrypt.
      */
     pub fn encrypt_key(key: &str) -> Result<String, ApplicationError> {
         let mc: MagicCrypt256 = new_magic_crypt!(std::env::var("ENCRYPT_KEY")?, 256);
@@ -66,10 +71,10 @@ impl JwtUser {
     }
 
     /**
-     * Generates a token
+     * Generates a token.
      *
-     * * Arguments :
-     * - user : The base user that we want to tokenize
+     * # Arguments :
+     * - user : The base user that we want to tokenize.
      */
     async fn gen_token(user: User) -> Result<String, ApplicationError> {
         let jwt_key: String = std::env::var("JWT_KEY")?;
@@ -125,11 +130,11 @@ impl JwtUser {
      * None is returned when the user doesn't exist in the database. An error is thrown when the
      * user isn't authorized and thus a token can't be emitted.
      *
-     * * Arguments :
+     * # Arguments :
      *
-     * - login : User's login
+     * - login : User's login.
      * - Password : Associed password in base. Be aware that the raw password should be passed to
-     * this method and not the hashed one
+     * this method and not the hashed one.
      */
     pub async fn emit(login: &str, password: &str) -> Result<Option<String>, ApplicationError> {
         let encrypted_password: String = Self::encrypt_key(password)?;
@@ -163,8 +168,8 @@ impl JwtUser {
      *
      * # Arguments
      *
-     * - token : The token to verify
-     * - login : The login to verify
+     * - token : The token to verify.
+     * - login : The login to verify.
      */
     pub fn check_token_of_login(token: &str, login: &str) -> Result<(), ApplicationError> {
         if !token::Entity::verify(login, token)? {
@@ -196,7 +201,7 @@ impl JwtUser {
      *
      * # Argument :
      *
-     * - token : The token to refresh
+     * - token : The token to refresh.
      */
     pub async fn refresh_token(token: &str) -> Result<String, ApplicationError> {
         let jwt_user = JwtUser::from_token(token)?;
@@ -227,7 +232,7 @@ impl JwtUser {
     }
 
     /**
-     * Revoke completely every user session
+     * Revoke completely every user session.
      *
      * # Arguments :
      *
@@ -240,11 +245,11 @@ impl JwtUser {
     }
 
     /**
-     * Gets the jwt user directly from the HTTP request
+     * Gets the jwt user directly from the HTTP request.
      *
      * # Arguments :
      *
-     * - req : The HTTP request
+     * - req : The HTTP request.
      */
     pub fn from_request(req: HttpRequest) -> Result<JwtUser, ApplicationError> {
         match req.cookie(std::env::var("JWT_TOKEN_PATH")?.as_str()) {

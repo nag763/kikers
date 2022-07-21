@@ -1,13 +1,14 @@
-//! This crate is a set of commands used to modify the local data from either 
+//! This crate is a set of commands used to modify the local data from either
 //! remote endpoints or existing local data.
 //!
-//! These commands have to be used with the help of a crontab and need to be 
+//! These commands have to be used with the help of a crontab and need to be
 //! executed regulary in order to keep the application data up to date.
 
 use async_std::{
     fs::File,
     io::{copy, Cursor},
 };
+use chrono::{DateTime, Utc};
 use clap::{Parser, Subcommand};
 use dotenv::dotenv;
 use error::CliError;
@@ -15,7 +16,6 @@ use ffb_structs::{api_token, bet, bookmaker, club, game, info, info::Model as In
 use scraper::{Html, Selector};
 use std::process::{ExitCode, Termination};
 use url::Url;
-use chrono::{DateTime, Utc};
 
 #[macro_use]
 extern crate log;
@@ -31,7 +31,7 @@ pub(crate) mod error;
 /// no options are available.
 #[derive(Parser, Debug)]
 struct Args {
-    /// The getter is the list of models that 
+    /// The getter is the list of models that
     /// can be fetched.
     #[clap(subcommand)]
     get: Getter,
@@ -60,7 +60,7 @@ enum Getter {
         ///
         /// This fetches if nothing is passed or
         /// equals to 0, the games of the day
-        /// will be fetched, if it is equals to 
+        /// will be fetched, if it is equals to
         /// -1, the days of yesterday will be fetched,
         /// and so on.
         #[clap(default_value = "0")]
@@ -68,16 +68,16 @@ enum Getter {
     },
     /// Index the odds.
     ///
-    /// Usually it has to be used after the command [Getter::Odds] has been 
+    /// Usually it has to be used after the command [Getter::Odds] has been
     /// called.
     IndexOdds,
     /// Validate the bets.
     ///
-    /// This arg is meant give points of the betters if they predicted 
+    /// This arg is meant give points of the betters if they predicted
     /// correctly.
     ValidateBets,
     /// Fetching the odds.
-    /// 
+    ///
     /// This adds the probabilities to win of each teams
     /// to the fixtures, so that the users can bet easily.
     Odds {
@@ -89,9 +89,9 @@ enum Getter {
     Bookmakers,
     /// Add an api token to the list.
     ///
-    /// The model of usage of the API tokens is to use always the one with the 
-    /// most remaining calls. Since the API I am using is a freemium, the goal 
-    /// is to use register several and use them all without going through the 
+    /// The model of usage of the API tokens is to use always the one with the
+    /// most remaining calls. Since the API I am using is a freemium, the goal
+    /// is to use register several and use them all without going through the
     /// threshold.
     ApiToken {
         /// The token to add to the list of tokens.
@@ -103,8 +103,8 @@ enum Getter {
 }
 
 /// A fetchable struct is a remote structure from the API Provider.
-/// 
-/// A fetchable struct is  both containing a fetchable model (its data) and a 
+///
+/// A fetchable struct is  both containing a fetchable model (its data) and a
 /// logo. Both have to be downloaded separatly.
 #[derive(clap::ArgEnum, Debug, Clone)]
 enum Fetchable {
@@ -261,7 +261,6 @@ async fn fetch_leagues_logo() -> Result<(), CliError> {
     Ok(())
 }
 
-
 /// Fetch the clubs logo.
 ///
 /// Has to be called with [Getter::Clubs] variant [Indexable::Logo].
@@ -288,7 +287,7 @@ async fn fetch_clubs_logo() -> Result<(), CliError> {
 ///  # Arguments
 ///
 ///  - files_uri : the uri of files, they will be stored in what will correspond
-///  to their relative remote URI path preceeded with the value of 
+///  to their relative remote URI path preceeded with the value of
 ///  `ASSETS_LOCAL_PATH`.
 async fn bulk_download_files(files_uri: Vec<String>) -> Result<(), CliError> {
     let cooldown: u64 = std::env::var("BULK_DOWNLOAD_COOLDOWN")?.parse()?;
@@ -303,13 +302,13 @@ async fn bulk_download_files(files_uri: Vec<String>) -> Result<(), CliError> {
         debug!("All threads created, starting the fetching of the remote assets");
         async_std::task::spawn(async move {
             let assets_path: String = std::env::var("ASSETS_LOCAL_PATH")?;
-            let url : Url = Url::parse(&logo)?;
+            let url: Url = Url::parse(&logo)?;
             debug!("URL of remote file : {:?}", url);
             let file_name = url.path();
             let resp = reqwest::get(logo).await?;
             if resp.status().is_success() {
                 let mut content = Cursor::new(resp.bytes().await?);
-                let local_file_path : String = format!("{}/{}", assets_path, file_name); 
+                let local_file_path: String = format!("{}/{}", assets_path, file_name);
                 debug!("File is about to be stored at {}", &local_file_path);
                 let mut out = File::create(&local_file_path).await?;
                 copy(&mut content, &mut out).await?;
@@ -346,11 +345,11 @@ async fn fetch_bookmakers() -> Result<(), CliError> {
 ///
 /// # Arguments
 ///
-/// - day_diff : The day we want to fetch the odds of the fixtures, as a 
+/// - day_diff : The day we want to fetch the odds of the fixtures, as a
 /// difference of today (ie. yesteday = -1, tomorow =1, today =0, ...).
 async fn fetch_odds(day_diff: i64) -> Result<(), CliError> {
-    let now : DateTime<Utc> = Utc::now();
-    let date_diff : DateTime<Utc> = now + chrono::Duration::days(day_diff);
+    let now: DateTime<Utc> = Utc::now();
+    let date_diff: DateTime<Utc> = now + chrono::Duration::days(day_diff);
     let mut date_to_fetch = date_diff.to_rfc3339();
     // RFC 3339 format has to be truncated of its last 10 chars to obtain
     // a date such `YYYY-MM-DD`
@@ -372,7 +371,10 @@ async fn fetch_odds(day_diff: i64) -> Result<(), CliError> {
             date_to_fetch, main_bookmaker_id, page
         ))
         .await?;
-        debug!("Remoe end point called successfully for page number #{}", page);
+        debug!(
+            "Remoe end point called successfully for page number #{}",
+            page
+        );
         let response: String = res["response"].to_string();
         let total_pages: Option<u64> = res["paging"]["total"].as_u64();
         // We then store the odds, who are as String
@@ -432,7 +434,10 @@ async fn call_api_endpoint(endpoint: String) -> Result<serde_json::Value, CliErr
         );
         api_token::Entity::update_threshold(&token, remaining_calls)?;
     } else {
-        warn!("The number of calls remaining for the token {} couldn't have been determined", &token);
+        warn!(
+            "The number of calls remaining for the token {} couldn't have been determined",
+            &token
+        );
     }
 
     let value: serde_json::Value = res.json::<serde_json::Value>().await?;

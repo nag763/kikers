@@ -1,22 +1,44 @@
+//! The common errors thrown by the application.
+//!
+//! Those errors can be thrown either by internal logic, by sub crates
+//! or being caught by external crates.
+
 use std::fmt;
 
 #[derive(Debug)]
 pub enum ApplicationError {
+    /// A MySQL error.
+    ///
+    /// The string should contain the code of the error and the message.
     DatabaseError(String),
+    /// A redis error.
+    ///
+    /// Often occurs when the args are incorrect or the return type is 
+    /// incoherent with what was expected.
     RedisError(String),
+    /// A mongo error.
+    ///
+    /// Might occur when a model doesn't exist.
     MongoError(String),
+    /// An elastic search error.
     ElasticError(String),
+    /// A translation error.
+    ///
+    /// Can merely be thrown when a label is requested but isn't existing.
     TranslationError(String, u32),
+    /// A serde error.
     SerialError,
+    /// Error thrown only when we are requesting the remote API without saving a token locally.
     NoTokenStored,
+    /// A parsing error, internal logic.
     ParseError(String),
+    /// When a form is outdated, and a request has been submitted by a user since.
     FormOutdated,
 }
 
 impl ApplicationError {
-    /**
-     * Returns an http error code for the given enum.
-     */
+
+    /// Returns an http error code for the given enum.
     pub fn http_error_code(&self) -> u16 {
         match *self {
             Self::FormOutdated => 205,

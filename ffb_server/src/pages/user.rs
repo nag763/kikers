@@ -105,9 +105,9 @@ pub async fn user_club(
     let fav_clubs_id: Vec<u32> = user::Entity::get_favorite_clubs_id(jwt_user.id).await?;
     let (fav_clubs, searched_clubs): (Option<Vec<Club>>, Option<Vec<Club>>) =
         match &context_query.search {
-            Some(search) => (None, Some(club::Entity::search_name(search).await?)),
+            Some(search) => (None, Some(club::EntityBuilder::build().name(Some(search.into())).finish().await?)),
             None => (
-                Some(club::Entity::get_fav_clubs_of_user(fav_clubs_id.clone()).await?),
+                Some(club::EntityBuilder::build().ids(Some(fav_clubs_id.clone())).finish().await?),
                 None,
             ),
         };

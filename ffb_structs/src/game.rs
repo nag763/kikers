@@ -1,33 +1,33 @@
-//! A game is a Mongo stored structure that represent an opposition between 
+//! A game is a Mongo stored structure that represent an opposition between
 //! two clubs.
-//! 
+//!
 //! This structure is the core of the application. A game is what the users
 //! will bet on. This structure is fetched regulary given the need from the
-//! API provider. For instance, between 13 and 23 CET, the games should be 
+//! API provider. For instance, between 13 and 23 CET, the games should be
 //! fetched between every 1 and 20 minutes, to keep the scores alive.
 //!
-//! It is very important to cache the requests since the queries are very 
+//! It is very important to cache the requests since the queries are very
 //! ressource consuming. The cache is cleared everytime :
 //! * A bet is made by a user.
 //! * The game is refreshed.
 //! * Odds are fetched.
 
 use crate::bet::GameResult;
-use crate::common_api_structs::{Better, Fixture, Goals, Odds, Score, Teams};
 #[cfg(feature = "server")]
 use crate::common_api_structs::ShortStatus;
+use crate::common_api_structs::{Better, Fixture, Goals, Odds, Score, Teams};
 use crate::database::Database;
 use crate::error::ApplicationError;
 use crate::league::Model as League;
 #[cfg(feature = "server")]
 use crate::transaction_result::TransactionResult;
 use bson::oid::ObjectId;
-    #[cfg(feature = "server")]
+#[cfg(feature = "server")]
 use futures::TryStreamExt;
 use mongodb::bson::doc;
-use std::collections::HashSet;
-    #[cfg(feature = "server")]
+#[cfg(feature = "server")]
 use std::collections::hash_map::DefaultHasher;
+use std::collections::HashSet;
 #[cfg(feature = "server")]
 use std::hash::{Hash, Hasher};
 
@@ -36,7 +36,7 @@ use std::hash::{Hash, Hasher};
 pub struct Model {
     /// The ID in the internal mongodatabase.
     ///
-    /// Since the mongo ID is automaticly indexed, it is prefered to use it 
+    /// Since the mongo ID is automaticly indexed, it is prefered to use it
     /// rather than the remote API id.
     #[serde(rename = "_id", skip_serializing_if = "Option::is_none")]
     pub id: Option<ObjectId>,
@@ -45,8 +45,8 @@ pub struct Model {
     /// Given user "A" adds the game to the bets, the fixture will be associed
     /// to the current season.
     ///
-    /// This also indicates whether the game is in the bets or not, since if 
-    /// the field is "None", this means that the game isn't a bet as it is 
+    /// This also indicates whether the game is in the bets or not, since if
+    /// the field is "None", this means that the game isn't a bet as it is
     /// added to the structure during the process.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub season_id: Option<u32>,
@@ -118,7 +118,7 @@ impl Model {
     /// Get the bet associed to the game for the given user id.
     ///
     /// # Argument
-    /// 
+    ///
     /// - user_id : The MySQL user ID.
     pub fn get_bet_for_user(&self, user_id: &u32) -> Option<GameResult> {
         if let Some(betters) = &self.betters {
@@ -137,7 +137,6 @@ impl Model {
 pub struct Entity;
 
 impl Entity {
-
     /// Store the games in the mongo database.
     ///
     /// # Arguments :
@@ -179,9 +178,9 @@ impl Entity {
     /// When the game is a bet, the user can do bets on it.
     ///
     /// # Arguments :
-    /// 
+    ///
     /// - id : game id, this corresponds to the fixture's id.
-    /// - value : the season id, if none is bet, remove the game from the 
+    /// - value : the season id, if none is bet, remove the game from the
     /// bets.
     #[cfg(feature = "server")]
     pub async fn change_is_bet_status(
@@ -197,7 +196,10 @@ impl Entity {
                 None,
             )
             .await?;
-        debug!("Game {} 's bet status has succesfully been modified to be with season {:?}", id, value);
+        debug!(
+            "Game {} 's bet status has succesfully been modified to be with season {:?}",
+            id, value
+        );
         Self::clear_cache()?;
         Ok(TransactionResult::expect_single_result(
             result.modified_count,

@@ -13,7 +13,7 @@ pub enum ApplicationError {
     DatabaseError(String),
     /// A redis error.
     ///
-    /// Often occurs when the args are incorrect or the return type is 
+    /// Often occurs when the args are incorrect or the return type is
     /// incoherent with what was expected.
     RedisError(String),
     /// A mongo error.
@@ -37,7 +37,6 @@ pub enum ApplicationError {
 }
 
 impl ApplicationError {
-
     /// Returns an http error code for the given enum.
     pub fn http_error_code(&self) -> u16 {
         match *self {

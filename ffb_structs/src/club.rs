@@ -14,9 +14,9 @@ use crate::error::ApplicationError;
 use crate::game;
 #[cfg(feature = "cli")]
 use crate::{ASSETS_BASE_PATH, RE_HOST_REPLACER};
-#[cfg(feature = "cli")]
-use elasticsearch::{http::request::JsonBody, BulkParts}; 
 use elasticsearch::SearchParts;
+#[cfg(feature = "cli")]
+use elasticsearch::{http::request::JsonBody, BulkParts};
 #[cfg(feature = "cli")]
 use futures::StreamExt;
 use futures::TryStreamExt;
@@ -58,8 +58,6 @@ pub struct Entity;
 
 #[cfg(feature = "cli")]
 impl Entity {
-    
-
     /// Clear the entity redis cache.
     ///
     /// This has to be called whenever the entities are modified.
@@ -72,7 +70,7 @@ impl Entity {
         debug!("Cache cleaned for club entity");
         Ok(())
     }
-    
+
     /// Get the logos of the entity.
     ///
     /// This will return only the logos for the given entity, making it easy to
@@ -80,7 +78,7 @@ impl Entity {
     pub async fn get_logos() -> Result<Vec<String>, ApplicationError> {
         let database = Database::acquire_mongo_connection().await?;
         // We replace the root document by its logo, and rename it.
-        // We only fetch the clubs that don't already have an existing local 
+        // We only fetch the clubs that don't already have an existing local
         // logo.
         let mut results = database
             .collection::<Model>("club")
@@ -100,7 +98,10 @@ impl Entity {
                 logos.push(logo);
             }
         }
-        debug!("Logos successfully binded to the Model Logo, {} unbinded logo found", logos.len());
+        debug!(
+            "Logos successfully binded to the Model Logo, {} unbinded logo found",
+            logos.len()
+        );
         Ok(logos)
     }
 
@@ -116,8 +117,8 @@ impl Entity {
             .await?
             .try_collect()
             .await?;
-        // Since there is no bulk insert for [mongo] nor bulk `modify 
-        // substring` for mongodb engine, we have to modify each model one by 
+        // Since there is no bulk insert for [mongo] nor bulk `modify
+        // substring` for mongodb engine, we have to modify each model one by
         // one.
         for model in models {
             if let Some(logo) = model.logo {
@@ -159,7 +160,7 @@ impl Entity {
 
     /// Store the clubs.
     ///
-    /// Unlike the structs that are fetched from the API provider, this 
+    /// Unlike the structs that are fetched from the API provider, this
     /// function uses the local data from MongoDB to store the games.
     pub async fn store() -> Result<(), ApplicationError> {
         let database = Database::acquire_mongo_connection().await?;
@@ -208,14 +209,11 @@ impl Entity {
         if response.status_code().is_success() {
             Ok(())
         } else {
-            let err_msg : String = format!(
-                "Error while joining the elastics database : {:?}",
-                response
-            );
+            let err_msg: String =
+                format!("Error while joining the elastics database : {:?}", response);
             Err(ApplicationError::ElasticError(err_msg))
         }
     }
-    
 
     /// Upsert a list of documents within the database.
     ///
@@ -247,20 +245,19 @@ impl Entity {
 pub struct EntityBuilder {
     /// The list of ids to query.
     ///
-    /// **Warning :** Giving a value to this argument will reset name to 
+    /// **Warning :** Giving a value to this argument will reset name to
     /// [Option::None].
     ids: Option<Vec<u32>>,
     /// The name to search for.
     ///
     /// This is using elastic search.
     ///
-    /// **Warning :** Giving a value to this argument will reset ids to 
+    /// **Warning :** Giving a value to this argument will reset ids to
     /// [Option::None].
     name: Option<String>,
 }
 
 impl EntityBuilder {
-
     /// Create the builder.
     pub fn build() -> EntityBuilder {
         Self::default()
@@ -268,7 +265,7 @@ impl EntityBuilder {
 
     /// Set the ids property.
     ///
-    /// **Warning :** Giving a value to this argument will reset name to 
+    /// **Warning :** Giving a value to this argument will reset name to
     /// [Option::None].
     pub fn ids(&mut self, ids: Option<Vec<u32>>) -> &mut Self {
         self.ids = ids;
@@ -280,7 +277,7 @@ impl EntityBuilder {
 
     /// Set the name property.
     ///
-    /// **Warning :** Giving a value to this argument will reset ids to 
+    /// **Warning :** Giving a value to this argument will reset ids to
     /// [Option::None].
     pub fn name(&mut self, name: Option<String>) -> &mut Self {
         self.name = name;
@@ -353,7 +350,9 @@ impl EntityBuilder {
                 .arg("EX")
                 .arg(200)
                 .query(&mut conn)?;
-            debug!("The club entity builder query finished with success and has been stored in cache");
+            debug!(
+                "The club entity builder query finished with success and has been stored in cache"
+            );
             Ok(models)
         }
     }

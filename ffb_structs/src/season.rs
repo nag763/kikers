@@ -204,7 +204,7 @@ impl EntityBuilder {
                         .push_bind(is_main);
                 }
             }
-            query_builder.push("\nRDER BY is_main DESC, name DESC");
+            query_builder.push("\nORDER BY is_main DESC, name DESC");
             let rows: Vec<MySqlRow> = query_builder.build().fetch_all(&mut conn).await?;
             let mut models: Vec<Model> = Vec::with_capacity(rows.len());
             for row in rows {

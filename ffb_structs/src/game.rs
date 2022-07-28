@@ -331,11 +331,11 @@ impl EntityBuilder {
         } else {
             debug!("Model game hasn't been found in cache for the given lookup");
             let database = Database::acquire_mongo_connection().await?;
-            let options: Option<mongodb::options::FindOptions> = self.limit.map(|v| {
+            let options: mongodb::options::FindOptions = 
                 mongodb::options::FindOptions::builder()
-                    .limit(Some(v))
-                    .build()
-            });
+                    .limit(self.limit)
+                    .sort(doc!{"fixture.timestamp":1})
+                    .build();
             let mut key: bson::Document = bson::Document::new();
             let mut query_selector: Vec<bson::Document> = vec![];
             if let Some(leagues) = &self.leagues {

@@ -41,6 +41,7 @@ pub mod error;
 pub mod game;
 pub mod info;
 pub mod league;
+#[cfg(feature = "server")]
 pub mod locale;
 pub mod navaccess;
 pub mod odd;

@@ -109,7 +109,7 @@ pub async fn admin_seasons(
 ) -> Result<HttpResponse, ApplicationError> {
     let jwt_user: JwtUser = JwtUser::from_request(req)?;
     let seasons: Vec<Season> = season::EntityBuilder::build()
-        .open_only(true)
+        .is_closed(Some(false))
         .finish()
         .await?;
     let index = AdminSeasons {

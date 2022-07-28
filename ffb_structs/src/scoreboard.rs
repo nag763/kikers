@@ -1,3 +1,13 @@
+//! The scoreboard is the ranked list of users for a season.
+//!
+//! This list is defined by the bets they have made and how good they predicted
+//! given the final results of the games.
+//!
+//! A scoreboard is associed to a season, or can be all time.
+//!
+//! Given the time complexity to display a scoreboard, it is important to cache
+//! it.
+
 use crate::database::Database;
 use crate::error::ApplicationError;
 use crate::{scoreboard_entry::Model as ScoreEntry, season, season::Model as Season};
@@ -8,13 +18,16 @@ use std::hash::{Hash, Hasher};
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize, sqlx::FromRow)]
 pub struct Model {
+    /// The season associed to the scoreboard.
     pub season: Option<Season>,
+    /// The entries of the scoreboard.
     pub score_entries: Vec<ScoreEntry>,
 }
 
 pub(crate) struct Entity;
 
 impl Entity {
+    /// Clears the cache.
     pub(crate) fn clear_cache() -> Result<(), ApplicationError> {
         let mut conn = Database::acquire_redis_connection()?;
         let keys_to_del: Vec<String> =
@@ -22,6 +35,7 @@ impl Entity {
         if !keys_to_del.is_empty() {
             redis::cmd("DEL").arg(keys_to_del).query(&mut conn)?;
         }
+        debug!("The scoreboard's cache has been cleared");
 
         Ok(())
     }
@@ -39,18 +53,23 @@ impl EntityBuilder {
         Self::default()
     }
 
-    pub fn season_id(&mut self, season_id: u32) -> &mut Self {
-        self.season_id = Some(season_id);
+    /// The season id to look up for.
+    ///
+    /// If none is passed, all the season ids will be looked up for.
+    pub fn season_id(&mut self, season_id: Option<u32>) -> &mut Self {
+        self.season_id = season_id;
         self.all_time = false;
         self
     }
 
+    /// Whether to look for all time or not.
     pub fn all_time(&mut self, all_time: bool) -> &mut Self {
         self.all_time = all_time;
         self.season_id = None;
         self
     }
 
+    /// Limit the results to the 0..nth entries.
     pub fn limit(&mut self, limit: Option<u32>) -> &mut Self {
         self.limit = limit;
         self
@@ -67,8 +86,10 @@ impl EntityBuilder {
             .arg("300")
             .query(&mut redis_conn)?;
         if let Some(cache_result) = cache_result {
+            debug!("The requested scoreboard has been found in the cache");
             Ok(serde_json::from_str(&cache_result)?)
         } else {
+            debug!("The requested scoreboard hasn't been found in the cache, looking up in the database");
             let mut conn = Database::acquire_sql_connection().await?;
             let season_id: Option<u32> = match (self.season_id, self.all_time) {
                 (Some(v), false) => Some(v),
@@ -107,6 +128,7 @@ impl EntityBuilder {
                 .arg("EX")
                 .arg("300")
                 .query(&mut redis_conn)?;
+            debug!("The scoreboard has been cached within the redis cache");
             Ok(model)
         }
     }

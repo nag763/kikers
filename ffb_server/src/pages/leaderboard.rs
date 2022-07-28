@@ -31,7 +31,7 @@ pub async fn leaderboard(
     let jwt_user: JwtUser = JwtUser::from_request(req)?;
     let mut scoreboard_builder = ScoreboardBuilder::build();
     if let Some(season_id) = context_query.id {
-        scoreboard_builder.season_id(season_id);
+        scoreboard_builder.season_id(Some(season_id));
     } else if let Some(all_time) = context_query.all {
         scoreboard_builder.all_time(all_time);
     }

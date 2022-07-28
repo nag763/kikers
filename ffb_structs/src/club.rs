@@ -120,6 +120,7 @@ impl Entity {
         // Since there is no bulk insert for [mongo] nor bulk `modify
         // substring` for mongodb engine, we have to modify each model one by
         // one.
+        debug!("Replacing club logos has started");
         for model in models {
             if let Some(logo) = model.logo {
                 let replaced_path: String =
@@ -152,6 +153,7 @@ impl Entity {
                     .await?;
             }
         }
+        debug!("The clubs logo have been updated within the whole database");
         // Both the clubs and game caches have to be cleared following this.
         Self::clear_cache()?;
         game::Entity::clear_cache()?;

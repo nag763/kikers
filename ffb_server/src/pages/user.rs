@@ -3,7 +3,7 @@ use crate::ApplicationData;
 use askama::Template;
 use ffb_auth::JwtUser;
 
-use ffb_structs::{club, club::Model as Club, league, league::Model as APILeague, user};
+use ffb_structs::{club, club::Model as Club, league::Model as APILeague, league::EntityBuilder as LeagueBuilder, user};
 
 use crate::error::ApplicationError;
 use actix_web::web;
@@ -61,10 +61,10 @@ pub async fn user_leagues(
     let fav_leagues_id: Vec<u32> = user::Entity::get_favorite_leagues_id(jwt_user.id).await?;
     let (searched_leagues, fav_leagues): (Option<Vec<APILeague>>, Option<Vec<APILeague>>) =
         match &context_query.search {
-            Some(v) => (Some(league::Entity::search_name(v).await?), None),
+            Some(v) => (Some(LeagueBuilder::build().name(Some(v.into())).finish().await?), None),
             None => (
                 None,
-                Some(league::Entity::get_fav_leagues_of_user(fav_leagues_id.clone()).await?),
+                Some(LeagueBuilder::build().ids(Some(fav_leagues_id.clone())).finish().await?),
             ),
         };
     let index = UserLeagueTemplate {

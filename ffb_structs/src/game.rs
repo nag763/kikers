@@ -192,7 +192,7 @@ impl Entity {
             .collection::<Model>("fixture")
             .update_one(
                 doc! {"fixture.id": id},
-                doc! {"$set":{"season_id":value}},
+                doc! {"$set":{"seasonId":value}},
                 None,
             )
             .await?;
@@ -346,7 +346,7 @@ impl EntityBuilder {
                 query_selector.push(doc! {"teams.away.id" : {"$in" : &clubs}});
             }
             if self.bets {
-                query_selector.push(doc! {"season_id": {"$ne": null}});
+                query_selector.push(doc! {"seasonId": {"$ne": null}});
             }
             if self.potential_bets {
                 query_selector.push(doc! {"odds": {"$ne": null}});

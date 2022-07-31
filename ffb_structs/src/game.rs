@@ -374,3 +374,16 @@ impl EntityBuilder {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::Model;
+    #[test]
+    fn it_works() {
+        let model : Model = Model {
+            league_local_logo: Some("".into())
+        };
+        let result = 2 + 2;
+        assert_eq!(result, 4);
+    }
+}

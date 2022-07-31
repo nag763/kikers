@@ -73,8 +73,8 @@ impl Entity {
             .collection::<Game>("fixture")
             .find(
                 doc! {
-                    "processed_as" : null,
-                    "season_id": {"$ne": null},
+                    "processedAs" : null,
+                    "seasonId": {"$ne": null},
                     "fixture.status.short" :
                     {
                         "$in":
@@ -112,7 +112,7 @@ impl Entity {
                         .collection::<Game>("fixture")
                         .update_one(
                             doc! {"_id": game_id},
-                            doc! {"$set": {"processed_as": bson::to_bson(&result)?}},
+                            doc! {"$set": {"processedAs": bson::to_bson(&result)?}},
                             None,
                         )
                         .await?;
